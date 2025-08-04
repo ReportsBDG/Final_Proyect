@@ -523,7 +523,7 @@ export default function DentalDashboard() {
           onClick={() => setIsOpen(!isOpen)}
           className="w-full px-3 py-2 text-left border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between"
         >
-          <span className="truncate">
+          <span className="truncate text-sm">
             {selectedValues.length === 0
               ? placeholder
               : selectedValues.length === 1
@@ -531,7 +531,7 @@ export default function DentalDashboard() {
                 : `${selectedValues.length} selected`
             }
           </span>
-          <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Dropdown */}
@@ -539,16 +539,16 @@ export default function DentalDashboard() {
           <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
             {/* Select All / Clear All */}
             <div className="p-2 border-b border-gray-200 dark:border-gray-600">
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={onSelectAll}
-                  className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
+                  className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 whitespace-nowrap"
                 >
                   Select All
                 </button>
                 <button
                   onClick={onClearAll}
-                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200"
+                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200 whitespace-nowrap"
                 >
                   Clear All
                 </button>
@@ -565,9 +565,9 @@ export default function DentalDashboard() {
                   type="checkbox"
                   checked={selectedValues.includes(option)}
                   onChange={() => onToggle(option)}
-                  className="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
                 />
-                <span className="text-sm text-gray-900 dark:text-white truncate">{option}</span>
+                <span className="text-sm text-gray-900 dark:text-white truncate min-w-0">{option}</span>
               </label>
             ))}
 
@@ -721,9 +721,9 @@ export default function DentalDashboard() {
 
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="px-6 py-4">
+        <div className="px-4 sm:px-6 py-4">
           {/* Top Row */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
             <div className="flex items-center space-x-3">
               {/* Hamburger Menu Button */}
               <button
@@ -742,20 +742,20 @@ export default function DentalDashboard() {
                 }`} />
               </button>
 
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Activity className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
                   Dental Analytics Dashboard
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                   Professional Dental Analytics Platform
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-end space-x-2 sm:space-x-3">
               <div className="relative">
                 <button
                   onClick={() => setShowNotificationsPanel(!showNotificationsPanel)}
@@ -772,7 +772,7 @@ export default function DentalDashboard() {
 
                 {/* Enhanced Notifications Panel */}
                 {showNotificationsPanel && (
-                  <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl z-50 max-h-96 overflow-hidden">
                     <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold text-gray-900 dark:text-white">Recent Changes</h4>
@@ -799,10 +799,10 @@ export default function DentalDashboard() {
                                   change.type === 'deleted_record' ? 'bg-red-500' :
                                   'bg-gray-500'
                                 }`}></div>
-                                <div className="flex-1">
-                                  <p className="text-sm text-gray-900 dark:text-white font-medium">{change.message}</p>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-gray-900 dark:text-white font-medium truncate">{change.message}</p>
                                   {change.details && (
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">{change.details}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{change.details}</p>
                                   )}
                                   <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                     {change.timestamp.toLocaleTimeString()}
@@ -825,7 +825,7 @@ export default function DentalDashboard() {
                               notification.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20' :
                               'bg-blue-50 dark:bg-blue-900/20'
                             }`}>
-                              <p className="text-sm text-gray-900 dark:text-white">{notification.message}</p>
+                              <p className="text-sm text-gray-900 dark:text-white truncate">{notification.message}</p>
                               <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                                 {notification.timestamp.toLocaleTimeString()}
                               </p>
@@ -876,17 +876,18 @@ export default function DentalDashboard() {
               </button>
               <button
                 onClick={handleCompleteDashboardPDFExport}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700"
+                className="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center space-x-1 sm:space-x-2 hover:bg-blue-700 text-sm"
                 title="Export Complete Dashboard Report"
               >
                 <Download className="w-4 h-4" />
-                <span>Export Dashboard</span>
+                <span className="hidden sm:inline">Export Dashboard</span>
+                <span className="sm:hidden">Export</span>
               </button>
             </div>
           </div>
 
           {/* Main KPI Cards - Updated with new layout */}
-          <div id="kpi-cards-section" className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div id="kpi-cards-section" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
             {/* Total Revenue */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-4 text-white">
               <div className="flex items-center justify-between">
@@ -965,15 +966,23 @@ export default function DentalDashboard() {
       </header>
 
       <div className="flex relative">
+        {/* Mobile overlay for filters */}
+        {!isFiltersCollapsed && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden"
+            onClick={toggleFilters}
+          />
+        )}
+        
         {/* Collapsible Sidebar Filters */}
         <div
-          className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-80'
+          className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
+            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-80'
           }`}
         >
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-between sm:justify-center">
               <div className={`flex items-center space-x-2 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
                 <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters & Search</h2>
@@ -983,6 +992,13 @@ export default function DentalDashboard() {
                   <Filter className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                 </div>
               )}
+              {/* Close button for mobile */}
+              <button
+                onClick={toggleFilters}
+                className="sm:hidden p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
           </div>
 
@@ -992,7 +1008,7 @@ export default function DentalDashboard() {
               isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
             }`}
           >
-            <div className="p-4 space-y-4">
+            <div className="p-4 space-y-4 max-h-[calc(100vh-120px)] overflow-y-auto">
               {/* Enhanced Global Search */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1159,7 +1175,7 @@ export default function DentalDashboard() {
 
         {/* Main Content */}
         <div className={`flex-1 space-y-6 transition-all duration-300 ease-in-out ${
-          isFiltersCollapsed ? 'p-6 ml-0' : 'p-6'
+          isFiltersCollapsed ? 'p-4 sm:p-6 ml-0' : 'p-4 sm:p-6'
         }`}>
           {/* Interactive Charts Section */}
           <div id="charts-section">
@@ -1168,15 +1184,15 @@ export default function DentalDashboard() {
 
           {/* Enhanced Patient Records Table */}
           <div id="patient-records-section" className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Patient Records</h2>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Patient Records</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} records
                   </p>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-end space-x-2">
                   {/* Column Filters Button */}
                   <div className="relative">
                     <button 
@@ -1244,88 +1260,108 @@ export default function DentalDashboard() {
 
             {/* Responsive Table */}
             <div className="overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto min-w-full">
+                <table className="w-full min-w-max">
                   <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
                       {selectedColumns.patientName && (
                         <th 
-                          className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('patientname')}
                         >
-                          Patient Name
-                          {sortBy === 'patientname' && (
-                            <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                          )}
+                          <div className="truncate max-w-[120px] sm:max-w-none">
+                            Patient Name
+                            {sortBy === 'patientname' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
                         </th>
                       )}
                       {selectedColumns.carrier && (
                         <th 
-                          className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('insurancecarrier')}
                         >
-                          Carrier
-                          {sortBy === 'insurancecarrier' && (
-                            <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                          )}
+                          <div className="truncate max-w-[100px] sm:max-w-none">
+                            Carrier
+                            {sortBy === 'insurancecarrier' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
                         </th>
                       )}
                       {selectedColumns.offices && (
                         <th 
-                          className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('offices')}
                         >
-                          Office
-                          {sortBy === 'offices' && (
-                            <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                          )}
+                          <div className="truncate max-w-[80px] sm:max-w-none">
+                            Office
+                            {sortBy === 'offices' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
                         </th>
                       )}
                       {selectedColumns.dos && (
                         <th 
-                          className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('dos')}
                         >
-                          DOS
-                          {sortBy === 'dos' && (
-                            <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                          )}
+                          <div className="truncate">
+                            DOS
+                            {sortBy === 'dos' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
                         </th>
                       )}
                       {selectedColumns.claimStatus && (
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Claim Status
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate">
+                            Claim Status
+                          </div>
                         </th>
                       )}
                       {selectedColumns.comments && (
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Comments
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate max-w-[150px] sm:max-w-none">
+                            Comments
+                          </div>
                         </th>
                       )}
                       {selectedColumns.email && (
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Email
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate max-w-[120px] sm:max-w-none">
+                            Email
+                          </div>
                         </th>
                       )}
                       {selectedColumns.patientPortion && (
                         <th 
-                          className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('paidamount')}
                         >
-                          Patient Portion
-                          {sortBy === 'paidamount' && (
-                            <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-                          )}
+                          <div className="truncate">
+                            Patient Portion
+                            {sortBy === 'paidamount' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
                         </th>
                       )}
                       {selectedColumns.eftCheckDate && (
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          EFT/Check Date
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate">
+                            EFT/Check Date
+                          </div>
                         </th>
                       )}
                       {selectedColumns.status && (
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Status
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate">
+                            Status
+                          </div>
                         </th>
                       )}
                       {/* Actions column removed completely */}
@@ -1335,58 +1371,70 @@ export default function DentalDashboard() {
                     {paginatedData.map((record, index) => (
                       <tr key={`${record.timestamp || 'no-timestamp'}-${record.patientname || 'no-name'}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
                         {selectedColumns.patientName && (
-                          <td className="px-4 py-3 whitespace-nowrap transition-all duration-200">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px] sm:max-w-none">
                               {record.patientname}
                             </div>
                           </td>
                         )}
                         {selectedColumns.carrier && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            {record.insurancecarrier}
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[100px] sm:max-w-none">
+                              {record.insurancecarrier}
+                            </div>
                           </td>
                         )}
                         {selectedColumns.offices && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            {record.offices}
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[80px] sm:max-w-none">
+                              {record.offices}
+                            </div>
                           </td>
                         )}
                         {selectedColumns.dos && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            {record.dos ? formatDate(record.dos) : 'N/A'}
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate">
+                              {record.dos ? formatDate(record.dos) : 'N/A'}
+                            </div>
                           </td>
                         )}
                         {selectedColumns.claimStatus && (
-                          <td className="px-4 py-3 whitespace-nowrap transition-all duration-200">
+                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.claimstatus)}`}>
                               {record.claimstatus}
                             </span>
                           </td>
                         )}
                         {selectedColumns.comments && (
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-white max-w-xs transition-all duration-200">
-                            <div className="truncate" title={record.commentsreasons}>
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[150px] sm:max-w-xs" title={record.commentsreasons}>
                               {record.commentsreasons || 'N/A'}
                             </div>
                           </td>
                         )}
                         {selectedColumns.email && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            {record.emailaddress || 'N/A'}
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[120px] sm:max-w-none">
+                              {record.emailaddress || 'N/A'}
+                            </div>
                           </td>
                         )}
                         {selectedColumns.patientPortion && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white transition-all duration-200">
-                            {formatCurrency(record.paidamount)}
+                          <td className="px-2 sm:px-4 py-3 text-sm font-medium text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate">
+                              {formatCurrency(record.paidamount)}
+                            </div>
                           </td>
                         )}
                         {selectedColumns.eftCheckDate && (
-                          <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            {record.eftCheckIssuedDate ? formatDate(record.eftCheckIssuedDate) : 'N/A'}
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate">
+                              {record.eftCheckIssuedDate ? formatDate(record.eftCheckIssuedDate) : 'N/A'}
+                            </div>
                           </td>
                         )}
                         {selectedColumns.status && (
-                          <td className="px-4 py-3 whitespace-nowrap transition-all duration-200">
+                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
                             <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.status || '')}`}>
                               {record.status || 'N/A'}
                             </span>
@@ -1401,12 +1449,12 @@ export default function DentalDashboard() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 text-center sm:text-left">
                     Page {currentPage} of {totalPages}
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center justify-center sm:justify-end space-x-2">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
