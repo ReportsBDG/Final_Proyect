@@ -521,9 +521,9 @@ export default function DentalDashboard() {
         {/* Toggle Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-3 py-2 text-left border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between"
+          className="w-full px-4 py-3 text-left border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
         >
-          <span className="truncate text-sm">
+          <span className="truncate text-sm font-medium">
             {selectedValues.length === 0
               ? placeholder
               : selectedValues.length === 1
@@ -531,24 +531,24 @@ export default function DentalDashboard() {
                 : `${selectedValues.length} selected`
             }
           </span>
-          <ChevronDown className={`w-4 h-4 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-5 h-5 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Dropdown */}
         {isOpen && (
           <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
             {/* Select All / Clear All */}
-            <div className="p-2 border-b border-gray-200 dark:border-gray-600">
+            <div className="p-3 border-b border-gray-200 dark:border-gray-600">
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={onSelectAll}
-                  className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 whitespace-nowrap"
+                  className="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded hover:bg-blue-200 whitespace-nowrap font-medium"
                 >
                   Select All
                 </button>
                 <button
                   onClick={onClearAll}
-                  className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200 whitespace-nowrap"
+                  className="text-sm bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 whitespace-nowrap font-medium"
                 >
                   Clear All
                 </button>
@@ -559,20 +559,20 @@ export default function DentalDashboard() {
             {options.map((option) => (
               <label
                 key={option}
-                className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer"
+                className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
               >
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(option)}
                   onChange={() => onToggle(option)}
-                  className="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                  className="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-4 h-4"
                 />
-                <span className="text-sm text-gray-900 dark:text-white truncate min-w-0">{option}</span>
+                <span className="text-sm text-gray-900 dark:text-white truncate min-w-0 leading-relaxed">{option}</span>
               </label>
             ))}
 
             {options.length === 0 && (
-              <div className="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+              <div className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
                 No options available
               </div>
             )}
@@ -977,7 +977,7 @@ export default function DentalDashboard() {
         {/* Collapsible Sidebar Filters */}
         <div
           className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-80'
+            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-96 md:w-80 lg:w-96 xl:w-[420px]'
           }`}
         >
           {/* Header */}
@@ -1008,24 +1008,24 @@ export default function DentalDashboard() {
               isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
             }`}
           >
-            <div className="p-4 space-y-4 max-h-[calc(100vh-120px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto">
               {/* Enhanced Global Search */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
                   Global Search
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search patients, emails, carriers..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                   />
                 </div>
                 {searchTerm && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 mt-2 font-medium">
                     Found {filteredData.length} results
                   </p>
                 )}
@@ -1033,22 +1033,32 @@ export default function DentalDashboard() {
 
               {/* Date Range Filter - Updated for DOS */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
                   DOS Date Range
                 </label>
-                <div className="space-y-2">
-                  <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Start Date
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      End Date
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1104,67 +1114,67 @@ export default function DentalDashboard() {
             />
 
               {/* Active Filters Summary */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-gray-900 dark:text-white text-sm">Active Filters</h3>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-900 dark:text-white text-base">Active Filters</h3>
                 {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
                   selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
                   dateRange.start || dateRange.end) && (
                   <button
                     onClick={clearAllFilters}
-                    className="text-xs text-red-600 dark:text-red-400 hover:underline"
+                    className="text-sm text-red-600 dark:text-red-400 hover:underline font-medium"
                   >
                     Clear All
                   </button>
                 )}
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {selectedOffices.length > 0 && (
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Offices:</span>
-                    <span className="font-medium text-blue-600 ml-1">{selectedOffices.length} selected</span>
+                    <span className="font-semibold text-blue-600 ml-2">{selectedOffices.length} selected</span>
                   </div>
                 )}
                 {selectedCarriers.length > 0 && (
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Carriers:</span>
-                    <span className="font-medium text-blue-600 ml-1">{selectedCarriers.length} selected</span>
+                    <span className="font-semibold text-blue-600 ml-2">{selectedCarriers.length} selected</span>
                   </div>
                 )}
                 {selectedClaimStatuses.length > 0 && (
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Claim Status:</span>
-                    <span className="font-medium text-blue-600 ml-1">{selectedClaimStatuses.length} selected</span>
+                    <span className="font-semibold text-blue-600 ml-2">{selectedClaimStatuses.length} selected</span>
                   </div>
                 )}
                 {selectedStatuses.length > 0 && (
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Processing:</span>
-                    <span className="font-medium text-blue-600 ml-1">{selectedStatuses.length} selected</span>
+                    <span className="font-semibold text-blue-600 ml-2">{selectedStatuses.length} selected</span>
                   </div>
                 )}
                 {selectedInteractionTypes.length > 0 && (
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Interaction:</span>
-                    <span className="font-medium text-blue-600 ml-1">{selectedInteractionTypes.length} selected</span>
+                    <span className="font-semibold text-blue-600 ml-2">{selectedInteractionTypes.length} selected</span>
                   </div>
                 )}
                 {searchTerm && (
-                  <div className="text-xs">
+                  <div className="text-sm">
                     <span className="text-gray-600 dark:text-gray-400">Search:</span>
-                    <span className="font-medium text-blue-600 ml-1">"{searchTerm}"</span>
+                    <span className="font-semibold text-blue-600 ml-2">"{searchTerm}"</span>
                   </div>
                 )}
 
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
-                  <div className="flex justify-between text-xs">
+                <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
+                  <div className="flex justify-between text-sm font-medium">
                     <span className="text-gray-600 dark:text-gray-400">Total Records</span>
-                    <span className="font-medium text-blue-600">{data.length}</span>
+                    <span className="text-blue-600">{data.length}</span>
                   </div>
-                  <div className="flex justify-between text-xs">
+                  <div className="flex justify-between text-sm font-medium">
                     <span className="text-gray-600 dark:text-gray-400">Filtered Records</span>
-                    <span className="font-medium text-green-600">{filteredData.length}</span>
+                    <span className="text-green-600">{filteredData.length}</span>
                   </div>
                 </div>
               </div>
