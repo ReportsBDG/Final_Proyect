@@ -118,7 +118,22 @@ export default function DentalDashboard() {
     loadPersistedState('dentalDashboard.filtersCollapsed', false)
   )
   const [showColumnFilter, setShowColumnFilter] = useState(false)
-  const [selectedColumns, setSelectedColumns] = useState(() =>
+  
+  // Define the type for selected columns
+  type SelectedColumnsType = {
+    patientName: boolean
+    carrier: boolean
+    offices: boolean
+    dos: boolean
+    claimStatus: boolean
+    comments: boolean
+    email: boolean
+    patientPortion: boolean
+    eftCheckDate: boolean
+    status: boolean
+  }
+  
+  const [selectedColumns, setSelectedColumns] = useState<SelectedColumnsType>(() =>
     loadPersistedState('dentalDashboard.selectedColumns', {
       patientName: true,
       carrier: true,
@@ -340,11 +355,11 @@ export default function DentalDashboard() {
   const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage)
 
   // Get unique values for filters
-  const uniqueOffices = Array.from(new Set(data.map(item => item.offices).filter(Boolean)))
-  const uniqueStatuses = Array.from(new Set(data.map(item => item.status).filter(Boolean)))
-  const uniqueClaimStatuses = Array.from(new Set(data.map(item => item.claimstatus).filter(Boolean)))
-  const uniqueCarriers = Array.from(new Set(data.map(item => item.insurancecarrier).filter(Boolean)))
-  const uniqueInteractionTypes = Array.from(new Set(data.map(item => item.typeofinteraction).filter(Boolean)))
+  const uniqueOffices = Array.from(new Set(data.map(item => item.offices).filter((item): item is string => Boolean(item))))
+  const uniqueStatuses = Array.from(new Set(data.map(item => item.status).filter((item): item is string => Boolean(item))))
+  const uniqueClaimStatuses = Array.from(new Set(data.map(item => item.claimstatus).filter((item): item is string => Boolean(item))))
+  const uniqueCarriers = Array.from(new Set(data.map(item => item.insurancecarrier).filter((item): item is string => Boolean(item))))
+  const uniqueInteractionTypes = Array.from(new Set(data.map(item => item.typeofinteraction).filter((item): item is string => Boolean(item))))
 
   // Complete Dashboard PDF Export functionality - TODOS LOS REGISTROS
   const handleCompleteDashboardPDFExport = async () => {
@@ -437,7 +452,7 @@ export default function DentalDashboard() {
         format: 'excel',
         includeCharts: false,
         dateRange,
-        selectedColumns: Object.keys(selectedColumns).filter(key => selectedColumns[key as keyof typeof selectedColumns])
+        selectedColumns: Object.keys(selectedColumns).filter(key => selectedColumns[key as keyof SelectedColumnsType])
       }, dashboardMetrics)
 
       addNotification('success', `Excel file exported with ${filteredData.length} records`)
@@ -590,8 +605,8 @@ export default function DentalDashboard() {
   }
 
   // Toggle column visibility
-  const toggleColumn = (column: keyof typeof selectedColumns) => {
-    setSelectedColumns(prev => ({
+  const toggleColumn = (column: keyof SelectedColumnsType) => {
+    setSelectedColumns((prev: SelectedColumnsType) => ({
       ...prev,
       [column]: !prev[column]
     }))
@@ -1159,7 +1174,7 @@ export default function DentalDashboard() {
                           {Object.entries(selectedColumns).map(([key, value]) => (
                             <label key={key} className="flex items-center space-x-2 text-sm cursor-pointer">
                               <button
-                                onClick={() => toggleColumn(key as keyof typeof selectedColumns)}
+                                onClick={() => toggleColumn(key as keyof SelectedColumnsType)}
                                 className="flex items-center"
                               >
                                 {value ? 
@@ -1350,7 +1365,7 @@ export default function DentalDashboard() {
                         )}
                         {selectedColumns.status && (
                           <td className="px-4 py-3 whitespace-nowrap transition-all duration-200">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.status)}`}>
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.status || '')}`}>
                               {record.status || 'N/A'}
                             </span>
                           </td>

@@ -333,7 +333,7 @@ export class ExportService {
       }
 
       // Data table
-      currentY = await this.addDataTableToPDF(pdf, data, options, margin, currentY, pageWidth, pageHeight)
+      currentY = await this.addDataTableToPDF(pdf, data, { ...options, format: 'pdf', includeCharts: options.includeCharts || false }, margin, currentY, pageWidth, pageHeight)
 
       // Generate filename and save
       const filename = this.generateFilename('pdf', options.dateRange)

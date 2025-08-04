@@ -46,7 +46,7 @@ interface ChartConfig {
   showGrid: boolean
   xAxis: string
   yAxis: string[]
-  aggregation: 'sum' | 'count' | 'average'
+  aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min'
   colors: string[]
 }
 
@@ -170,7 +170,7 @@ export default function SimpleCharts({ data }: ChartProps) {
           result[field] = item.count
         } else if (aggregation === 'sum') {
           result[field] = item[field] || 0
-        } else if (aggregation === 'average') {
+        } else if (aggregation === 'avg') {
           result[field] = item.count > 0 ? (item[field] || 0) / item.count : 0
         } else if (aggregation === 'count') {
           result[field] = item.count
