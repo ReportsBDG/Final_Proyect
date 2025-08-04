@@ -15,7 +15,7 @@ export interface GoogleScriptResponse {
   message?: string
 }
 
-// Datos de ejemplo para desarrollo
+// Datos de ejemplo para desarrollo (solo como respaldo)
 const fallbackData = [
   {
     timestamp: "2024-01-15T10:30:00Z",
@@ -58,115 +58,8 @@ const fallbackData = [
     productivityamount: 100.00,
     status: "Needs Review",
     emailaddress: "mike.davis@email.com"
-  },
-  {
-    timestamp: "2024-01-15T13:45:00Z",
-    insurancecarrier: "BlueCross BlueShield",
-    offices: "Westside Office",
-    patientname: "Emily Wilson",
-    paidamount: 225.00,
-    claimstatus: "Paid",
-    typeofinteraction: "Filling",
-    patientdob: "1992-05-18",
-    dos: "2024-01-14",
-    productivityamount: 275.00,
-    status: "Completed",
-    emailaddress: "emily.wilson@email.com"
-  },
-  {
-    timestamp: "2024-01-15T14:20:00Z",
-    insurancecarrier: "MetLife",
-    offices: "Eastside Office",
-    patientname: "Robert Brown",
-    paidamount: 500.00,
-    claimstatus: "Pending",
-    typeofinteraction: "Crown",
-    patientdob: "1980-12-03",
-    dos: "2024-01-13",
-    productivityamount: 600.00,
-    status: "In Progress",
-    emailaddress: "robert.brown@email.com"
-  },
-  {
-    timestamp: "2024-01-15T15:10:00Z",
-    insurancecarrier: "Humana",
-    offices: "Downtown Office",
-    patientname: "Lisa Garcia",
-    paidamount: 120.00,
-    claimstatus: "Paid",
-    typeofinteraction: "X-Ray",
-    patientdob: "1988-09-25",
-    dos: "2024-01-11",
-    productivityamount: 150.00,
-    status: "Completed",
-    emailaddress: "lisa.garcia@email.com"
-  },
-  {
-    timestamp: "2024-01-15T16:00:00Z",
-    insurancecarrier: "UnitedHealth",
-    offices: "Uptown Office",
-    patientname: "David Martinez",
-    paidamount: 0.00,
-    claimstatus: "Denied",
-    typeofinteraction: "Whitening",
-    patientdob: "1995-02-14",
-    dos: "2024-01-09",
-    productivityamount: 200.00,
-    status: "Rejected",
-    emailaddress: "david.martinez@email.com"
-  },
-  {
-    timestamp: "2024-01-15T16:45:00Z",
-    insurancecarrier: "Anthem",
-    offices: "Westside Office",
-    patientname: "Jennifer Lee",
-    paidamount: 180.00,
-    claimstatus: "Paid",
-    typeofinteraction: "Extraction",
-    patientdob: "1983-06-30",
-    dos: "2024-01-15",
-    productivityamount: 220.00,
-    status: "Completed",
-    emailaddress: "jennifer.lee@email.com"
   }
 ]
-
-// Generar más datos de ejemplo para simular 248 registros
-const generateMoreData = () => {
-  const offices = ["Downtown Office", "Uptown Office", "Westside Office", "Eastside Office"]
-  const carriers = ["Delta Dental", "Aetna", "Cigna", "BlueCross BlueShield", "MetLife", "Humana", "UnitedHealth", "Anthem"]
-  const interactions = ["Cleaning", "Root Canal", "Checkup", "Filling", "Crown", "X-Ray", "Whitening", "Extraction", "Implant", "Bonding"]
-  const statuses = ["Paid", "Pending", "Denied"]
-  
-  const additionalData = []
-  
-  for (let i = 9; i <= 248; i++) {
-    const office = offices[Math.floor(Math.random() * offices.length)]
-    const carrier = carriers[Math.floor(Math.random() * carriers.length)]
-    const interaction = interactions[Math.floor(Math.random() * interactions.length)]
-    const status = statuses[Math.floor(Math.random() * statuses.length)]
-    const amount = Math.floor(Math.random() * 500) + 50
-    
-    additionalData.push({
-      timestamp: new Date(2024, 0, 15 + Math.floor(i/10), 8 + Math.floor(Math.random() * 8), Math.floor(Math.random() * 60)).toISOString(),
-      insurancecarrier: carrier,
-      offices: office,
-      patientname: `Patient ${i}`,
-      paidamount: status === "Denied" ? 0 : amount,
-      claimstatus: status,
-      typeofinteraction: interaction,
-      patientdob: `${1980 + Math.floor(Math.random() * 30)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
-      dos: `${2024}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
-      productivityamount: amount + Math.floor(Math.random() * 100),
-      status: status === "Paid" ? "Completed" : status === "Pending" ? "In Progress" : "Needs Review",
-      emailaddress: `patient${i}@email.com`
-    })
-  }
-  
-  return [...fallbackData, ...additionalData]
-}
-
-const fullFallbackData = generateMoreData()
 
 // Función principal para obtener datos
 export async function fetchFromGoogleScript(): Promise<any[]> {
@@ -174,7 +67,7 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
   
   if (useFallbackData) {
     console.log('Usando datos de ejemplo (modo de desarrollo)')
-    return fullFallbackData
+    return fallbackData
   }
   
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -216,24 +109,15 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
         throw new Error('No se recibieron datos válidos de Google Sheets')
       }
       
-      // Si obtenemos menos de 248 registros, complementar con datos generados
-      if (processedData.length < 248) {
-        console.log(`��️ Solo se obtuvieron ${processedData.length} registros, complementando con datos generados...`)
-        const missingCount = 248 - processedData.length
-        const additionalData = generateAdditionalData(missingCount, processedData.length + 1)
-        const combinedData = [...processedData, ...additionalData]
-        console.log(`✅ Datos combinados: ${combinedData.length} registros (${processedData.length} reales + ${missingCount} generados)`)
-        return combinedData
-      }
-      
+      console.log(`✅ Datos reales obtenidos de Google Sheets: ${processedData.length} registros`)
       return processedData
       
     } catch (error) {
-      console.error(`❌ Intento ${attempt} falló:`, error)
+      console.error(`❌ Intento ${attempt}/${retries} falló:`, error)
       
       if (attempt === retries) {
         console.log('⚠️ Usando datos de respaldo debido a errores de conexión')
-        return fullFallbackData
+        return fallbackData
       }
       
       // Esperar antes del siguiente intento (backoff exponencial)
@@ -243,42 +127,7 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
     }
   }
   
-  return fullFallbackData
-}
-
-// Función para generar datos adicionales que complementen los reales
-function generateAdditionalData(count: number, startIndex: number): any[] {
-  const offices = ["Downtown Office", "Uptown Office", "Westside Office", "Eastside Office"]
-  const carriers = ["Delta Dental", "Aetna", "Cigna", "BlueCross BlueShield", "MetLife", "Humana", "UnitedHealth", "Anthem"]
-  const interactions = ["Cleaning", "Root Canal", "Checkup", "Filling", "Crown", "X-Ray", "Whitening", "Extraction", "Implant", "Bonding"]
-  const statuses = ["Paid", "Pending", "Denied"]
-  
-  const additionalData = []
-  
-  for (let i = 0; i < count; i++) {
-    const office = offices[Math.floor(Math.random() * offices.length)]
-    const carrier = carriers[Math.floor(Math.random() * carriers.length)]
-    const interaction = interactions[Math.floor(Math.random() * interactions.length)]
-    const status = statuses[Math.floor(Math.random() * statuses.length)]
-    const amount = Math.floor(Math.random() * 500) + 50
-    
-    additionalData.push({
-      timestamp: new Date(2024, 0, 15 + Math.floor(i/10), 8 + Math.floor(Math.random() * 8), Math.floor(Math.random() * 60)).toISOString(),
-      insurancecarrier: carrier,
-      offices: office,
-      patientname: `Patient ${startIndex + i}`,
-      paidamount: status === "Denied" ? 0 : amount,
-      claimstatus: status,
-      typeofinteraction: interaction,
-      patientdob: `${1980 + Math.floor(Math.random() * 30)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
-      dos: `${2024}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
-      productivityamount: amount + Math.floor(Math.random() * 100),
-      status: status === "Paid" ? "Completed" : status === "Pending" ? "In Progress" : "Needs Review",
-      emailaddress: `patient${startIndex + i}@email.com`
-    })
-  }
-  
-  return additionalData
+  return fallbackData
 }
 
 // Procesar datos recibidos

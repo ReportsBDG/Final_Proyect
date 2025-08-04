@@ -14,10 +14,18 @@ export async function GET(request: NextRequest) {
   let url = baseUrl
   const params = new URLSearchParams()
   
-  if (action) params.append('action', action)
-  if (limit) params.append('limit', limit)
-  if (sheet) params.append('sheet', sheet)
-  if (range) params.append('range', range)
+  // Si no hay parámetros específicos, intentar obtener todos los datos
+  if (!action && !limit && !sheet && !range) {
+    params.append('action', 'getAllRecords')
+    params.append('limit', '10000') // Límite alto para obtener todos los datos
+    params.append('sheet', 'Sheet1')
+    params.append('range', 'A:Z')
+  } else {
+    if (action) params.append('action', action)
+    if (limit) params.append('limit', limit)
+    if (sheet) params.append('sheet', sheet)
+    if (range) params.append('range', range)
+  }
   
   if (params.toString()) {
     url += '?' + params.toString()
