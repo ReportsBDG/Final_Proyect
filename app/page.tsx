@@ -498,12 +498,16 @@ export default function DentalDashboard() {
     options,
     selectedValues,
     onToggle,
+    onSelectAll,
+    onClearAll,
     placeholder = "Select options..."
   }: {
     label: string
     options: string[]
     selectedValues: string[]
     onToggle: (value: string) => void
+    onSelectAll: () => void
+    onClearAll: () => void
     placeholder?: string
   }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -537,21 +541,13 @@ export default function DentalDashboard() {
             <div className="p-2 border-b border-gray-200 dark:border-gray-600">
               <div className="flex space-x-2">
                 <button
-                  onClick={() => {
-                    options.forEach(option => {
-                      if (!selectedValues.includes(option)) {
-                        onToggle(option)
-                      }
-                    })
-                  }}
+                  onClick={onSelectAll}
                   className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
                 >
                   Select All
                 </button>
                 <button
-                  onClick={() => {
-                    selectedValues.forEach(selected => onToggle(selected))
-                  }}
+                  onClick={onClearAll}
                   className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200"
                 >
                   Clear All
@@ -625,6 +621,22 @@ export default function DentalDashboard() {
       setSelection([...currentSelection, value])
     }
   }
+
+  // Functions for Select All and Clear All for each filter
+  const selectAllOffices = () => setSelectedOffices(uniqueOffices)
+  const clearAllOffices = () => setSelectedOffices([])
+  
+  const selectAllCarriers = () => setSelectedCarriers(uniqueCarriers)
+  const clearAllCarriers = () => setSelectedCarriers([])
+  
+  const selectAllClaimStatuses = () => setSelectedClaimStatuses(uniqueClaimStatuses)
+  const clearAllClaimStatuses = () => setSelectedClaimStatuses([])
+  
+  const selectAllStatuses = () => setSelectedStatuses(uniqueStatuses)
+  const clearAllStatuses = () => setSelectedStatuses([])
+  
+  const selectAllInteractionTypes = () => setSelectedInteractionTypes(uniqueInteractionTypes)
+  const clearAllInteractionTypes = () => setSelectedInteractionTypes([])
 
   const clearAllFilters = () => {
     setSelectedOffices([])
@@ -1030,6 +1042,8 @@ export default function DentalDashboard() {
               options={uniqueOffices}
               selectedValues={selectedOffices}
               onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
+              onSelectAll={selectAllOffices}
+              onClearAll={clearAllOffices}
               placeholder="All Offices"
             />
 
@@ -1038,6 +1052,8 @@ export default function DentalDashboard() {
               options={uniqueCarriers}
               selectedValues={selectedCarriers}
               onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
+              onSelectAll={selectAllCarriers}
+              onClearAll={clearAllCarriers}
               placeholder="All Carriers"
             />
 
@@ -1046,6 +1062,8 @@ export default function DentalDashboard() {
               options={uniqueClaimStatuses}
               selectedValues={selectedClaimStatuses}
               onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
+              onSelectAll={selectAllClaimStatuses}
+              onClearAll={clearAllClaimStatuses}
               placeholder="All Claim Statuses"
             />
 
@@ -1054,6 +1072,8 @@ export default function DentalDashboard() {
               options={uniqueStatuses}
               selectedValues={selectedStatuses}
               onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
+              onSelectAll={selectAllStatuses}
+              onClearAll={clearAllStatuses}
               placeholder="All Statuses"
             />
 
@@ -1062,6 +1082,8 @@ export default function DentalDashboard() {
               options={uniqueInteractionTypes}
               selectedValues={selectedInteractionTypes}
               onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
+              onSelectAll={selectAllInteractionTypes}
+              onClearAll={clearAllInteractionTypes}
               placeholder="All Interaction Types"
             />
 
