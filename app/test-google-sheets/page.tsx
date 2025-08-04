@@ -59,8 +59,10 @@ export default function TestGoogleSheetsPage() {
         { name: 'Sin parámetros', url: '/api/proxy' },
         { name: 'Con action getAllRecords', url: '/api/proxy?action=getAllRecords' },
         { name: 'Con límite alto', url: '/api/proxy?action=getAllRecords&limit=10000' },
-        { name: 'Con rango completo', url: '/api/proxy?action=getAllRecords&range=A:Z' },
-        { name: 'Con sheet específico', url: '/api/proxy?action=getAllRecords&sheet=Sheet1' }
+        { name: 'Con rango completo', url: '/api/proxy?action=getAllRecords&range=A:AG' },
+        { name: 'Con sheet DB', url: '/api/proxy?action=getAllRecords&sheet=DB' },
+        { name: 'Con sheet DB y límite', url: '/api/proxy?action=getAllRecords&sheet=DB&limit=10000' },
+        { name: 'Con sheet DB y rango AG', url: '/api/proxy?action=getAllRecords&sheet=DB&range=A:AG' }
       ]
       
       const results = []

@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
   if (!action && !limit && !sheet && !range) {
     params.append('action', 'getAllRecords')
     params.append('limit', '10000') // Límite alto para obtener todos los datos
-    params.append('sheet', 'Sheet1')
-    params.append('range', 'A:Z')
+    params.append('sheet', 'DB') // Nombre correcto de la hoja
+    params.append('range', 'A:AG') // Rango correcto hasta columna AG
   } else {
     if (action) params.append('action', action)
     if (limit) params.append('limit', limit)

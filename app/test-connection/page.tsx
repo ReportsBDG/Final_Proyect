@@ -78,7 +78,7 @@ export default function TestConnectionPage() {
     
     try {
       console.log('Probando con parámetros...')
-      const response = await fetch('/api/proxy?action=getAllRecords&limit=1000&sheet=Sheet1')
+      const response = await fetch('/api/proxy?action=getAllRecords&limit=1000&sheet=DB')
       console.log('Parameters Status:', response.status)
       
       if (!response.ok) {
@@ -101,7 +101,7 @@ export default function TestConnectionPage() {
     
     try {
       console.log('Probando información de la hoja...')
-      const response = await fetch('/api/proxy?action=getSheetInfo')
+      const response = await fetch('/api/proxy?action=getSheetInfo&sheet=DB')
       console.log('Sheet Info Status:', response.status)
       
       if (!response.ok) {
@@ -230,6 +230,73 @@ export default function TestConnectionPage() {
     }
   }
 
+  const testAuthenticationIssue = async () => {
+    setLoading(true)
+    setError(null)
+    setResult(null)
+    
+    try {
+      console.log('🔍 Diagnosticando problema de autenticación...')
+      
+      // Probar diferentes URLs y métodos
+      const tests = [
+        { name: 'URL Directa', url: 'https://script.google.com/macros/s/AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ/exec' },
+        { name: 'URL con parámetros', url: 'https://script.google.com/macros/s/AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ/exec?action=getAllRecords&sheet=DB&range=A:AG' },
+        { name: 'Proxy sin parámetros', url: '/api/proxy' },
+        { name: 'Proxy con sheet DB', url: '/api/proxy?sheet=DB' },
+        { name: 'Proxy con action y sheet', url: '/api/proxy?action=getAllRecords&sheet=DB' },
+        { name: 'Proxy con rango AG', url: '/api/proxy?action=getAllRecords&sheet=DB&range=A:AG' }
+      ]
+      
+      const results = []
+      
+      for (const test of tests) {
+        try {
+          console.log(`📡 Probando: ${test.name}`)
+          const response = await fetch(test.url)
+          
+          const result: any = {
+            test: test.name,
+            success: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            contentType: response.headers.get('content-type'),
+            isRedirect: response.redirected,
+            url: response.url
+          }
+          
+          if (response.ok) {
+            try {
+              const data = await response.json()
+              result.data = data
+              result.dataLength = data.data?.length || data.length || 0
+            } catch (parseError) {
+              result.parseError = parseError instanceof Error ? parseError.message : 'Unknown error'
+            }
+          }
+          
+          results.push(result)
+        } catch (err) {
+          results.push({
+            test: test.name,
+            success: false,
+            error: err instanceof Error ? err.message : 'Unknown error'
+          })
+        }
+      }
+      
+      setResult({ 
+        type: 'Authentication Diagnosis', 
+        data: results,
+        message: `Diagnóstico completado - ${results.filter(r => r.success).length} de ${results.length} pruebas exitosas`
+      })
+    } catch (err) {
+      setError(`Error diagnóstico: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
@@ -241,6 +308,14 @@ export default function TestConnectionPage() {
           <h2 className="text-xl font-semibold mb-4">Diagnóstico de Conexión</h2>
           
           <div className="space-y-4">
+            <button
+              onClick={testAuthenticationIssue}
+              disabled={loading}
+              className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
+            >
+              {loading ? 'Diagnosticando...' : '🔍 Diagnosticar Problema de Autenticación'}
+            </button>
+            
             <button
               onClick={testDirectConnection}
               disabled={loading}
@@ -270,7 +345,7 @@ export default function TestConnectionPage() {
               disabled={loading}
               className="w-full bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 disabled:opacity-50"
             >
-              {loading ? 'Probando...' : '4. Test con Parámetros (limit=1000)'}
+              {loading ? 'Probando...' : '4. Test con Parámetros (sheet=DB)'}
             </button>
 
             <button
@@ -278,7 +353,7 @@ export default function TestConnectionPage() {
               disabled={loading}
               className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50"
             >
-              {loading ? 'Probando...' : '5. Test Información de la Hoja'}
+              {loading ? 'Probando...' : '5. Test Información de la Hoja DB'}
             </button>
 
             <button
@@ -338,20 +413,31 @@ export default function TestConnectionPage() {
           <ul className="text-yellow-700 space-y-1">
             <li>• <strong>ID del Script:</strong> AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ</li>
             <li>• <strong>URL:</strong> https://script.google.com/macros/s/AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ/exec</li>
-            <li>• <strong>Registros esperados:</strong> 248</li>
-            <li>• <strong>Registros obtenidos:</strong> 147</li>
-            <li>• <strong>Registros faltantes:</strong> 101</li>
+            <li>• <strong>Archivo:</strong> Test Overview</li>
+            <li>• <strong>Hoja:</strong> DB</li>
+            <li>• <strong>Problema detectado:</strong> El script requiere autenticación</li>
+          </ul>
+        </div>
+
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <h3 className="text-red-800 font-semibold mb-2">🚨 Problema de Autenticación Detectado:</h3>
+          <ul className="text-red-700 space-y-1">
+            <li>• <strong>El Google Apps Script está solicitando autenticación</strong></li>
+            <li>• <strong>Solución 1:</strong> Configurar el script para acceso público</li>
+            <li>• <strong>Solución 2:</strong> Usar autenticación con credenciales de servicio</li>
+            <li>• <strong>Solución 3:</strong> Implementar OAuth 2.0</li>
+            <li>• <strong>Estado actual:</strong> El script no es accesible públicamente</li>
           </ul>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-blue-800 font-semibold mb-2">🔍 Posibles Causas:</h3>
+          <h3 className="text-blue-800 font-semibold mb-2">🔧 Soluciones Recomendadas:</h3>
           <ul className="text-blue-700 space-y-1">
-            <li>• <strong>Límite de filas:</strong> Google Apps Script puede tener un límite por defecto</li>
-            <li>• <strong>Filtros:</strong> Puede haber filtros aplicados en la consulta</li>
-            <li>• <strong>Hoja incorrecta:</strong> Los datos pueden estar en otra hoja</li>
-            <li>• <strong>Rango limitado:</strong> El rango de lectura puede estar limitado</li>
-            <li>• <strong>Datos ocultos:</strong> Algunas filas pueden estar ocultas o filtradas</li>
+            <li>• <strong>Opción 1:</strong> Configurar el script para ejecutarse como "yo" y hacerlo público</li>
+            <li>• <strong>Opción 2:</strong> Usar Google Apps Script API con autenticación</li>
+            <li>• <strong>Opción 3:</strong> Crear un webhook que publique los datos</li>
+            <li>• <strong>Opción 4:</strong> Usar Google Sheets API directamente</li>
+            <li>• <strong>Opción 5:</strong> Implementar un sistema de autenticación en el frontend</li>
           </ul>
         </div>
       </div>
