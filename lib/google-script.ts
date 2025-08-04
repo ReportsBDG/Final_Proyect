@@ -1,10 +1,10 @@
 // Configuración para Google Apps Script
 export const GOOGLE_SCRIPT_CONFIG = {
   url: "https://script.google.com/macros/s/AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ/exec",
-  timeout: 10000,
+  timeout: 15000, // Aumentado para dar más tiempo
   retries: 3,
   useProxy: true,
-  useFallbackData: true // Activado temporalmente hasta configurar conexión real
+  useFallbackData: false // Activando conexión real
 }
 
 // Tipos de respuesta esperados
@@ -181,7 +181,8 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
     try {
       const fetchUrl = useProxy ? '/api/proxy' : url
       
-      console.log(`Intento ${attempt}: Conectando a Google Sheets...`)
+      console.log(`🔄 Intento ${attempt}/${retries}: Conectando a Google Sheets...`)
+      console.log(`📍 URL: ${fetchUrl}`)
       
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), timeout)
@@ -196,15 +197,24 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
 
       clearTimeout(timeoutId)
       
+      console.log(`📡 Response Status: ${response.status} ${response.statusText}`)
+      console.log(`📡 Response Headers:`, Object.fromEntries(response.headers.entries()))
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`)
       }
       
       const data = await response.json()
+      console.log(`📊 Datos recibidos:`, data)
       console.log(`✅ Datos obtenidos: ${data.data?.length || data.length || 0} registros`)
       
       const processedData = processData(data.data || data)
       console.log(`✅ Datos procesados: ${processedData.length} registros`)
+      
+      // Validar que tenemos datos válidos
+      if (!processedData || processedData.length === 0) {
+        throw new Error('No se recibieron datos válidos de Google Sheets')
+      }
       
       // Si obtenemos menos de 248 registros, complementar con datos generados
       if (processedData.length < 248) {
