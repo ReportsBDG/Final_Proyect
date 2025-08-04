@@ -1,10 +1,11 @@
 // Configuración para Google Apps Script
 export const GOOGLE_SCRIPT_CONFIG = {
   url: "https://script.google.com/macros/s/AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ/exec",
-  timeout: 15000, // Aumentado para dar más tiempo
+  timeout: 20000, // Aumentado para dar más tiempo
   retries: 3,
   useProxy: true,
-  useFallbackData: false // Activando conexión real
+  useFallbackData: false, // Activando conexión real
+  debugMode: true // Activar modo debug
 }
 
 // Tipos de respuesta esperados
@@ -63,7 +64,7 @@ const fallbackData = [
 
 // Función principal para obtener datos
 export async function fetchFromGoogleScript(): Promise<any[]> {
-  const { url, timeout, retries, useFallbackData, useProxy } = GOOGLE_SCRIPT_CONFIG
+  const { url, timeout, retries, useFallbackData, useProxy, debugMode } = GOOGLE_SCRIPT_CONFIG
   
   if (useFallbackData) {
     console.log('Usando datos de ejemplo (modo de desarrollo)')
@@ -76,6 +77,7 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
       
       console.log(`🔄 Intento ${attempt}/${retries}: Conectando a Google Sheets...`)
       console.log(`📍 URL: ${fetchUrl}`)
+      console.log(`🔧 Configuración:`, { useFallbackData, useProxy, debugMode })
       
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), timeout)

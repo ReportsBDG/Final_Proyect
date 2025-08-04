@@ -977,7 +977,7 @@ export default function DentalDashboard() {
         {/* Collapsible Sidebar Filters */}
         <div
           className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-96 md:w-80 lg:w-96 xl:w-[420px]'
+            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-96 md:w-96 lg:w-[420px] xl:w-[480px]'
           }`}
         >
           {/* Header */}
@@ -1008,7 +1008,7 @@ export default function DentalDashboard() {
               isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
             }`}
           >
-            <div className="p-4 sm:p-6 space-y-6 max-h-[calc(100vh-120px)] overflow-y-auto">
+            <div className="p-4 sm:p-6 space-y-6 max-h-[calc(100vh-140px)] overflow-y-auto">
               {/* Enhanced Global Search */}
               <div>
                 <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
