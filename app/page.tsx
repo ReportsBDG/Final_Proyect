@@ -574,15 +574,15 @@ export default function DentalDashboard() {
             {options.map((option) => (
               <label
                 key={option}
-                className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                className="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
               >
                 <input
                   type="checkbox"
                   checked={selectedValues.includes(option)}
                   onChange={() => onToggle(option)}
-                  className="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-4 h-4"
+                  className="mr-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-5 h-5"
                 />
-                <span className="text-sm text-gray-900 dark:text-white truncate min-w-0 leading-relaxed">{option}</span>
+                <span className="text-base text-gray-900 dark:text-white truncate min-w-0 leading-relaxed font-medium">{option}</span>
               </label>
             ))}
 
