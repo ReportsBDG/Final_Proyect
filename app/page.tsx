@@ -1085,7 +1085,7 @@ export default function DentalDashboard() {
           }`}
         >
           {/* Header */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-12 py-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between sm:justify-center">
               <div className={`flex items-center space-x-2 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
                 <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -1423,7 +1423,7 @@ export default function DentalDashboard() {
                           <div className="truncate">
                             DOS
                             {sortBy === 'dos' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '��'}</span>
                             )}
                           </div>
                         </th>
