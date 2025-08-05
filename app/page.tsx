@@ -31,9 +31,10 @@ import {
   Menu
 } from 'lucide-react'
 import SimpleCharts from '@/components/SimpleCharts'
+import ConnectionStatus from '@/components/ConnectionStatus'
 import { dataService } from '@/services/dataService'
 import { PatientRecord } from '@/types'
-import { exportService } from '@/services/exportService'
+import { exportService } from '@/services/exportService\'vice\'ervice\'/exportService\'rvice'
 
 // Enhanced notification system
 interface Notification {
