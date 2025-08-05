@@ -61,6 +61,18 @@ export class DirectDataService {
 
     } catch (error) {
       console.error('❌ [DirectDataService] Error al cargar datos:', error)
+
+      // Proveer más contexto sobre el tipo de error
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.error('🌐 [DirectDataService] Error de red - posible problema de conectividad')
+        throw new Error('Error de conexión: No se pudo conectar con el servidor. Verifica tu conexión a internet.')
+      }
+
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.error('⏰ [DirectDataService] Request cancelado por timeout')
+        throw new Error('Timeout: La carga de datos está tomando demasiado tiempo. Intenta de nuevo.')
+      }
+
       throw error
     }
   }
