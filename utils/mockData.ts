@@ -300,3 +300,48 @@ export const mockFilterOptions = {
     { value: 'Orthodontic Adjustment', label: 'Orthodontic Adjustment', count: 1 },
   ],
 }
+
+// Función para generar datos mock dinámicamente
+export function generateMockData(count: number = 100): PatientRecord[] {
+  const insuranceCarriers = ['Delta Dental', 'BlueCross BlueShield', 'Aetna', 'Cigna', 'MetLife', 'Humana', 'Guardian']
+  const offices = ['Downtown Dental Center', 'Westside Family Dental', 'North Park Dental', 'Eastside Dental', 'Central Clinic', 'Riverside Dental']
+  const claimStatuses = ['Paid', 'Pending', 'Processing', 'Denied', 'Rejected']
+  const interactionTypes = ['Cleaning', 'Filling', 'Crown', 'Root Canal', 'Extraction', 'X-Ray', 'Consultation', 'Orthodontic', 'Whitening', 'Emergency']
+  const patientNames = [
+    'John Smith', 'Sarah Johnson', 'Michael Brown', 'Emily Davis', 'Robert Wilson',
+    'Lisa Anderson', 'David Martinez', 'Jennifer Taylor', 'Christopher Lee', 'Amanda Rodriguez',
+    'Kevin Thompson', 'Michelle White', 'Mark Johnson', 'Susan Miller', 'James Wilson',
+    'Patricia Garcia', 'Richard Martinez', 'Linda Anderson', 'Charles Taylor', 'Barbara Thomas',
+    'Daniel Jackson', 'Nancy White', 'Matthew Harris', 'Karen Martin', 'Anthony Thompson'
+  ]
+  const statuses = ['Completed', 'In Progress', 'Planning', 'Appeal', 'Documentation']
+
+  return Array.from({ length: count }, (_, i) => {
+    const randomDate = new Date()
+    randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 30)) // Últimos 30 días
+
+    const paidAmount = Math.floor(Math.random() * 1500) + 100
+    const isRejectedOrDenied = Math.random() < 0.1 // 10% de casos rechazados/negados
+
+    return {
+      timestamp: randomDate.toISOString(),
+      insurancecarrier: insuranceCarriers[Math.floor(Math.random() * insuranceCarriers.length)],
+      offices: offices[Math.floor(Math.random() * offices.length)],
+      patientname: patientNames[Math.floor(Math.random() * patientNames.length)] + ` ${i + 1}`,
+      paidamount: isRejectedOrDenied ? 0 : paidAmount,
+      claimstatus: claimStatuses[Math.floor(Math.random() * claimStatuses.length)],
+      typeofinteraction: interactionTypes[Math.floor(Math.random() * interactionTypes.length)],
+      patientdob: `19${60 + Math.floor(Math.random() * 40)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+      dos: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+      productivityamount: paidAmount,
+      missingdocsorinformation: Math.random() < 0.2 ? 'Documentación pendiente' : '',
+      howweproceeded: Math.random() < 0.3 ? 'Seguimiento requerido' : 'Procesamiento estándar',
+      escalatedto: Math.random() < 0.1 ? 'Supervisor' : '',
+      commentsreasons: `Procedimiento de ${interactionTypes[Math.floor(Math.random() * interactionTypes.length)]} - Mock Data`,
+      emailaddress: `patient${i + 1}@mock-email.com`,
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+      timestampbyinteraction: randomDate.toISOString(),
+      eftCheckIssuedDate: Math.random() < 0.7 ? randomDate.toISOString().split('T')[0] : ''
+    }
+  })
+}
