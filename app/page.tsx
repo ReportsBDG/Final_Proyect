@@ -587,7 +587,7 @@ export default function DentalDashboard() {
             ))}
 
             {options.length === 0 && (
-              <div className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+              <div className="p-6 text-base text-gray-500 dark:text-gray-400 text-center">
                 No options available
               </div>
             )}
