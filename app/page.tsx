@@ -731,22 +731,29 @@ export default function DentalDashboard() {
     )
   }
 
-  // Show error state
-  if (error) {
+  // Show error state only if we have no data at all
+  if (error && data.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-6">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-red-600" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Connection Error</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={() => loadData()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Retry
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={retryConnection}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 w-full"
+            >
+              Retry Connection
+            </button>
+            <div className="text-sm text-gray-500">
+              {error.includes('datos de prueba') && (
+                <p>✅ Currently showing mock data for demonstration</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     )
