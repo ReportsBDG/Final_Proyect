@@ -637,21 +637,51 @@ export default function DentalDashboard() {
     }
   }
 
-  // Functions for Select All and Clear All for each filter
-  const selectAllOffices = () => setSelectedOffices(uniqueOffices)
-  const clearAllOffices = () => setSelectedOffices([])
-  
-  const selectAllCarriers = () => setSelectedCarriers(uniqueCarriers)
-  const clearAllCarriers = () => setSelectedCarriers([])
-  
-  const selectAllClaimStatuses = () => setSelectedClaimStatuses(uniqueClaimStatuses)
-  const clearAllClaimStatuses = () => setSelectedClaimStatuses([])
-  
-  const selectAllStatuses = () => setSelectedStatuses(uniqueStatuses)
-  const clearAllStatuses = () => setSelectedStatuses([])
-  
-  const selectAllInteractionTypes = () => setSelectedInteractionTypes(uniqueInteractionTypes)
-  const clearAllInteractionTypes = () => setSelectedInteractionTypes([])
+  // Functions for Select All and Clear All for each filter - Fixed to work properly
+  const selectAllOffices = () => {
+    console.log('Selecting all offices:', uniqueOffices)
+    setSelectedOffices([...uniqueOffices])
+  }
+  const clearAllOffices = () => {
+    console.log('Clearing all offices')
+    setSelectedOffices([])
+  }
+
+  const selectAllCarriers = () => {
+    console.log('Selecting all carriers:', uniqueCarriers)
+    setSelectedCarriers([...uniqueCarriers])
+  }
+  const clearAllCarriers = () => {
+    console.log('Clearing all carriers')
+    setSelectedCarriers([])
+  }
+
+  const selectAllClaimStatuses = () => {
+    console.log('Selecting all claim statuses:', uniqueClaimStatuses)
+    setSelectedClaimStatuses([...uniqueClaimStatuses])
+  }
+  const clearAllClaimStatuses = () => {
+    console.log('Clearing all claim statuses')
+    setSelectedClaimStatuses([])
+  }
+
+  const selectAllStatuses = () => {
+    console.log('Selecting all statuses:', uniqueStatuses)
+    setSelectedStatuses([...uniqueStatuses])
+  }
+  const clearAllStatuses = () => {
+    console.log('Clearing all statuses')
+    setSelectedStatuses([])
+  }
+
+  const selectAllInteractionTypes = () => {
+    console.log('Selecting all interaction types:', uniqueInteractionTypes)
+    setSelectedInteractionTypes([...uniqueInteractionTypes])
+  }
+  const clearAllInteractionTypes = () => {
+    console.log('Clearing all interaction types')
+    setSelectedInteractionTypes([])
+  }
 
   const clearAllFilters = () => {
     setSelectedOffices([])
