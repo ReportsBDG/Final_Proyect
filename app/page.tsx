@@ -34,7 +34,7 @@ import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
 import { dataService } from '@/services/dataService'
 import { PatientRecord } from '@/types'
-import { exportService } from '@/services/exportService\'vice\'ortService'
+import { exportService } from '@/services/exportService'
 
 // Enhanced notification system
 interface Notification {
@@ -1308,7 +1308,7 @@ export default function DentalDashboard() {
                           <div className="truncate max-w-[100px] sm:max-w-none">
                             Carrier
                             {sortBy === 'insurancecarrier' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '���'}</span>
                             )}
                           </div>
                         </th>
