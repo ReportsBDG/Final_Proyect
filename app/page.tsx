@@ -551,7 +551,7 @@ export default function DentalDashboard() {
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-xl max-h-72 overflow-y-auto">
             {/* Select All / Clear All */}
             <div className="p-3 border-b border-gray-200 dark:border-gray-600">
               <div className="flex flex-wrap gap-2">
