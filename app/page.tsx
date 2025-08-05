@@ -1075,7 +1075,7 @@ export default function DentalDashboard() {
               {/* Compact Filters Grid */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 <div className="grid grid-cols-1 gap-3">
-                  <CompactMultiSelectFilter
+                  <MultiSelectFilter
                     label="Office"
                     options={uniqueOffices}
                     selectedValues={selectedOffices}
@@ -1085,7 +1085,7 @@ export default function DentalDashboard() {
                     placeholder="All Offices"
                   />
 
-                  <CompactMultiSelectFilter
+                  <MultiSelectFilter
                     label="Insurance Carrier"
                     options={uniqueCarriers}
                     selectedValues={selectedCarriers}
@@ -1095,7 +1095,7 @@ export default function DentalDashboard() {
                     placeholder="All Carriers"
                   />
 
-                  <CompactMultiSelectFilter
+                  <MultiSelectFilter
                     label="Claim Status"
                     options={uniqueClaimStatuses}
                     selectedValues={selectedClaimStatuses}
@@ -1105,7 +1105,7 @@ export default function DentalDashboard() {
                     placeholder="All Claim Statuses"
                   />
 
-                  <CompactMultiSelectFilter
+                  <MultiSelectFilter
                     label="Processing Status"
                     options={uniqueStatuses}
                     selectedValues={selectedStatuses}
@@ -1115,7 +1115,7 @@ export default function DentalDashboard() {
                     placeholder="All Statuses"
                   />
 
-                  <CompactMultiSelectFilter
+                  <MultiSelectFilter
                     label="Type of Interaction"
                     options={uniqueInteractionTypes}
                     selectedValues={selectedInteractionTypes}
