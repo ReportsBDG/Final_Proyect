@@ -33,7 +33,8 @@ import {
 } from 'lucide-react'
 import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
-import { dataService } from '@/services/dataService'
+import DataLoadingStatus from '@/components/DataLoadingStatus'
+import { dataService } from '@/services/dataService\'e\'ervice\'ice\'vices/dataService'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
 
