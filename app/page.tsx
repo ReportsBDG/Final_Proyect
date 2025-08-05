@@ -34,7 +34,7 @@ import {
 import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
 import DataLoadingStatus from '@/components/DataLoadingStatus'
-import { directDataService } from '@/services/directDataService\'aService\'rectDataService\'ctDataService\'ice'
+import { directDataService } from '@/services/directDataService'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
 
@@ -212,7 +212,7 @@ export default function DentalDashboard() {
         setError(null)
       }
 
-      const patientData = await dataService.fetchPatientRecords()
+      const patientData = await directDataService.fetchPatientRecords()
 
       // Detailed change detection
       if (data.length > 0) {
