@@ -1209,6 +1209,13 @@ export default function DentalDashboard() {
         <div className={`flex-1 space-y-6 transition-all duration-300 ease-in-out ${
           isFiltersCollapsed ? 'p-4 sm:p-6 ml-0' : 'p-4 sm:p-6'
         }`}>
+          {/* Data Loading Status */}
+          <DataLoadingStatus
+            totalRecords={data.length}
+            isLoading={loading}
+            error={error || undefined}
+          />
+
           {/* Interactive Charts Section */}
           <div id="charts-section">
             <SimpleCharts data={filteredData} />
