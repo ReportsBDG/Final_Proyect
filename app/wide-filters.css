@@ -2,7 +2,7 @@
 
 /* Panel más ancho con mejor espaciado */
 .wide-filter-panel {
-  min-width: 600px;
+  min-width: 750px;
 }
 
 /* Mejorar dropdowns para aprovechar el ancho */
