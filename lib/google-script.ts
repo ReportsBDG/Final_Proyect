@@ -1,8 +1,8 @@
 // Configuración para Google Apps Script
 export const GOOGLE_SCRIPT_CONFIG = {
   url: "https://script.google.com/macros/s/AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ/exec",
-  timeout: 20000, // Aumentado para dar más tiempo
-  retries: 3,
+  timeout: 120000, // 2 minutos para 6000+ registros
+  retries: 2, // Reducir reintentos para evitar delay
   useProxy: true,
   useFallbackData: false, // Activando conexión real
   debugMode: true // Activar modo debug
@@ -80,7 +80,10 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
       console.log(`🔧 Configuración:`, { useFallbackData, useProxy, debugMode })
       
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), timeout)
+      const timeoutId = setTimeout(() => {
+        console.log(`⏰ Timeout después de ${timeout}ms para dataset grande`)
+        controller.abort()
+      }, timeout)
 
       const response = await fetch(fetchUrl, {
         method: 'GET',
@@ -116,7 +119,17 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
       
     } catch (error) {
       console.error(`❌ Intento ${attempt}/${retries} falló:`, error)
-      
+
+      // Si es AbortError por timeout con dataset grande, usar chunk loading
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('🔄 Timeout detectado, intentando carga por chunks...')
+        try {
+          return await loadDataInChunks()
+        } catch (chunkError) {
+          console.error('❌ Error en carga por chunks:', chunkError)
+        }
+      }
+
       if (attempt === retries) {
         console.log('⚠️ Usando datos de respaldo debido a errores de conexión')
         return fallbackData
