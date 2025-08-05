@@ -115,7 +115,7 @@ export default function DentalDashboard() {
     details?: string
   }>>([])
 
-  // New states for enhanced functionality
+  // New states for enhanced functionality - Inicializar filtros visibles por defecto
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false)
   const [showColumnFilter, setShowColumnFilter] = useState(false)
   
@@ -153,10 +153,12 @@ export default function DentalDashboard() {
   const [sortBy, setSortBy] = useState<keyof PatientRecord | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
-  // Load persisted state after client mount
+  // Load persisted state after client mount - Asegurar que los filtros sean visibles por defecto
   useEffect(() => {
     if (isClient) {
-      setIsFiltersCollapsed(loadPersistedState('dentalDashboard.filtersCollapsed', false))
+      const savedState = loadPersistedState('dentalDashboard.filtersCollapsed', false)
+      setIsFiltersCollapsed(savedState)
+      console.log('🔧 Estado de filtros cargado:', savedState)
     }
   }, [isClient])
 
@@ -739,8 +741,13 @@ export default function DentalDashboard() {
               {/* Hamburger Menu Button */}
               <button
                 onClick={() => {
-                  console.log('Toggle filters clicked, current state:', isFiltersCollapsed)
-                  setIsFiltersCollapsed(!isFiltersCollapsed)
+                  const newState = !isFiltersCollapsed
+                  console.log('🔧 Toggle filters clicked:', isFiltersCollapsed, '->', newState)
+                  setIsFiltersCollapsed(newState)
+                  // Guardar estado inmediatamente
+                  if (typeof window !== 'undefined') {
+                    savePersistedState('dentalDashboard.filtersCollapsed', newState)
+                  }
                 }}
                 className={`p-2 rounded-lg transition-all duration-200 border ${
                   isFiltersCollapsed
