@@ -538,7 +538,7 @@ export default function DentalDashboard() {
           onClick={() => setIsOpen(!isOpen)}
           className="w-full px-5 py-4 text-left border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm"
         >
-          <span className="truncate text-sm font-medium">
+          <span className="truncate text-base font-medium">
             {selectedValues.length === 0
               ? placeholder
               : selectedValues.length === 1
@@ -546,7 +546,7 @@ export default function DentalDashboard() {
                 : `${selectedValues.length} selected`
             }
           </span>
-          <ChevronDown className={`w-5 h-5 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-6 h-6 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Dropdown */}
