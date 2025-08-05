@@ -103,16 +103,35 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
       }
       
       const data = await response.json()
-      console.log(`📊 Datos recibidos:`, data)
-      console.log(`✅ Datos obtenidos: ${data.data?.length || data.length || 0} registros`)
-      
-      const processedData = processData(data.data || data)
-      console.log(`✅ Datos procesados: ${processedData.length} registros`)
-      
-      // Validar que tenemos datos válidos
-      if (!processedData || processedData.length === 0) {
-        throw new Error('No se recibieron datos válidos de Google Sheets')
+      console.log(`📊 Respuesta completa:`, {
+        success: data.success,
+        totalRecords: data.totalRecords,
+        dataLength: data.data?.length,
+        timestamp: data.timestamp
+      })
+
+      // Extraer correctamente los datos de la respuesta de la API
+      const rawRecords = data.data || []
+      console.log(`📈 Registros en bruto recibidos: ${rawRecords.length}`)
+
+      if (!Array.isArray(rawRecords) || rawRecords.length === 0) {
+        throw new Error(`No se recibieron registros válidos: ${rawRecords.length} registros`)
       }
+
+      const processedData = processData(rawRecords)
+      console.log(`✅ Datos procesados exitosamente: ${processedData.length} registros`)
+      
+      // Validar que tenemos datos válidos después del procesamiento
+      if (!processedData || processedData.length === 0) {
+        console.error('❌ Error: datos procesados están vacíos')
+        console.error('Raw records length:', rawRecords.length)
+        console.error('Sample raw record:', rawRecords[0])
+        throw new Error(`Datos procesados vacíos: ${rawRecords.length} registros en bruto -> ${processedData.length} procesados`)
+      }
+
+      // Log de validación exitosa
+      console.log(`🎯 ÉXITO: ${processedData.length} registros reales cargados desde Google Sheets`)
+      console.log('📋 Muestra de datos:', processedData.slice(0, 2))
       
       console.log(`✅ Datos reales obtenidos de Google Sheets: ${processedData.length} registros`)
       return processedData
