@@ -114,9 +114,7 @@ export default function DentalDashboard() {
   }>>([])
 
   // New states for enhanced functionality
-  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(() => 
-    loadPersistedState('dentalDashboard.filtersCollapsed', false)
-  )
+  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false)
   const [showColumnFilter, setShowColumnFilter] = useState(false)
   
   // Define the type for selected columns
@@ -153,14 +151,25 @@ export default function DentalDashboard() {
   const [sortBy, setSortBy] = useState<keyof PatientRecord | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
+  // Load persisted state after client mount
+  useEffect(() => {
+    if (isClient) {
+      setIsFiltersCollapsed(loadPersistedState('dentalDashboard.filtersCollapsed', false))
+    }
+  }, [isClient])
+
   // Persist states to localStorage
   useEffect(() => {
-    savePersistedState('dentalDashboard.filtersCollapsed', isFiltersCollapsed)
-  }, [isFiltersCollapsed])
+    if (isClient) {
+      savePersistedState('dentalDashboard.filtersCollapsed', isFiltersCollapsed)
+    }
+  }, [isFiltersCollapsed, isClient])
 
   useEffect(() => {
-    savePersistedState('dentalDashboard.selectedColumns', selectedColumns)
-  }, [selectedColumns])
+    if (isClient) {
+      savePersistedState('dentalDashboard.selectedColumns', selectedColumns)
+    }
+  }, [selectedColumns, isClient])
 
   // Add notification function with unique ID generation
   const addNotification = (type: Notification['type'], message: string) => {
@@ -727,7 +736,10 @@ export default function DentalDashboard() {
             <div className="flex items-center space-x-3">
               {/* Hamburger Menu Button */}
               <button
-                onClick={toggleFilters}
+                onClick={() => {
+                  console.log('Toggle filters clicked, current state:', isFiltersCollapsed)
+                  setIsFiltersCollapsed(!isFiltersCollapsed)
+                }}
                 className={`p-2 rounded-lg transition-all duration-200 border ${
                   isFiltersCollapsed
                     ? 'hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-200 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/10'
