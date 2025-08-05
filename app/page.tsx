@@ -34,8 +34,8 @@ import {
 import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
 import DataLoadingStatus from '@/components/DataLoadingStatus'
-import ImprovedFilterStyles from '@/components/ImprovedFilterStyles\'es\'ImprovedFilterStyles\'tyles\'/ImprovedFilterStyles'
-import { directDataService } from '@/services/directDataService\'ices/directDataService\'ice'
+import ImprovedFilterStyles from '@/components/ImprovedFilterStyles'
+import { directDataService } from '@/services/directDataService'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
 
