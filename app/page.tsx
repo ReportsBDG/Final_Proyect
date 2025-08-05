@@ -34,7 +34,8 @@ import {
 import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
 import DataLoadingStatus from '@/components/DataLoadingStatus'
-import { directDataService } from '@/services/directDataService'
+import CompactFilterPanel from '@/components/CompactFilterPanel'
+import { directDataService } from '@/services/directDataService\'ctDataService'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
 
