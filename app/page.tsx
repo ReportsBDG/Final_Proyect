@@ -34,7 +34,7 @@ import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
 import { dataService } from '@/services/dataService'
 import { PatientRecord } from '@/types'
-import { exportService } from '@/services/exportService\'om \'@/services/exportService'
+import { exportService } from '@/services/exportService\'ortService\'/services/exportService'
 
 // Enhanced notification system
 interface Notification {
