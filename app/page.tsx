@@ -1083,8 +1083,8 @@ export default function DentalDashboard() {
 
               {/* Compact Date Range */}
               <div className="flex-shrink-0">
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">DOS Date Range</h3>
-                <div className="grid grid-cols-2 gap-2">
+                <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">DOS Date Range</h3>
+                <div className="grid grid-cols-2 gap-3">
                   <input
                     type="date"
                     value={dateRange.start}
