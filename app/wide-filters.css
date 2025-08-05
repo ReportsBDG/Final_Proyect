@@ -229,19 +229,19 @@
 /* Responsive para anchos grandes */
 @media (min-width: 1024px) {
   .wide-filter-panel {
-    min-width: 800px;
+    min-width: 950px;
   }
 }
 
 @media (min-width: 1280px) {
   .wide-filter-panel {
-    min-width: 900px;
+    min-width: 1100px;
   }
 }
 
 @media (min-width: 1536px) {
   .wide-filter-panel {
-    min-width: 1000px;
+    min-width: 1250px;
   }
 }
 
