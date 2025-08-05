@@ -1000,7 +1000,7 @@ export default function DentalDashboard() {
         {/* Collapsible Sidebar Filters */}
         <div
           className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-96 md:w-96 lg:w-[420px] xl:w-[480px]'
+            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-[500px] md:w-[580px] lg:w-[650px] xl:w-[720px] 2xl:w-[800px]'
           }`}
         >
           {/* Header */}
