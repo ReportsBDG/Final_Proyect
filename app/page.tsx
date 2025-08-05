@@ -34,7 +34,7 @@ import {
 import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
 import DataLoadingStatus from '@/components/DataLoadingStatus'
-import { dataService } from '@/services/dataService\'e\'ervice\'ice\'vices/dataService'
+import { dataService } from '@/services/dataService\'vice\'ervice'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
 
