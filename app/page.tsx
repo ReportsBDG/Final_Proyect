@@ -1112,7 +1112,7 @@ export default function DentalDashboard() {
               isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
             }`}
           >
-            <div className="p-8 space-y-6 h-[calc(100vh-120px)] overflow-hidden flex flex-col">
+            <div className="px-12 py-8 space-y-6 h-[calc(100vh-120px)] overflow-hidden flex flex-col">
               {/* Compact Global Search */}
               <div className="flex-shrink-0">
                 <div className="relative">
