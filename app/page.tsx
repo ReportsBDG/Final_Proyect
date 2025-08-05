@@ -1158,9 +1158,9 @@ export default function DentalDashboard() {
               </div>
 
               {/* Active Filters Summary */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-gray-900 dark:text-white text-base">Active Filters</h3>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg">Active Filters</h3>
                 {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
                   selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
                   dateRange.start || dateRange.end) && (
