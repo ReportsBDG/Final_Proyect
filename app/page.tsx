@@ -1166,7 +1166,7 @@ export default function DentalDashboard() {
                   dateRange.start || dateRange.end) && (
                   <button
                     onClick={clearAllFilters}
-                    className="text-sm text-red-600 dark:text-red-400 hover:underline font-medium"
+                    className="text-sm text-red-600 dark:text-red-400 hover:underline font-semibold px-3 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                   >
                     Clear All
                   </button>
