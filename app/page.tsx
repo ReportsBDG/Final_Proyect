@@ -608,7 +608,7 @@ export default function DentalDashboard() {
                   onChange={() => onToggle(option)}
                   className="mr-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-5 h-5"
                 />
-                <span className="text-base text-gray-900 dark:text-white truncate min-w-0 leading-relaxed font-medium">{option}</span>
+                <span className="text-base text-gray-900 dark:text-white min-w-0 leading-relaxed font-medium break-words">{option}</span>
               </label>
             ))}
 
