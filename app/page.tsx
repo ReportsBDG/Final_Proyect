@@ -196,14 +196,20 @@ export default function DentalDashboard() {
   // Load data from Google Sheets with better error handling
   useEffect(() => {
     loadData()
-    
+
     // Set up polling for real-time updates every 30 seconds
     const interval = setInterval(() => {
       loadData(true) // Silent reload
     }, 30000)
-    
+
     return () => clearInterval(interval)
   }, [])
+
+  // Función de reintento de conexión
+  const retryConnection = () => {
+    setError(null)
+    loadData()
+  }
 
   // Enhanced reload function with detailed change tracking
   const loadData = async (silent = false) => {
