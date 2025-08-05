@@ -529,7 +529,7 @@ export default function DentalDashboard() {
 
     return (
       <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
           {label}
         </label>
 
