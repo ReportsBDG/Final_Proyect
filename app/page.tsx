@@ -1051,6 +1051,24 @@ export default function DentalDashboard() {
         </div>
       </header>
 
+      {/* Connection Status Banner */}
+      {error && data.length > 0 && (
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 text-yellow-600" />
+              <span className="text-sm font-medium text-yellow-800">{error}</span>
+            </div>
+            <button
+              onClick={retryConnection}
+              className="text-sm bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 transition-colors"
+            >
+              Retry Connection
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex relative">
         {/* Mobile overlay for filters */}
         {!isFiltersCollapsed && (
