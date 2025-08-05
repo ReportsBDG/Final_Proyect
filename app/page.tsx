@@ -35,7 +35,7 @@ import SimpleCharts from '@/components/SimpleCharts'
 import ConnectionStatus from '@/components/ConnectionStatus'
 import DataLoadingStatus from '@/components/DataLoadingStatus'
 import CompactFilterPanel from '@/components/CompactFilterPanel'
-import { directDataService } from '@/services/directDataService\'DataService\'ervice\'ataService'
+import { directDataService } from '@/services/directDataService\'ices/directDataService\'ice'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
 
