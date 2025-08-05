@@ -1173,11 +1173,11 @@ export default function DentalDashboard() {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {selectedOffices.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Offices:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedOffices.length} selected</span>
+                  <div className="text-base">
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">Offices:</span>
+                    <span className="font-bold text-blue-600 ml-2">{selectedOffices.length} selected</span>
                   </div>
                 )}
                 {selectedCarriers.length > 0 && (
