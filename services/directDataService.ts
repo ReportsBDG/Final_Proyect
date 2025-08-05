@@ -131,6 +131,34 @@ export class DirectDataService {
   }
 
   /**
+   * Probar conectividad con la API
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      console.log('🔍 [DirectDataService] Probando conectividad...')
+
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos para test
+
+      const response = await fetch('/api/proxy?action=test', {
+        method: 'GET',
+        signal: controller.signal,
+        cache: 'no-cache'
+      })
+
+      clearTimeout(timeoutId)
+
+      const isConnected = response.ok
+      console.log(`🔗 [DirectDataService] Conectividad: ${isConnected ? 'OK' : 'FAILED'}`)
+
+      return isConnected
+    } catch (error) {
+      console.error('❌ [DirectDataService] Test de conectividad falló:', error)
+      return false
+    }
+  }
+
+  /**
    * Convertir valores a número de forma segura
    */
   private parseNumber(value: any): number {
