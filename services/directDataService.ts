@@ -8,13 +8,26 @@ export class DirectDataService {
   async fetchPatientRecords(): Promise<PatientRecord[]> {
     try {
       console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
-      
+
+      // Crear AbortController con timeout extendido
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => {
+        console.log('⏰ [DirectDataService] Timeout alcanzado - abortando request')
+        controller.abort()
+      }, 180000) // 3 minutos para datasets grandes
+
       const response = await fetch('/api/proxy', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
+        // Agregar configuraciones adicionales para mejorar la conexión
+        cache: 'no-cache',
+        credentials: 'same-origin'
       })
+
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`)
