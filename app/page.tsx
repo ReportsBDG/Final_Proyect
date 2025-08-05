@@ -553,17 +553,17 @@ export default function DentalDashboard() {
         {isOpen && (
           <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-xl max-h-72 overflow-y-auto">
             {/* Select All / Clear All */}
-            <div className="p-3 border-b border-gray-200 dark:border-gray-600">
-              <div className="flex flex-wrap gap-2">
+            <div className="p-4 border-b-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+              <div className="flex flex-wrap gap-3">
                 <button
                   onClick={onSelectAll}
-                  className="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded hover:bg-blue-200 whitespace-nowrap font-medium"
+                  className="text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 whitespace-nowrap font-semibold transition-colors"
                 >
                   Select All
                 </button>
                 <button
                   onClick={onClearAll}
-                  className="text-sm bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 whitespace-nowrap font-medium"
+                  className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 whitespace-nowrap font-semibold transition-colors"
                 >
                   Clear All
                 </button>
