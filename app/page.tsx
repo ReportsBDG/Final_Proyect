@@ -1025,115 +1025,106 @@ export default function DentalDashboard() {
           </div>
 
           {/* Filters Content */}
-          <div 
+          <div
             className={`transition-all duration-300 ease-in-out overflow-hidden ${
               isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
             }`}
           >
-            <div className="p-4 sm:p-6 space-y-6 max-h-[calc(100vh-140px)] overflow-y-auto">
-              {/* Enhanced Global Search */}
-              <div>
-                <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  Global Search
-                </label>
+            <div className="p-3 space-y-4 h-[calc(100vh-120px)] overflow-hidden flex flex-col">
+              {/* Compact Global Search */}
+              <div className="flex-shrink-0">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search patients, emails, carriers..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                    className="w-full pl-9 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm font-medium placeholder:text-gray-400"
+                  />
+                  {searchTerm && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                      {filteredData.length}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Compact Date Range */}
+              <div className="flex-shrink-0">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">DOS Date Range</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    placeholder="Start"
+                    className="px-2 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-xs"
+                  />
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                    placeholder="End"
+                    className="px-2 py-2 border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-xs"
                   />
                 </div>
-                {searchTerm && (
-                  <p className="text-sm text-gray-500 mt-2 font-medium">
-                    Found {filteredData.length} results
-                  </p>
-                )}
               </div>
 
-              {/* Date Range Filter - Updated for DOS */}
-              <div>
-                <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  DOS Date Range
-                </label>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={dateRange.start}
-                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={dateRange.end}
-                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                    />
-                  </div>
+              {/* Compact Filters Grid */}
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                <div className="grid grid-cols-1 gap-3">
+                  <CompactMultiSelectFilter
+                    label="Office"
+                    options={uniqueOffices}
+                    selectedValues={selectedOffices}
+                    onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
+                    onSelectAll={selectAllOffices}
+                    onClearAll={clearAllOffices}
+                    placeholder="All Offices"
+                  />
+
+                  <CompactMultiSelectFilter
+                    label="Insurance Carrier"
+                    options={uniqueCarriers}
+                    selectedValues={selectedCarriers}
+                    onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
+                    onSelectAll={selectAllCarriers}
+                    onClearAll={clearAllCarriers}
+                    placeholder="All Carriers"
+                  />
+
+                  <CompactMultiSelectFilter
+                    label="Claim Status"
+                    options={uniqueClaimStatuses}
+                    selectedValues={selectedClaimStatuses}
+                    onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
+                    onSelectAll={selectAllClaimStatuses}
+                    onClearAll={clearAllClaimStatuses}
+                    placeholder="All Claim Statuses"
+                  />
+
+                  <CompactMultiSelectFilter
+                    label="Processing Status"
+                    options={uniqueStatuses}
+                    selectedValues={selectedStatuses}
+                    onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
+                    onSelectAll={selectAllStatuses}
+                    onClearAll={clearAllStatuses}
+                    placeholder="All Statuses"
+                  />
+
+                  <CompactMultiSelectFilter
+                    label="Type of Interaction"
+                    options={uniqueInteractionTypes}
+                    selectedValues={selectedInteractionTypes}
+                    onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
+                    onSelectAll={selectAllInteractionTypes}
+                    onClearAll={clearAllInteractionTypes}
+                    placeholder="All Interaction Types"
+                  />
                 </div>
               </div>
-
-              {/* Multi-Select Filters */}
-            <MultiSelectFilter
-              label="Office"
-              options={uniqueOffices}
-              selectedValues={selectedOffices}
-              onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
-              onSelectAll={selectAllOffices}
-              onClearAll={clearAllOffices}
-              placeholder="All Offices"
-            />
-
-            <MultiSelectFilter
-              label="Insurance Carrier"
-              options={uniqueCarriers}
-              selectedValues={selectedCarriers}
-              onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
-              onSelectAll={selectAllCarriers}
-              onClearAll={clearAllCarriers}
-              placeholder="All Carriers"
-            />
-
-            <MultiSelectFilter
-              label="Claim Status"
-              options={uniqueClaimStatuses}
-              selectedValues={selectedClaimStatuses}
-              onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
-              onSelectAll={selectAllClaimStatuses}
-              onClearAll={clearAllClaimStatuses}
-              placeholder="All Claim Statuses"
-            />
-
-            <MultiSelectFilter
-              label="Processing Status"
-              options={uniqueStatuses}
-              selectedValues={selectedStatuses}
-              onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
-              onSelectAll={selectAllStatuses}
-              onClearAll={clearAllStatuses}
-              placeholder="All Statuses"
-            />
-
-            <MultiSelectFilter
-              label="Type of Interaction"
-              options={uniqueInteractionTypes}
-              selectedValues={selectedInteractionTypes}
-              onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
-              onSelectAll={selectAllInteractionTypes}
-              onClearAll={clearAllInteractionTypes}
-              placeholder="All Interaction Types"
-            />
 
               {/* Active Filters Summary */}
             <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
