@@ -1069,36 +1069,50 @@ export default function DentalDashboard() {
         </div>
       )}
 
-      {/* Modal Overlay Background */}
-      {!isFiltersCollapsed && (
+      <div className="flex relative">
+        {/* Mobile overlay for filters */}
+        {!isFiltersCollapsed && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            onClick={toggleFilters}
+          />
+        )}
+
+        {/* Sidebar Filters - Wide and Improved */}
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40"
-          onClick={toggleFilters}
-        />
-      )}
-
-      {/* Modal Content - Centered and Wide */}
-      {!isFiltersCollapsed && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden">
-            {/* Header */}
-            <div className="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters & Search</h2>
-                </div>
-                <button
-                  onClick={toggleFilters}
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+          className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
+            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full lg:w-[900px] xl:w-[1000px] 2xl:w-[1100px]'
+          }`}
+        >
+          {/* Header */}
+          <div className="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <div className="flex items-center justify-between">
+              <div className={`flex items-center space-x-3 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
+                <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters & Search</h2>
               </div>
+              {isFiltersCollapsed && (
+                <div className="opacity-60">
+                  <Filter className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                </div>
+              )}
+              {/* Close button for mobile */}
+              <button
+                onClick={toggleFilters}
+                className="lg:hidden p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
+          </div>
 
-            {/* Content */}
-            <div className="p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+          {/* Filters Content */}
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
+            }`}
+          >
+            <div className="p-8 h-[calc(100vh-120px)] overflow-y-auto">
               <div className="space-y-6">
               {/* Top Row: Search and Date Range */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1270,11 +1284,11 @@ export default function DentalDashboard() {
             </div>
           </div>
         </div>
-      )}
 
-      <div className="flex relative">
         {/* Main Content */}
-        <div className="flex-1 space-y-6 p-4 sm:p-6">
+        <div className={`flex-1 space-y-6 transition-all duration-300 ease-in-out ${
+          isFiltersCollapsed ? 'p-4 sm:p-6' : 'p-4 sm:p-6'
+        }`}>
           {/* Data Loading Status */}
           <DataLoadingStatus
             totalRecords={data.length}
