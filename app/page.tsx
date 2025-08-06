@@ -1077,43 +1077,29 @@ export default function DentalDashboard() {
         />
       )}
 
-      <div className="flex relative">
-        
-        {/* Collapsible Sidebar Filters */}
-        <div
-          className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-[750px] md:w-[850px] lg:w-[950px] xl:w-[1100px] 2xl:w-[1250px]'
-          }`}
-        >
-          {/* Header */}
-          <div className="px-12 py-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between sm:justify-center">
-              <div className={`flex items-center space-x-2 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-                <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters & Search</h2>
-              </div>
-              {isFiltersCollapsed && (
-                <div className="opacity-60">
-                  <Filter className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+      {/* Modal Content - Centered and Wide */}
+      {!isFiltersCollapsed && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 rounded-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters & Search</h2>
                 </div>
-              )}
-              {/* Close button for mobile */}
-              <button
-                onClick={toggleFilters}
-                className="sm:hidden p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
+                <button
+                  onClick={toggleFilters}
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Filters Content */}
-          <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
-            }`}
-          >
-            <div className="px-12 py-8 space-y-6 h-[calc(100vh-120px)] overflow-hidden flex flex-col">
+            {/* Content */}
+            <div className="p-8 overflow-y-auto max-h-[calc(90vh-140px)]">
+              <div className="space-y-6">
               {/* Compact Global Search */}
               <div className="flex-shrink-0">
                 <div className="relative">
@@ -1155,8 +1141,8 @@ export default function DentalDashboard() {
               </div>
 
               {/* Compact Filters Grid */}
-              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-4">
                   <MultiSelectFilter
                     label="Office"
                     options={uniqueOffices}
@@ -1275,10 +1261,13 @@ export default function DentalDashboard() {
                 </div>
               </div>
             </div>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
+      <div className="flex relative">
         {/* Main Content */}
         <div className={`flex-1 space-y-6 transition-all duration-300 ease-in-out ${
           isFiltersCollapsed ? 'p-4 sm:p-6 ml-0' : 'p-4 sm:p-6'
