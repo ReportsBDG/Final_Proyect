@@ -109,6 +109,10 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
     yAxis: [],
     aggregation: 'sum',
     showLegend: true,
+    legendPosition: 'bottom',
+    legendAlign: 'center',
+    legendVerticalAlign: 'bottom',
+    customLegendNames: {},
     showGrid: true,
     colors: ['#0ea5e9']
   })
