@@ -543,17 +543,17 @@ export default function DentalDashboard() {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-200 dark:border-gray-700 relative">
-        <label className="block text-base font-semibold text-gray-800 dark:text-white mb-3">
+      <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700 relative">
+        <label className="block text-sm font-medium text-gray-800 dark:text-white mb-2">
           {label}
         </label>
 
         {/* Toggle Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-4 py-3 text-left border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-gray-50 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+          className="w-full px-3 py-2 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-sm"
         >
-          <span className="text-sm font-medium truncate">
+          <span className="truncate">
             {selectedValues.length === 0
               ? placeholder
               : selectedValues.length === 1
@@ -561,50 +561,50 @@ export default function DentalDashboard() {
                 : `${selectedValues.length} selected`
             }
           </span>
-          <ChevronDown className={`w-5 h-5 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-20 mt-2 left-0 right-0 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          <div className="absolute z-30 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 overflow-y-auto">
             {/* Select All / Clear All */}
-            <div className="p-3 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
-              <div className="flex gap-2">
+            <div className="p-2 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+              <div className="flex gap-1">
                 <button
                   onClick={onSelectAll}
-                  className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600 font-medium transition-colors"
+                  className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
                 >
-                  Select All
+                  All
                 </button>
                 <button
                   onClick={onClearAll}
-                  className="bg-gray-500 text-white px-3 py-1.5 rounded text-xs hover:bg-gray-600 font-medium transition-colors"
+                  className="bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600 transition-colors"
                 >
-                  Clear All
+                  Clear
                 </button>
               </div>
             </div>
 
             {/* Options */}
-            <div className="max-h-48 overflow-y-auto">
+            <div className="max-h-32 overflow-y-auto">
               {options.map((option) => (
                 <label
                   key={option}
-                  className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+                  className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={selectedValues.includes(option)}
                     onChange={() => onToggle(option)}
-                    className="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-4 h-4"
+                    className="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-3 h-3"
                   />
-                  <span className="text-sm text-gray-900 dark:text-white min-w-0 leading-relaxed break-words">{option}</span>
+                  <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-relaxed break-words">{option}</span>
                 </label>
               ))}
             </div>
 
             {options.length === 0 && (
-              <div className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+              <div className="p-3 text-xs text-gray-500 dark:text-gray-400 text-center">
                 No options available
               </div>
             )}
@@ -614,7 +614,7 @@ export default function DentalDashboard() {
         {/* Click outside to close */}
         {isOpen && (
           <div
-            className="fixed inset-0 z-10"
+            className="fixed inset-0 z-20"
             onClick={() => setIsOpen(false)}
           ></div>
         )}
