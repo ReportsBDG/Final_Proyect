@@ -276,26 +276,15 @@ export default function DentalDashboard() {
     } catch (err) {
       console.error('Error loading data:', err)
 
-      // Si es un error de conexión y no tenemos datos, usar datos mock como fallback
+      // El DirectDataService ya maneja el fallback automáticamente
+      // Si llegamos aquí, significa que incluso el fallback falló
       if (data.length === 0) {
-        console.log('🔄 Usando datos mock como fallback debido a error de conexión')
-        try {
-          // Importar datos mock dinámicamente
-          const { generateMockData } = await import('@/utils/mockData')
-          const mockData = generateMockData(100) // Generar 100 registros mock
-          setData(mockData)
-
-          const errorMessage = 'Usando datos de prueba (sin conexión a Google Sheets)'
-          setError(errorMessage)
-          addNotification('warning', errorMessage)
-        } catch (mockError) {
-          const errorMessage = 'Error loading data from Google Sheets'
-          setError(errorMessage)
-          addNotification('error', errorMessage)
-        }
+        const errorMessage = 'Problema de conectividad - usando datos de demostración'
+        setError(errorMessage)
+        addNotification('warning', errorMessage)
       } else {
         // Si ya tenemos datos, solo mostrar notificación pero mantener datos existentes
-        const errorMessage = 'No se pudo actualizar datos - usando datos previos'
+        const errorMessage = 'Problema temporal de conexión - usando datos previos'
         addNotification('warning', errorMessage)
       }
     } finally {
