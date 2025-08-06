@@ -1,8 +1,8 @@
 // Configuración para Google Apps Script
 export const GOOGLE_SCRIPT_CONFIG = {
   url: "https://script.google.com/macros/s/AKfycbz-hSsHHk5lcYtRc_XLC20hV24XneVFSLbrm-MuYnaJYqWHJZ75JjU1E6GtCe6oF6yQ/exec",
-  timeout: 20000, // Aumentado para dar más tiempo
-  retries: 3,
+  timeout: 120000, // 2 minutos para 6000+ registros
+  retries: 2, // Reducir reintentos para evitar delay
   useProxy: true,
   useFallbackData: false, // Activando conexión real
   debugMode: true // Activar modo debug
@@ -80,7 +80,10 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
       console.log(`🔧 Configuración:`, { useFallbackData, useProxy, debugMode })
       
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), timeout)
+      const timeoutId = setTimeout(() => {
+        console.log(`⏰ Timeout después de ${timeout}ms para dataset grande`)
+        controller.abort()
+      }, timeout)
 
       const response = await fetch(fetchUrl, {
         method: 'GET',
@@ -100,23 +103,52 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
       }
       
       const data = await response.json()
-      console.log(`📊 Datos recibidos:`, data)
-      console.log(`✅ Datos obtenidos: ${data.data?.length || data.length || 0} registros`)
-      
-      const processedData = processData(data.data || data)
-      console.log(`✅ Datos procesados: ${processedData.length} registros`)
-      
-      // Validar que tenemos datos válidos
-      if (!processedData || processedData.length === 0) {
-        throw new Error('No se recibieron datos válidos de Google Sheets')
+      console.log(`📊 Respuesta completa:`, {
+        success: data.success,
+        totalRecords: data.totalRecords,
+        dataLength: data.data?.length,
+        timestamp: data.timestamp
+      })
+
+      // Extraer correctamente los datos de la respuesta de la API
+      const rawRecords = data.data || []
+      console.log(`📈 Registros en bruto recibidos: ${rawRecords.length}`)
+
+      if (!Array.isArray(rawRecords) || rawRecords.length === 0) {
+        throw new Error(`No se recibieron registros válidos: ${rawRecords.length} registros`)
       }
+
+      const processedData = processData(rawRecords)
+      console.log(`✅ Datos procesados exitosamente: ${processedData.length} registros`)
+      
+      // Validar que tenemos datos válidos después del procesamiento
+      if (!processedData || processedData.length === 0) {
+        console.error('❌ Error: datos procesados están vacíos')
+        console.error('Raw records length:', rawRecords.length)
+        console.error('Sample raw record:', rawRecords[0])
+        throw new Error(`Datos procesados vacíos: ${rawRecords.length} registros en bruto -> ${processedData.length} procesados`)
+      }
+
+      // Log de validación exitosa
+      console.log(`🎯 ÉXITO: ${processedData.length} registros reales cargados desde Google Sheets`)
+      console.log('📋 Muestra de datos:', processedData.slice(0, 2))
       
       console.log(`✅ Datos reales obtenidos de Google Sheets: ${processedData.length} registros`)
       return processedData
       
     } catch (error) {
       console.error(`❌ Intento ${attempt}/${retries} falló:`, error)
-      
+
+      // Si es AbortError por timeout con dataset grande, usar chunk loading
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('🔄 Timeout detectado, intentando carga por chunks...')
+        try {
+          return await loadDataInChunks()
+        } catch (chunkError) {
+          console.error('❌ Error en carga por chunks:', chunkError)
+        }
+      }
+
       if (attempt === retries) {
         console.log('⚠️ Usando datos de respaldo debido a errores de conexión')
         return fallbackData

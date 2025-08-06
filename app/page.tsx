@@ -1,3 +1,4 @@
+'use client\'\'use client'
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -31,7 +32,10 @@ import {
   Menu
 } from 'lucide-react'
 import SimpleCharts from '@/components/SimpleCharts'
-import { dataService } from '@/services/dataService'
+import ConnectionStatus from '@/components/ConnectionStatus'
+import DataLoadingStatus from '@/components/DataLoadingStatus'
+import ImprovedFilterStyles from '@/components/ImprovedFilterStyles'
+import { directDataService } from '@/services/directDataService'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
 
@@ -113,10 +117,8 @@ export default function DentalDashboard() {
     details?: string
   }>>([])
 
-  // New states for enhanced functionality
-  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(() => 
-    loadPersistedState('dentalDashboard.filtersCollapsed', false)
-  )
+  // New states for enhanced functionality - Inicializar filtros visibles por defecto
+  const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false)
   const [showColumnFilter, setShowColumnFilter] = useState(false)
   
   // Define the type for selected columns
@@ -153,14 +155,27 @@ export default function DentalDashboard() {
   const [sortBy, setSortBy] = useState<keyof PatientRecord | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
+  // Load persisted state after client mount - Asegurar que los filtros sean visibles por defecto
+  useEffect(() => {
+    if (isClient) {
+      const savedState = loadPersistedState('dentalDashboard.filtersCollapsed', false)
+      setIsFiltersCollapsed(savedState)
+      console.log('🔧 Estado de filtros cargado:', savedState)
+    }
+  }, [isClient])
+
   // Persist states to localStorage
   useEffect(() => {
-    savePersistedState('dentalDashboard.filtersCollapsed', isFiltersCollapsed)
-  }, [isFiltersCollapsed])
+    if (isClient) {
+      savePersistedState('dentalDashboard.filtersCollapsed', isFiltersCollapsed)
+    }
+  }, [isFiltersCollapsed, isClient])
 
   useEffect(() => {
-    savePersistedState('dentalDashboard.selectedColumns', selectedColumns)
-  }, [selectedColumns])
+    if (isClient) {
+      savePersistedState('dentalDashboard.selectedColumns', selectedColumns)
+    }
+  }, [selectedColumns, isClient])
 
   // Add notification function with unique ID generation
   const addNotification = (type: Notification['type'], message: string) => {
@@ -181,14 +196,20 @@ export default function DentalDashboard() {
   // Load data from Google Sheets with better error handling
   useEffect(() => {
     loadData()
-    
+
     // Set up polling for real-time updates every 30 seconds
     const interval = setInterval(() => {
       loadData(true) // Silent reload
     }, 30000)
-    
+
     return () => clearInterval(interval)
   }, [])
+
+  // Función de reintento de conexión
+  const retryConnection = () => {
+    setError(null)
+    loadData()
+  }
 
   // Enhanced reload function with detailed change tracking
   const loadData = async (silent = false) => {
@@ -198,7 +219,7 @@ export default function DentalDashboard() {
         setError(null)
       }
 
-      const patientData = await dataService.fetchPatientRecords()
+      const patientData = await directDataService.fetchPatientRecords()
 
       // Detailed change detection
       if (data.length > 0) {
@@ -253,10 +274,19 @@ export default function DentalDashboard() {
           `${patientData.length} total records`)
       }
     } catch (err) {
-      const errorMessage = 'Error loading data from Google Sheets'
-      setError(errorMessage)
-      addNotification('error', errorMessage)
       console.error('Error loading data:', err)
+
+      // El DirectDataService ya maneja el fallback automáticamente
+      // Si llegamos aquí, significa que incluso el fallback falló
+      if (data.length === 0) {
+        const errorMessage = 'Problema de conectividad - usando datos de demostración'
+        setError(errorMessage)
+        addNotification('warning', errorMessage)
+      } else {
+        // Si ya tenemos datos, solo mostrar notificación pero mantener datos existentes
+        const errorMessage = 'Problema temporal de conexión - usando datos previos'
+        addNotification('warning', errorMessage)
+      }
     } finally {
       if (!silent) {
         setLoading(false)
@@ -514,16 +544,16 @@ export default function DentalDashboard() {
 
     return (
       <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
           {label}
         </label>
 
         {/* Toggle Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-4 py-3 text-left border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+          className="w-full px-2.5 py-1.5 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-xs"
         >
-          <span className="truncate text-sm font-medium">
+          <span className="truncate text-gray-700 dark:text-gray-300">
             {selectedValues.length === 0
               ? placeholder
               : selectedValues.length === 1
@@ -531,48 +561,56 @@ export default function DentalDashboard() {
                 : `${selectedValues.length} selected`
             }
           </span>
-          <ChevronDown className={`w-5 h-5 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-3 h-3 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto">
             {/* Select All / Clear All */}
-            <div className="p-3 border-b border-gray-200 dark:border-gray-600">
-              <div className="flex flex-wrap gap-2">
+            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+              <div className="flex gap-1">
                 <button
-                  onClick={onSelectAll}
-                  className="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded hover:bg-blue-200 whitespace-nowrap font-medium"
+                  onClick={() => {
+                    onSelectAll()
+                    setIsOpen(false)
+                  }}
+                  className="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-blue-600 transition-colors"
                 >
-                  Select All
+                  All
                 </button>
                 <button
-                  onClick={onClearAll}
-                  className="text-sm bg-gray-100 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-200 whitespace-nowrap font-medium"
+                  onClick={() => {
+                    onClearAll()
+                    setIsOpen(false)
+                  }}
+                  className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
                 >
-                  Clear All
+                  Clear
                 </button>
               </div>
             </div>
 
             {/* Options */}
-            {options.map((option) => (
-              <label
-                key={option}
-                className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedValues.includes(option)}
-                  onChange={() => onToggle(option)}
-                  className="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-4 h-4"
-                />
-                <span className="text-sm text-gray-900 dark:text-white truncate min-w-0 leading-relaxed">{option}</span>
-              </label>
-            ))}
+            <div className="max-h-32 overflow-y-auto">
+              {options.map((option) => (
+                <label
+                  key={option}
+                  className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedValues.includes(option)}
+                    onChange={() => onToggle(option)}
+                    className="mr-1.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-3 h-3"
+                  />
+                  <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
+                </label>
+              ))}
+            </div>
 
             {options.length === 0 && (
-              <div className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+              <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
                 No options available
               </div>
             )}
@@ -582,7 +620,7 @@ export default function DentalDashboard() {
         {/* Click outside to close */}
         {isOpen && (
           <div
-            className="fixed inset-0 z-5"
+            className="fixed inset-0 z-30"
             onClick={() => setIsOpen(false)}
           ></div>
         )}
@@ -622,21 +660,51 @@ export default function DentalDashboard() {
     }
   }
 
-  // Functions for Select All and Clear All for each filter
-  const selectAllOffices = () => setSelectedOffices(uniqueOffices)
-  const clearAllOffices = () => setSelectedOffices([])
-  
-  const selectAllCarriers = () => setSelectedCarriers(uniqueCarriers)
-  const clearAllCarriers = () => setSelectedCarriers([])
-  
-  const selectAllClaimStatuses = () => setSelectedClaimStatuses(uniqueClaimStatuses)
-  const clearAllClaimStatuses = () => setSelectedClaimStatuses([])
-  
-  const selectAllStatuses = () => setSelectedStatuses(uniqueStatuses)
-  const clearAllStatuses = () => setSelectedStatuses([])
-  
-  const selectAllInteractionTypes = () => setSelectedInteractionTypes(uniqueInteractionTypes)
-  const clearAllInteractionTypes = () => setSelectedInteractionTypes([])
+  // Functions for Select All and Clear All for each filter - Fixed to work properly
+  const selectAllOffices = () => {
+    console.log('Selecting all offices:', uniqueOffices)
+    setSelectedOffices([...uniqueOffices])
+  }
+  const clearAllOffices = () => {
+    console.log('Clearing all offices')
+    setSelectedOffices([])
+  }
+
+  const selectAllCarriers = () => {
+    console.log('Selecting all carriers:', uniqueCarriers)
+    setSelectedCarriers([...uniqueCarriers])
+  }
+  const clearAllCarriers = () => {
+    console.log('Clearing all carriers')
+    setSelectedCarriers([])
+  }
+
+  const selectAllClaimStatuses = () => {
+    console.log('Selecting all claim statuses:', uniqueClaimStatuses)
+    setSelectedClaimStatuses([...uniqueClaimStatuses])
+  }
+  const clearAllClaimStatuses = () => {
+    console.log('Clearing all claim statuses')
+    setSelectedClaimStatuses([])
+  }
+
+  const selectAllStatuses = () => {
+    console.log('Selecting all statuses:', uniqueStatuses)
+    setSelectedStatuses([...uniqueStatuses])
+  }
+  const clearAllStatuses = () => {
+    console.log('Clearing all statuses')
+    setSelectedStatuses([])
+  }
+
+  const selectAllInteractionTypes = () => {
+    console.log('Selecting all interaction types:', uniqueInteractionTypes)
+    setSelectedInteractionTypes([...uniqueInteractionTypes])
+  }
+  const clearAllInteractionTypes = () => {
+    console.log('Clearing all interaction types')
+    setSelectedInteractionTypes([])
+  }
 
   const clearAllFilters = () => {
     setSelectedOffices([])
@@ -660,22 +728,29 @@ export default function DentalDashboard() {
     )
   }
 
-  // Show error state
-  if (error) {
+  // Show error state only if we have no data at all
+  if (error && data.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-6">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-red-600" />
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Connection Error</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={() => loadData()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Retry
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={retryConnection}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 w-full"
+            >
+              Retry Connection
+            </button>
+            <div className="text-sm text-gray-500">
+              {error.includes('datos de prueba') && (
+                <p>✅ Currently showing mock data for demonstration</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -727,7 +802,15 @@ export default function DentalDashboard() {
             <div className="flex items-center space-x-3">
               {/* Hamburger Menu Button */}
               <button
-                onClick={toggleFilters}
+                onClick={() => {
+                  const newState = !isFiltersCollapsed
+                  console.log('🔧 Toggle filters clicked:', isFiltersCollapsed, '->', newState)
+                  setIsFiltersCollapsed(newState)
+                  // Guardar estado inmediatamente
+                  if (typeof window !== 'undefined') {
+                    savePersistedState('dentalDashboard.filtersCollapsed', newState)
+                  }
+                }}
                 className={`p-2 rounded-lg transition-all duration-200 border ${
                   isFiltersCollapsed
                     ? 'hover:bg-blue-50 dark:hover:bg-blue-900/20 border-blue-200 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/10'
@@ -965,228 +1048,225 @@ export default function DentalDashboard() {
         </div>
       </header>
 
-      <div className="flex relative">
-        {/* Mobile overlay for filters */}
-        {!isFiltersCollapsed && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden"
-            onClick={toggleFilters}
-          />
-        )}
-        
-        {/* Collapsible Sidebar Filters */}
+      {/* Connection Status Banner */}
+      {error && data.length > 0 && (
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <AlertCircle className="w-5 h-5 text-yellow-600" />
+              <span className="text-sm font-medium text-yellow-800">{error}</span>
+            </div>
+            <button
+              onClick={retryConnection}
+              className="text-sm bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 transition-colors"
+            >
+              Retry Connection
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="px-4 sm:px-6 space-y-6">
+        {/* Filters Container Card */}
         <div
-          className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-96 md:w-96 lg:w-[420px] xl:w-[480px]'
+          className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-4 transition-all duration-300 ease-in-out ${
+            isFiltersCollapsed ? 'opacity-0 max-h-0 overflow-hidden p-0 border-0 mb-0' : 'opacity-100 max-h-full p-4'
           }`}
         >
           {/* Header */}
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between sm:justify-center">
-              <div className={`flex items-center space-x-2 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-                <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters & Search</h2>
-              </div>
-              {isFiltersCollapsed && (
-                <div className="opacity-60">
-                  <Filter className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-                </div>
-              )}
-              {/* Close button for mobile */}
-              <button
-                onClick={toggleFilters}
-                className="sm:hidden p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
+          <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters & Search</h2>
             </div>
+            <button
+              onClick={toggleFilters}
+              className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Hide Filters"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Filters Content */}
-          <div 
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
-            }`}
-          >
-            <div className="p-4 sm:p-6 space-y-6 max-h-[calc(100vh-140px)] overflow-y-auto">
-              {/* Enhanced Global Search */}
-              <div>
-                <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  Global Search
-                </label>
+          {/* Filters Content - Optimized Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {/* BÚSQUEDA GLOBAL */}
+            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                  <Search className="w-4 h-4 mr-1.5 text-blue-600" />
+                  Search
+                </h3>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search patients, emails, carriers..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
                   />
-                </div>
-                {searchTerm && (
-                  <p className="text-sm text-gray-500 mt-2 font-medium">
-                    Found {filteredData.length} results
-                  </p>
-                )}
-              </div>
-
-              {/* Date Range Filter - Updated for DOS */}
-              <div>
-                <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  DOS Date Range
-                </label>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={dateRange.start}
-                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={dateRange.end}
-                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Multi-Select Filters */}
-            <MultiSelectFilter
-              label="Office"
-              options={uniqueOffices}
-              selectedValues={selectedOffices}
-              onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
-              onSelectAll={selectAllOffices}
-              onClearAll={clearAllOffices}
-              placeholder="All Offices"
-            />
-
-            <MultiSelectFilter
-              label="Insurance Carrier"
-              options={uniqueCarriers}
-              selectedValues={selectedCarriers}
-              onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
-              onSelectAll={selectAllCarriers}
-              onClearAll={clearAllCarriers}
-              placeholder="All Carriers"
-            />
-
-            <MultiSelectFilter
-              label="Claim Status"
-              options={uniqueClaimStatuses}
-              selectedValues={selectedClaimStatuses}
-              onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
-              onSelectAll={selectAllClaimStatuses}
-              onClearAll={clearAllClaimStatuses}
-              placeholder="All Claim Statuses"
-            />
-
-            <MultiSelectFilter
-              label="Processing Status"
-              options={uniqueStatuses}
-              selectedValues={selectedStatuses}
-              onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
-              onSelectAll={selectAllStatuses}
-              onClearAll={clearAllStatuses}
-              placeholder="All Statuses"
-            />
-
-            <MultiSelectFilter
-              label="Type of Interaction"
-              options={uniqueInteractionTypes}
-              selectedValues={selectedInteractionTypes}
-              onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
-              onSelectAll={selectAllInteractionTypes}
-              onClearAll={clearAllInteractionTypes}
-              placeholder="All Interaction Types"
-            />
-
-              {/* Active Filters Summary */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-gray-900 dark:text-white text-base">Active Filters</h3>
-                {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
-                  selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
-                  dateRange.start || dateRange.end) && (
-                  <button
-                    onClick={clearAllFilters}
-                    className="text-sm text-red-600 dark:text-red-400 hover:underline font-medium"
-                  >
-                    Clear All
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                {selectedOffices.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Offices:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedOffices.length} selected</span>
-                  </div>
-                )}
-                {selectedCarriers.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Carriers:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedCarriers.length} selected</span>
-                  </div>
-                )}
-                {selectedClaimStatuses.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Claim Status:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedClaimStatuses.length} selected</span>
-                  </div>
-                )}
-                {selectedStatuses.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Processing:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedStatuses.length} selected</span>
-                  </div>
-                )}
-                {selectedInteractionTypes.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Interaction:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedInteractionTypes.length} selected</span>
-                  </div>
-                )}
-                {searchTerm && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Search:</span>
-                    <span className="font-semibold text-blue-600 ml-2">"{searchTerm}"</span>
-                  </div>
-                )}
-
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
-                  <div className="flex justify-between text-sm font-medium">
-                    <span className="text-gray-600 dark:text-gray-400">Total Records</span>
-                    <span className="text-blue-600">{data.length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium">
-                    <span className="text-gray-600 dark:text-gray-400">Filtered Records</span>
-                    <span className="text-green-600">{filteredData.length}</span>
-                  </div>
+                  {searchTerm && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs font-medium">
+                      {filteredData.length}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* RANGO DE FECHAS */}
+            <div className="lg:col-span-1 xl:col-span-1">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                  <Calendar className="w-4 h-4 mr-1.5 text-green-600" />
+                  Date Range
+                </h3>
+                <div className="space-y-2">
+                  <input
+                    type="date"
+                    placeholder="Start Date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                  />
+                  <input
+                    type="date"
+                    placeholder="End Date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* FILTROS - Más compactos */}
+            <div className="md:col-span-2 lg:col-span-1 xl:col-span-2">
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-white flex items-center">
+                  <Filter className="w-4 h-4 mr-1.5 text-purple-600" />
+                  Filters
+                </h3>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                  <MultiSelectFilter
+                    label="Office"
+                    options={uniqueOffices}
+                    selectedValues={selectedOffices}
+                    onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
+                    onSelectAll={selectAllOffices}
+                    onClearAll={clearAllOffices}
+                    placeholder="All Offices"
+                  />
+
+                  <MultiSelectFilter
+                    label="Carrier"
+                    options={uniqueCarriers}
+                    selectedValues={selectedCarriers}
+                    onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
+                    onSelectAll={selectAllCarriers}
+                    onClearAll={clearAllCarriers}
+                    placeholder="All Carriers"
+                  />
+
+                  <MultiSelectFilter
+                    label="Claim Status"
+                    options={uniqueClaimStatuses}
+                    selectedValues={selectedClaimStatuses}
+                    onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
+                    onSelectAll={selectAllClaimStatuses}
+                    onClearAll={clearAllClaimStatuses}
+                    placeholder="All Claims"
+                  />
+
+                  <MultiSelectFilter
+                    label="Status"
+                    options={uniqueStatuses}
+                    selectedValues={selectedStatuses}
+                    onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
+                    onSelectAll={selectAllStatuses}
+                    onClearAll={clearAllStatuses}
+                    placeholder="All Status"
+                  />
+
+                  <MultiSelectFilter
+                    label="Interaction"
+                    options={uniqueInteractionTypes}
+                    selectedValues={selectedInteractionTypes}
+                    onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
+                    onSelectAll={selectAllInteractionTypes}
+                    onClearAll={clearAllInteractionTypes}
+                    placeholder="All Types"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Filters Summary - Compacto */}
+          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium text-gray-900 dark:text-white text-sm">Active Filters</h3>
+              {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                dateRange.start || dateRange.end) && (
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs text-red-600 dark:text-red-400 hover:underline font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              {selectedOffices.length > 0 && (
+                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-md">
+                  Offices: {selectedOffices.length}
+                </span>
+              )}
+              {selectedCarriers.length > 0 && (
+                <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded-md">
+                  Carriers: {selectedCarriers.length}
+                </span>
+              )}
+              {selectedClaimStatuses.length > 0 && (
+                <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-1 rounded-md">
+                  Claims: {selectedClaimStatuses.length}
+                </span>
+              )}
+              {selectedStatuses.length > 0 && (
+                <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-2 py-1 rounded-md">
+                  Status: {selectedStatuses.length}
+                </span>
+              )}
+              {selectedInteractionTypes.length > 0 && (
+                <span className="bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 px-2 py-1 rounded-md">
+                  Types: {selectedInteractionTypes.length}
+                </span>
+              )}
+              {searchTerm && (
+                <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 px-2 py-1 rounded-md">
+                  Search: "{searchTerm}"
+                </span>
+              )}
+              <div className="ml-auto flex items-center gap-3 text-xs">
+                <span className="text-gray-600 dark:text-gray-400">Total: {data.length}</span>
+                <span className="text-green-600 dark:text-green-400 font-medium">Filtered: {filteredData.length}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className={`flex-1 space-y-6 transition-all duration-300 ease-in-out ${
-          isFiltersCollapsed ? 'p-4 sm:p-6 ml-0' : 'p-4 sm:p-6'
-        }`}>
+        <div className="space-y-6">
+          {/* Data Loading Status */}
+          <DataLoadingStatus
+            totalRecords={data.length}
+            isLoading={loading}
+            error={error || undefined}
+          />
+
           {/* Interactive Charts Section */}
           <div id="charts-section">
             <SimpleCharts data={filteredData} />
@@ -1295,7 +1375,7 @@ export default function DentalDashboard() {
                           <div className="truncate max-w-[100px] sm:max-w-none">
                             Carrier
                             {sortBy === 'insurancecarrier' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '���'}</span>
                             )}
                           </div>
                         </th>
@@ -1321,7 +1401,7 @@ export default function DentalDashboard() {
                           <div className="truncate">
                             DOS
                             {sortBy === 'dos' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '��'}</span>
                             )}
                           </div>
                         </th>

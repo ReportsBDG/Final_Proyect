@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   // Si no hay parámetros específicos, intentar obtener todos los datos
   if (!action && !limit && !sheet && !range) {
     params.append('action', 'getAllRecords')
-    params.append('limit', '10000') // Límite alto para obtener todos los datos
+    params.append('limit', '15000') // Aumentado para asegurar 6000+ registros
     params.append('sheet', 'DB') // Nombre correcto de la hoja
     params.append('range', 'A:AG') // Rango correcto hasta columna AG
   } else {
@@ -38,13 +38,23 @@ export async function GET(request: NextRequest) {
     console.log('🔗 Proxy request to:', url)
     console.log('📋 Parameters:', { action, limit, sheet, range })
     
+    // Timeout aumentado para datasets grandes
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      console.log('⏰ Timeout de 3 minutos alcanzado para dataset grande')
+      controller.abort()
+    }, 180000) // 3 minutos para 6000+ registros
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'User-Agent': 'Dental-Dashboard/1.0',
       },
+      signal: controller.signal
     })
+
+    clearTimeout(timeoutId)
     
     console.log('📡 Response status:', response.status)
     console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
@@ -56,8 +66,22 @@ export async function GET(request: NextRequest) {
     }
     
     const data = await response.json()
-    console.log('✅ Proxy response data length:', data.data?.length || data.length || 0)
+    const recordCount = data.data?.length || data.length || 0
+    console.log('✅ Proxy response data length:', recordCount)
     console.log('📊 Response structure:', Object.keys(data))
+
+    // Log detallado para datasets grandes
+    if (recordCount > 1000) {
+      console.log('🔍 Dataset grande detectado:')
+      console.log('  - Total de registros:', recordCount)
+      console.log('  - Estructura de respuesta:', data.success ? 'Exitosa' : 'Con errores')
+      console.log('  - Timestamp:', data.timestamp)
+    }
+
+    // Verificar si necesitamos más datos
+    if (recordCount >= 10000) {
+      console.log('⚠️ Posible truncamiento: se alcanzó el límite de 10000 registros')
+    }
     
     return NextResponse.json(data)
   } catch (error) {
@@ -72,4 +96,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}

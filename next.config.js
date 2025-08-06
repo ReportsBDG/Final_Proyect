@@ -8,6 +8,10 @@ const nextConfig = {
   env: {
     GOOGLE_APPS_SCRIPT_URL: process.env.GOOGLE_APPS_SCRIPT_URL || '',
   },
+  // Configuraciones para mejorar rendimiento
+  experimental: {
+    serverComponentsExternalPackages: [],
+  },
 }
 
 module.exports = nextConfig
