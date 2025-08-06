@@ -53,6 +53,10 @@ interface ChartConfiguration {
   yAxis: string[]
   aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min'
   showLegend: boolean
+  legendPosition: 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
+  legendAlign: 'left' | 'center' | 'right'
+  legendVerticalAlign: 'top' | 'middle' | 'bottom'
+  customLegendNames: Record<string, string>
   showGrid: boolean
   colors: string[]
   filters?: {
