@@ -160,7 +160,7 @@ export default function DentalDashboard() {
     if (isClient) {
       const savedState = loadPersistedState('dentalDashboard.filtersCollapsed', false)
       setIsFiltersCollapsed(savedState)
-      console.log('�� Estado de filtros cargado:', savedState)
+      console.log('🔧 Estado de filtros cargado:', savedState)
     }
   }, [isClient])
 
@@ -1112,8 +1112,8 @@ export default function DentalDashboard() {
               isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
             }`}
           >
-            <div className="p-8 h-[calc(100vh-120px)] overflow-y-auto">
-              <div className="space-y-6">
+            <div className="px-12 py-8 h-[calc(100vh-120px)] overflow-y-auto">
+              <div className="space-y-8">
               {/* Global Search */}
               <div>
                 <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">Search</h3>
@@ -1427,7 +1427,7 @@ export default function DentalDashboard() {
                           <div className="truncate">
                             DOS
                             {sortBy === 'dos' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '��'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '���'}</span>
                             )}
                           </div>
                         </th>
