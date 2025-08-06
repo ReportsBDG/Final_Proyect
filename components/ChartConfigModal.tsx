@@ -643,7 +643,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                           </span>
                         </div>
                         {config.yAxis.includes(field) && (
-                          <span className="text-xs">�� Selected</span>
+                          <span className="text-xs">✓ Selected</span>
                         )}
                       </button>
                     ))}
@@ -682,8 +682,9 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <Target className="w-5 h-5 mr-2 text-purple-600" />
                 Display Options
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-6">
+                {/* General Options */}
                 <div className="space-y-4">
                   <label className="flex items-center space-x-3">
                     <input
@@ -694,7 +695,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                     />
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Legend</span>
                   </label>
-                  
+
                   <label className="flex items-center space-x-3">
                     <input
                       type="checkbox"
@@ -706,11 +707,12 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                   </label>
                 </div>
 
+                {/* Color Palette */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Color Palette
                   </label>
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
                     {COLOR_PALETTES.map((palette) => (
                       <button
                         key={palette.name}
@@ -735,6 +737,115 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 </div>
               </div>
             </div>
+
+            {/* Legend Configuration */}
+            {config.showLegend && (
+              <div className="space-y-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                  <Layers className="w-5 h-5 mr-2 text-blue-600" />
+                  Legend Configuration
+                </h3>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Legend Position */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Position
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {LEGEND_POSITIONS.map((position) => (
+                        <button
+                          key={position.value}
+                          onClick={() => setConfig(prev => ({ ...prev, legendPosition: position.value as any }))}
+                          className={`p-2 rounded-lg border-2 transition-all text-center ${
+                            config.legendPosition === position.value
+                              ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-800 dark:text-blue-200'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:hover:bg-blue-900/20'
+                          }`}
+                        >
+                          <div className="text-lg mb-1">{position.icon}</div>
+                          <div className="text-xs font-medium">{position.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Legend Alignment */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Horizontal Align
+                    </label>
+                    <div className="space-y-2">
+                      {LEGEND_ALIGN_OPTIONS.map((align) => (
+                        <button
+                          key={align.value}
+                          onClick={() => setConfig(prev => ({ ...prev, legendAlign: align.value as any }))}
+                          className={`w-full p-2 rounded-lg border-2 transition-all flex items-center space-x-2 ${
+                            config.legendAlign === align.value
+                              ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-800 dark:text-blue-200'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:hover:bg-blue-900/20'
+                          }`}
+                        >
+                          <span className="text-lg">{align.icon}</span>
+                          <span className="text-sm font-medium">{align.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Vertical Alignment */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Vertical Align
+                    </label>
+                    <div className="space-y-2">
+                      {LEGEND_VERTICAL_ALIGN_OPTIONS.map((align) => (
+                        <button
+                          key={align.value}
+                          onClick={() => setConfig(prev => ({ ...prev, legendVerticalAlign: align.value as any }))}
+                          className={`w-full p-2 rounded-lg border-2 transition-all flex items-center space-x-2 ${
+                            config.legendVerticalAlign === align.value
+                              ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-800 dark:text-blue-200'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:hover:bg-blue-900/20'
+                          }`}
+                        >
+                          <span className="text-lg">{align.icon}</span>
+                          <span className="text-sm font-medium">{align.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Legend Names */}
+                {config.yAxis.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Custom Legend Names
+                    </label>
+                    <div className="space-y-3">
+                      {config.yAxis.map((field) => (
+                        <div key={field} className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 flex-1">
+                            {getFieldIcon(field)}
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-0">
+                              {getFieldDisplayName(field)}:
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            value={config.customLegendNames[field] || ''}
+                            onChange={(e) => updateCustomLegendName(field, e.target.value)}
+                            placeholder={`Default: ${getFieldDisplayName(field)}`}
+                            className="flex-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Panel - Preview */}
