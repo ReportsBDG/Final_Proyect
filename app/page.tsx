@@ -1060,110 +1060,89 @@ export default function DentalDashboard() {
         </div>
       )}
 
-      <div className="flex relative">
-        {/* Mobile overlay for filters */}
-        {!isFiltersCollapsed && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-            onClick={toggleFilters}
-          />
-        )}
-
-        {/* Sidebar Filters - Wide and Improved */}
+      <div className="px-4 sm:px-6 space-y-6">
+        {/* Filters Container Card */}
         <div
-          className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full lg:w-[420px] xl:w-[450px]'
+          className={`bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 mb-6 transition-all duration-300 ease-in-out ${
+            isFiltersCollapsed ? 'opacity-0 max-h-0 overflow-hidden p-0 border-0 mb-0' : 'opacity-100 max-h-full'
           }`}
         >
           {/* Header */}
-          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
-            <div className="flex items-center justify-between">
-              <div className={`flex items-center space-x-3 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-                <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters & Search</h2>
-              </div>
-              {isFiltersCollapsed && (
-                <div className="opacity-60">
-                  <Filter className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-                </div>
-              )}
-              {/* Close button for mobile */}
-              <button
-                onClick={toggleFilters}
-                className="lg:hidden p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3">
+              <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters & Search</h2>
             </div>
+            <button
+              onClick={toggleFilters}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              title="Hide Filters"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Filters Content */}
-          <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
-            }`}
-          >
-            <div className="px-6 py-6 h-[calc(100vh-140px)] overflow-y-auto">
-              <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* BÚSQUEDA GLOBAL */}
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+                <Search className="w-4 h-4 mr-2 text-blue-600" />
+                Search
+              </h3>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search patients, emails, carriers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
+                />
+                {searchTerm && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">
+                    {filteredData.length}
+                  </div>
+                )}
+              </div>
+            </div>
 
-              {/* BÚSQUEDA GLOBAL */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-                  <Search className="w-5 h-5 mr-2 text-blue-600" />
-                  Search
-                </h3>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            {/* RANGO DE FECHAS */}
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+                <Calendar className="w-4 h-4 mr-2 text-green-600" />
+                Date Range
+              </h3>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
                   <input
-                    type="text"
-                    placeholder="Search patients, emails, carriers..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400"
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
                   />
-                  {searchTerm && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">
-                      {filteredData.length}
-                    </div>
-                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                  />
                 </div>
               </div>
+            </div>
 
-              {/* RANGO DE FECHAS */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-md border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-                  <Calendar className="w-5 h-5 mr-2 text-green-600" />
-                  Date Range
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-                    <input
-                      type="date"
-                      value={dateRange.start}
-                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                    <input
-                      type="date"
-                      value={dateRange.end}
-                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                      className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* FILTROS */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
-                  <Filter className="w-5 h-5 mr-2 text-purple-600" />
+            {/* FILTROS */}
+            <div className="lg:col-span-2 xl:col-span-1">
+              <div className="space-y-3">
+                <h3 className="text-base font-semibold text-gray-800 dark:text-white flex items-center">
+                  <Filter className="w-4 h-4 mr-2 text-purple-600" />
                   Filters
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <MultiSelectFilter
                     label="Office"
                     options={uniqueOffices}
@@ -1215,82 +1194,74 @@ export default function DentalDashboard() {
                   />
                 </div>
               </div>
-
-              {/* Active Filters Summary */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900 dark:text-white text-lg">Active Filters</h3>
-                {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
-                  selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
-                  dateRange.start || dateRange.end) && (
-                  <button
-                    onClick={clearAllFilters}
-                    className="text-sm text-red-600 dark:text-red-400 hover:underline font-semibold px-3 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    Clear All
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                {selectedOffices.length > 0 && (
-                  <div className="text-base">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Offices:</span>
-                    <span className="font-bold text-blue-600 ml-2">{selectedOffices.length} selected</span>
-                  </div>
-                )}
-                {selectedCarriers.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Carriers:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedCarriers.length} selected</span>
-                  </div>
-                )}
-                {selectedClaimStatuses.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Claim Status:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedClaimStatuses.length} selected</span>
-                  </div>
-                )}
-                {selectedStatuses.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Processing:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedStatuses.length} selected</span>
-                  </div>
-                )}
-                {selectedInteractionTypes.length > 0 && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Interaction:</span>
-                    <span className="font-semibold text-blue-600 ml-2">{selectedInteractionTypes.length} selected</span>
-                  </div>
-                )}
-                {searchTerm && (
-                  <div className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Search:</span>
-                    <span className="font-semibold text-blue-600 ml-2">"{searchTerm}"</span>
-                  </div>
-                )}
-
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
-                  <div className="flex justify-between text-sm font-medium">
-                    <span className="text-gray-600 dark:text-gray-400">Total Records</span>
-                    <span className="text-blue-600">{data.length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium">
-                    <span className="text-gray-600 dark:text-gray-400">Filtered Records</span>
-                    <span className="text-green-600">{filteredData.length}</span>
-                  </div>
-                </div>
-              </div>
             </div>
+          </div>
+
+          {/* Active Filters Summary */}
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-gray-900 dark:text-white text-base">Active Filters</h3>
+              {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                dateRange.start || dateRange.end) && (
+                <button
+                  onClick={clearAllFilters}
+                  className="text-sm text-red-600 dark:text-red-400 hover:underline font-semibold px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 text-sm">
+              {selectedOffices.length > 0 && (
+                <div>
+                  <span className="text-gray-600 dark:text-gray-400">Offices:</span>
+                  <span className="font-semibold text-blue-600 ml-1">{selectedOffices.length}</span>
+                </div>
+              )}
+              {selectedCarriers.length > 0 && (
+                <div>
+                  <span className="text-gray-600 dark:text-gray-400">Carriers:</span>
+                  <span className="font-semibold text-blue-600 ml-1">{selectedCarriers.length}</span>
+                </div>
+              )}
+              {selectedClaimStatuses.length > 0 && (
+                <div>
+                  <span className="text-gray-600 dark:text-gray-400">Claims:</span>
+                  <span className="font-semibold text-blue-600 ml-1">{selectedClaimStatuses.length}</span>
+                </div>
+              )}
+              {selectedStatuses.length > 0 && (
+                <div>
+                  <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                  <span className="font-semibold text-blue-600 ml-1">{selectedStatuses.length}</span>
+                </div>
+              )}
+              {selectedInteractionTypes.length > 0 && (
+                <div>
+                  <span className="text-gray-600 dark:text-gray-400">Types:</span>
+                  <span className="font-semibold text-blue-600 ml-1">{selectedInteractionTypes.length}</span>
+                </div>
+              )}
+              {searchTerm && (
+                <div className="col-span-full">
+                  <span className="text-gray-600 dark:text-gray-400">Search:</span>
+                  <span className="font-semibold text-blue-600 ml-1">"{searchTerm}"</span>
+                </div>
+              )}
+              <div className="col-span-full pt-2 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600 dark:text-gray-400">Total: {data.length}</span>
+                  <span className="text-green-600 font-semibold">Filtered: {filteredData.length}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className={`flex-1 space-y-6 transition-all duration-300 ease-in-out ${
-          isFiltersCollapsed ? 'p-4 sm:p-6' : 'p-4 sm:p-6'
-        }`}>
+        <div className="space-y-6">
           {/* Data Loading Status */}
           <DataLoadingStatus
             totalRecords={data.length}
