@@ -1073,9 +1073,8 @@ export default function DentalDashboard() {
         {/* Sidebar Filters - Wide and Improved */}
         <div
           className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full lg:w-1/2 xl:w-2/5'
+            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full lg:w-[420px] xl:w-[450px]'
           }`}
-          style={{ minWidth: isFiltersCollapsed ? '0' : '600px' }}
         >
           {/* Header */}
           <div className="px-16 py-10 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
