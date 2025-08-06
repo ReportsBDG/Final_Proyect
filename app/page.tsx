@@ -1077,11 +1077,11 @@ export default function DentalDashboard() {
           }`}
         >
           {/* Header */}
-          <div className="px-16 py-10 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
             <div className="flex items-center justify-between">
-              <div className={`flex items-center space-x-6 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-                <Filter className="w-10 h-10 text-blue-600 dark:text-blue-400" />
-                <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Filters & Search</h2>
+              <div className={`flex items-center space-x-3 transition-opacity duration-300 ${isFiltersCollapsed ? 'opacity-0' : 'opacity-100'}`}>
+                <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters & Search</h2>
               </div>
               {isFiltersCollapsed && (
                 <div className="opacity-60">
