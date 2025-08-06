@@ -1102,56 +1102,67 @@ export default function DentalDashboard() {
               isFiltersCollapsed ? 'max-h-0 opacity-0' : 'max-h-full opacity-100'
             }`}
           >
-            <div className="px-12 py-8 h-[calc(100vh-120px)] overflow-y-auto">
-              <div className="space-y-8">
-              {/* Search and Date Range - Side by side layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Global Search - Takes 2 columns */}
-                <div className="lg:col-span-2">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Search</h3>
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search patients, emails, carriers..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-3 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-lg font-medium placeholder:text-gray-400"
-                    />
-                    {searchTerm && (
-                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm bg-blue-100 text-blue-700 px-3 py-2 rounded-full font-bold">
-                        {filteredData.length}
-                      </div>
-                    )}
-                  </div>
-                </div>
+            <div className="px-16 py-10 h-[calc(100vh-160px)] overflow-y-auto bg-gray-50/30 dark:bg-gray-900/30">
+              <div className="max-w-full space-y-12">
 
-                {/* Date Range - Takes 1 column */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">DOS Date Range</h3>
-                  <div className="space-y-3">
+              {/* BÚSQUEDA GLOBAL - ANCHO COMPLETO */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                  <Search className="w-7 h-7 mr-3 text-blue-600" />
+                  Global Search
+                </h3>
+                <div className="relative">
+                  <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 w-7 h-7 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search patients, emails, carriers, offices..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-16 pr-6 py-6 text-xl border-3 border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white font-medium placeholder:text-gray-400 shadow-inner"
+                  />
+                  {searchTerm && (
+                    <div className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-4 py-2 rounded-full font-bold text-sm">
+                      {filteredData.length} resultados
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* RANGO DE FECHAS - HORIZONTAL */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
+                  <Calendar className="w-7 h-7 mr-3 text-green-600" />
+                  Date Range Filter
+                </h3>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Start Date</label>
                     <input
                       type="date"
                       value={dateRange.start}
                       onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                      placeholder="Start"
-                      className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-3 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-base"
+                      className="w-full px-6 py-4 text-lg border-3 border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">End Date</label>
                     <input
                       type="date"
                       value={dateRange.end}
                       onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                      placeholder="End"
-                      className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-3 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-base"
+                      className="w-full px-6 py-4 text-lg border-3 border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Filters Grid - Optimized for wide sidebar */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-6">Filters</h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-8">
+              {/* FILTROS - DISEÑO DE TARJETAS */}
+              <div className="space-y-6">
+                <h3 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                  <Filter className="w-7 h-7 mr-3 text-purple-600" />
+                  Advanced Filters
+                </h3>
+                <div className="grid grid-cols-1 gap-6">
                   <MultiSelectFilter
                     label="Office"
                     options={uniqueOffices}
