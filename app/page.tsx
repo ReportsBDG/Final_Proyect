@@ -1157,8 +1157,8 @@ export default function DentalDashboard() {
 
               {/* Filters Grid - Optimized for wide sidebar */}
               <div>
-                <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-4">Filters</h3>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-6 gap-y-6">
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-6">Filters</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-8">
                   <MultiSelectFilter
                     label="Office"
                     options={uniqueOffices}
@@ -1427,7 +1427,7 @@ export default function DentalDashboard() {
                           <div className="truncate">
                             DOS
                             {sortBy === 'dos' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '���'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '��'}</span>
                             )}
                           </div>
                         </th>
