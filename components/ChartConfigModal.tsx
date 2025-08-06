@@ -322,7 +322,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 {config.yAxis.map((field, index) => (
                   <Bar
                     key={field}
@@ -345,7 +355,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 {config.yAxis.map((field, index) => (
                   <Line
                     key={field}
@@ -370,7 +390,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 {config.yAxis.map((field, index) => (
                   <Area
                     key={field}
@@ -397,7 +427,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
             <ResponsiveContainer width="100%" height="100%">
               <RechartsPieChart>
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 <Pie
                   data={pieData}
                   cx="50%"
@@ -603,7 +643,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                           </span>
                         </div>
                         {config.yAxis.includes(field) && (
-                          <span className="text-xs">✓ Selected</span>
+                          <span className="text-xs">�� Selected</span>
                         )}
                       </button>
                     ))}
