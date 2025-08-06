@@ -566,9 +566,9 @@ export default function DentalDashboard() {
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto">
+          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 flex flex-col">
             {/* Select All / Clear All */}
-            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
               <div className="flex gap-1">
                 <button
                   onClick={() => {
@@ -591,8 +591,8 @@ export default function DentalDashboard() {
               </div>
             </div>
 
-            {/* Options */}
-            <div className="max-h-32 overflow-y-auto">
+            {/* Options - Single scroll container */}
+            <div className="flex-1 overflow-y-auto min-h-0">
               {options.map((option) => (
                 <label
                   key={option}
@@ -607,13 +607,13 @@ export default function DentalDashboard() {
                   <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
                 </label>
               ))}
-            </div>
 
-            {options.length === 0 && (
-              <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                No options available
-              </div>
-            )}
+              {options.length === 0 && (
+                <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                  No options available
+                </div>
+              )}
+            </div>
           </div>
         )}
 
