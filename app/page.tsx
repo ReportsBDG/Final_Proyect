@@ -543,17 +543,18 @@ export default function DentalDashboard() {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-      <div className="relative">
-        <label className="block text-base font-semibold text-gray-700 dark:text-gray-300 mb-3">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 relative">
+        <label className="block text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+          <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3"></div>
           {label}
         </label>
 
         {/* Toggle Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-5 py-4 text-left border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm"
+          className="w-full px-6 py-5 text-left border-3 border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white bg-gray-50 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 shadow-inner"
         >
-          <span className="text-base font-medium overflow-hidden">
+          <span className="text-lg font-semibold overflow-hidden">
             {selectedValues.length === 0
               ? placeholder
               : selectedValues.length === 1
@@ -561,48 +562,50 @@ export default function DentalDashboard() {
                 : `${selectedValues.length} items selected`
             }
           </span>
-          <ChevronDown className={`w-6 h-6 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-7 h-7 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-xl max-h-72 overflow-y-auto">
+          <div className="absolute z-20 mt-3 left-6 right-6 bg-white dark:bg-gray-700 border-3 border-gray-300 dark:border-gray-600 rounded-2xl shadow-2xl max-h-80 overflow-y-auto">
             {/* Select All / Clear All */}
-            <div className="p-4 border-b-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
-              <div className="flex flex-wrap gap-3">
+            <div className="p-6 border-b-3 border-gray-200 dark:border-gray-600 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
+              <div className="flex gap-4 justify-center">
                 <button
                   onClick={onSelectAll}
-                  className="text-sm bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 whitespace-nowrap font-semibold transition-colors"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 font-bold transition-all duration-200 shadow-lg"
                 >
-                  Select All
+                  ✓ Select All
                 </button>
                 <button
                   onClick={onClearAll}
-                  className="text-sm bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 whitespace-nowrap font-semibold transition-colors"
+                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 font-bold transition-all duration-200 shadow-lg"
                 >
-                  Clear All
+                  ✗ Clear All
                 </button>
               </div>
             </div>
 
             {/* Options */}
-            {options.map((option) => (
-              <label
-                key={option}
-                className="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedValues.includes(option)}
-                  onChange={() => onToggle(option)}
-                  className="mr-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-5 h-5"
-                />
-                <span className="text-base text-gray-900 dark:text-white min-w-0 leading-relaxed font-medium break-words">{option}</span>
-              </label>
-            ))}
+            <div className="max-h-60 overflow-y-auto">
+              {options.map((option) => (
+                <label
+                  key={option}
+                  className="flex items-center p-5 hover:bg-blue-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors group"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedValues.includes(option)}
+                    onChange={() => onToggle(option)}
+                    className="mr-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-6 h-6"
+                  />
+                  <span className="text-lg text-gray-900 dark:text-white min-w-0 leading-relaxed font-medium break-words group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">{option}</span>
+                </label>
+              ))}
+            </div>
 
             {options.length === 0 && (
-              <div className="p-6 text-base text-gray-500 dark:text-gray-400 text-center">
+              <div className="p-8 text-lg text-gray-500 dark:text-gray-400 text-center">
                 No options available
               </div>
             )}
@@ -612,7 +615,7 @@ export default function DentalDashboard() {
         {/* Click outside to close */}
         {isOpen && (
           <div
-            className="fixed inset-0 z-5"
+            className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           ></div>
         )}
