@@ -1072,7 +1072,7 @@ export default function DentalDashboard() {
       {/* Modal Overlay Background */}
       {!isFiltersCollapsed && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40"
           onClick={toggleFilters}
         />
       )}
