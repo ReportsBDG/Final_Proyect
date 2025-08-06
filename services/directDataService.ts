@@ -7,30 +7,48 @@ export class DirectDataService {
    */
   async fetchPatientRecords(): Promise<PatientRecord[]> {
     console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
-    
+
+    let lastError: Error | null = null
+
     // Intentar múltiples veces en caso de interferencias
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        console.log(`��� [DirectDataService] Intento ${attempt}/3`)
-        
+        console.log(`🔄 [DirectDataService] Intento ${attempt}/3`)
+
         const data = await this.attemptFetch(attempt)
         if (data && data.length > 0) {
           console.log(`✅ [DirectDataService] Datos cargados exitosamente en intento ${attempt}: ${data.length} registros`)
           return data
+        } else if (data && data.length === 0) {
+          console.warn(`⚠️ [DirectDataService] Intento ${attempt} devolvió datos vacíos`)
+          // Si obtenemos respuesta pero sin datos, puede ser problema temporal
+          if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, 2000 * attempt))
+            continue
+          }
         }
-        
-      } catch (error) {
-        console.warn(`⚠️ [DirectDataService] Intento ${attempt} falló:`, error)
-        
+
+      } catch (error: any) {
+        lastError = error
+        console.warn(`⚠️ [DirectDataService] Intento ${attempt} falló:`, {
+          message: error.message,
+          name: error.name,
+          stack: error.stack?.split('\n').slice(0, 3).join('\n')
+        })
+
         // Si no es el último intento, esperar un poco antes del siguiente
         if (attempt < 3) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+          const delay = 1000 * attempt
+          console.log(`⏳ [DirectDataService] Esperando ${delay}ms antes del siguiente intento...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
         }
       }
     }
-    
+
     // Si todos los intentos fallaron, usar datos mock como fallback
-    console.warn('❌ [DirectDataService] Todos los intentos fallaron, usando datos mock')
+    console.warn('❌ [DirectDataService] Todos los intentos fallaron, usando datos mock como fallback')
+    console.warn('🔍 [DirectDataService] Último error:', lastError?.message || 'Unknown error')
+
     return this.getFallbackData()
   }
 
