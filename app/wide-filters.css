@@ -229,7 +229,7 @@
 /* Responsive para anchos grandes */
 @media (min-width: 1024px) {
   .wide-filter-panel {
-    min-width: 950px;
+    min-width: 1000px;
   }
 }
 
@@ -241,7 +241,7 @@
 
 @media (min-width: 1536px) {
   .wide-filter-panel {
-    min-width: 1250px;
+    min-width: 1200px;
   }
 }
 
