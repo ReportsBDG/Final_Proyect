@@ -219,7 +219,9 @@ export default function DentalDashboard() {
         setError(null)
       }
 
+      console.log('🔄 [Page] Iniciando carga de datos...')
       const patientData = await directDataService.fetchPatientRecords()
+      console.log('✅ [Page] Datos cargados exitosamente:', patientData.length, 'registros')
 
       // Detailed change detection
       if (data.length > 0) {
