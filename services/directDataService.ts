@@ -11,7 +11,7 @@ export class DirectDataService {
     // Intentar múltiples veces en caso de interferencias
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        console.log(`🔄 [DirectDataService] Intento ${attempt}/3`)
+        console.log(`��� [DirectDataService] Intento ${attempt}/3`)
         
         const data = await this.attemptFetch(attempt)
         if (data && data.length > 0) {
@@ -41,7 +41,7 @@ export class DirectDataService {
     // Crear AbortController con timeout progresivo
     const controller = new AbortController()
     const timeout = 30000 + (attempt * 15000) // 30s, 45s, 60s
-    
+
     const timeoutId = setTimeout(() => {
       console.log(`⏰ [DirectDataService] Timeout de ${timeout}ms alcanzado en intento ${attempt}`)
       controller.abort()
@@ -59,14 +59,22 @@ export class DirectDataService {
         },
         signal: controller.signal,
         cache: 'no-cache',
-        credentials: 'same-origin',
-        mode: 'cors'
+        credentials: 'same-origin'
       })
 
       clearTimeout(timeoutId)
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        const errorText = await response.text().catch(() => 'No error details available')
+        console.error(`❌ [DirectDataService] HTTP Error ${response.status}:`, errorText)
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`)
+      }
+
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        const responseText = await response.text()
+        console.error('❌ [DirectDataService] Response is not JSON:', responseText.substring(0, 200))
+        throw new Error(`Invalid response format: expected JSON, got ${contentType}`)
       }
 
       const apiData = await response.json()
@@ -74,19 +82,45 @@ export class DirectDataService {
         success: apiData.success,
         totalRecords: apiData.totalRecords,
         dataLength: apiData.data?.length,
-        timestamp: apiData.timestamp
+        timestamp: apiData.timestamp,
+        hasError: !!apiData.error
       })
 
+      // Verificar si la API reporta error
+      if (apiData.error) {
+        throw new Error(`API Error: ${apiData.error} - ${apiData.details || ''}`)
+      }
+
       const rawData = apiData.data || []
-      
+
       if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
-        throw new Error(`No hay datos válidos: ${typeof rawData}, length: ${rawData?.length}`)
+        console.warn(`⚠️ [DirectDataService] Datos vacíos o inválidos: ${typeof rawData}, length: ${rawData?.length}`)
+        // Si es el primer intento y no hay datos, lanzar error para reintentar
+        if (attempt === 1) {
+          throw new Error(`No hay datos válidos en primer intento`)
+        }
+        // En intentos posteriores, usar fallback directamente
+        return []
       }
 
       return this.processRawData(rawData)
 
-    } finally {
+    } catch (error: any) {
       clearTimeout(timeoutId)
+
+      // Analizar el tipo de error para mejor debugging
+      if (error.name === 'AbortError') {
+        console.error(`⏰ [DirectDataService] Request aborted (timeout) en intento ${attempt}`)
+        throw new Error(`Request timeout after ${timeout}ms`)
+      }
+
+      if (error.message?.includes('Failed to fetch')) {
+        console.error(`🌐 [DirectDataService] Network error en intento ${attempt}:`, error.message)
+        throw new Error(`Network connectivity issue: ${error.message}`)
+      }
+
+      console.error(`❌ [DirectDataService] Error en intento ${attempt}:`, error)
+      throw error
     }
   }
 
