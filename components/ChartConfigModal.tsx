@@ -101,6 +101,29 @@ const COLOR_PALETTES = [
   { name: 'Warm', colors: ['#dc2626', '#ea580c', '#d97706', '#ca8a04'] }
 ]
 
+const LEGEND_POSITIONS = [
+  { value: 'top', label: 'Top', icon: '↑' },
+  { value: 'bottom', label: 'Bottom', icon: '↓' },
+  { value: 'left', label: 'Left', icon: '←' },
+  { value: 'right', label: 'Right', icon: '→' },
+  { value: 'topLeft', label: 'Top Left', icon: '↖' },
+  { value: 'topRight', label: 'Top Right', icon: '↗' },
+  { value: 'bottomLeft', label: 'Bottom Left', icon: '↙' },
+  { value: 'bottomRight', label: 'Bottom Right', icon: '↘' }
+]
+
+const LEGEND_ALIGN_OPTIONS = [
+  { value: 'left', label: 'Left', icon: '⊣' },
+  { value: 'center', label: 'Center', icon: '⊥' },
+  { value: 'right', label: 'Right', icon: '⊢' }
+]
+
+const LEGEND_VERTICAL_ALIGN_OPTIONS = [
+  { value: 'top', label: 'Top', icon: '⊤' },
+  { value: 'middle', label: 'Middle', icon: '⊥' },
+  { value: 'bottom', label: 'Bottom', icon: '⊥' }
+]
+
 export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart, data }: ChartConfigModalProps) {
   const [config, setConfig] = useState<ChartConfiguration>({
     title: currentChart?.title || 'New Chart',
