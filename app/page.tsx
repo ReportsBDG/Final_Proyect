@@ -1063,86 +1063,86 @@ export default function DentalDashboard() {
       <div className="px-4 sm:px-6 space-y-6">
         {/* Filters Container Card */}
         <div
-          className={`bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 mb-6 transition-all duration-300 ease-in-out ${
-            isFiltersCollapsed ? 'opacity-0 max-h-0 overflow-hidden p-0 border-0 mb-0' : 'opacity-100 max-h-full'
+          className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-4 transition-all duration-300 ease-in-out ${
+            isFiltersCollapsed ? 'opacity-0 max-h-0 overflow-hidden p-0 border-0 mb-0' : 'opacity-100 max-h-full p-4'
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-3">
-              <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters & Search</h2>
+          <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters & Search</h2>
             </div>
             <button
               onClick={toggleFilters}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               title="Hide Filters"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Filters Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {/* Filters Content - Optimized Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {/* BÚSQUEDA GLOBAL */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
-                <Search className="w-4 h-4 mr-2 text-blue-600" />
-                Search
-              </h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search patients, emails, carriers..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
-                />
-                {searchTerm && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-bold">
-                    {filteredData.length}
-                  </div>
-                )}
+            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                  <Search className="w-4 h-4 mr-1.5 text-blue-600" />
+                  Search
+                </h3>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search patients, emails, carriers..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
+                  />
+                  {searchTerm && (
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs font-medium">
+                      {filteredData.length}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* RANGO DE FECHAS */}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-base font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
-                <Calendar className="w-4 h-4 mr-2 text-green-600" />
-                Date Range
-              </h3>
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+            <div className="lg:col-span-1 xl:col-span-1">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                  <Calendar className="w-4 h-4 mr-1.5 text-green-600" />
+                  Date Range
+                </h3>
+                <div className="space-y-2">
                   <input
                     type="date"
+                    placeholder="Start Date"
                     value={dateRange.start}
                     onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
                   />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
                   <input
                     type="date"
+                    placeholder="End Date"
                     value={dateRange.end}
                     onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
                   />
                 </div>
               </div>
             </div>
 
-            {/* FILTROS */}
-            <div className="lg:col-span-2 xl:col-span-1">
-              <div className="space-y-3">
-                <h3 className="text-base font-semibold text-gray-800 dark:text-white flex items-center">
-                  <Filter className="w-4 h-4 mr-2 text-purple-600" />
+            {/* FILTROS - Más compactos */}
+            <div className="md:col-span-2 lg:col-span-1 xl:col-span-2">
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-800 dark:text-white flex items-center">
+                  <Filter className="w-4 h-4 mr-1.5 text-purple-600" />
                   Filters
                 </h3>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
                   <MultiSelectFilter
                     label="Office"
                     options={uniqueOffices}
@@ -1154,7 +1154,7 @@ export default function DentalDashboard() {
                   />
 
                   <MultiSelectFilter
-                    label="Insurance Carrier"
+                    label="Carrier"
                     options={uniqueCarriers}
                     selectedValues={selectedCarriers}
                     onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
@@ -1170,91 +1170,83 @@ export default function DentalDashboard() {
                     onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
                     onSelectAll={selectAllClaimStatuses}
                     onClearAll={clearAllClaimStatuses}
-                    placeholder="All Claim Statuses"
+                    placeholder="All Claims"
                   />
 
                   <MultiSelectFilter
-                    label="Processing Status"
+                    label="Status"
                     options={uniqueStatuses}
                     selectedValues={selectedStatuses}
                     onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
                     onSelectAll={selectAllStatuses}
                     onClearAll={clearAllStatuses}
-                    placeholder="All Statuses"
+                    placeholder="All Status"
                   />
 
                   <MultiSelectFilter
-                    label="Type of Interaction"
+                    label="Interaction"
                     options={uniqueInteractionTypes}
                     selectedValues={selectedInteractionTypes}
                     onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
                     onSelectAll={selectAllInteractionTypes}
                     onClearAll={clearAllInteractionTypes}
-                    placeholder="All Interaction Types"
+                    placeholder="All Types"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Active Filters Summary */}
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-900 dark:text-white text-base">Active Filters</h3>
+          {/* Active Filters Summary - Compacto */}
+          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium text-gray-900 dark:text-white text-sm">Active Filters</h3>
               {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
                 selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
                 dateRange.start || dateRange.end) && (
                 <button
                   onClick={clearAllFilters}
-                  className="text-sm text-red-600 dark:text-red-400 hover:underline font-semibold px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  className="text-xs text-red-600 dark:text-red-400 hover:underline font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                   Clear All
                 </button>
               )}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 text-sm">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
               {selectedOffices.length > 0 && (
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Offices:</span>
-                  <span className="font-semibold text-blue-600 ml-1">{selectedOffices.length}</span>
-                </div>
+                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-md">
+                  Offices: {selectedOffices.length}
+                </span>
               )}
               {selectedCarriers.length > 0 && (
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Carriers:</span>
-                  <span className="font-semibold text-blue-600 ml-1">{selectedCarriers.length}</span>
-                </div>
+                <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-2 py-1 rounded-md">
+                  Carriers: {selectedCarriers.length}
+                </span>
               )}
               {selectedClaimStatuses.length > 0 && (
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Claims:</span>
-                  <span className="font-semibold text-blue-600 ml-1">{selectedClaimStatuses.length}</span>
-                </div>
+                <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-1 rounded-md">
+                  Claims: {selectedClaimStatuses.length}
+                </span>
               )}
               {selectedStatuses.length > 0 && (
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                  <span className="font-semibold text-blue-600 ml-1">{selectedStatuses.length}</span>
-                </div>
+                <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-2 py-1 rounded-md">
+                  Status: {selectedStatuses.length}
+                </span>
               )}
               {selectedInteractionTypes.length > 0 && (
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Types:</span>
-                  <span className="font-semibold text-blue-600 ml-1">{selectedInteractionTypes.length}</span>
-                </div>
+                <span className="bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 px-2 py-1 rounded-md">
+                  Types: {selectedInteractionTypes.length}
+                </span>
               )}
               {searchTerm && (
-                <div className="col-span-full">
-                  <span className="text-gray-600 dark:text-gray-400">Search:</span>
-                  <span className="font-semibold text-blue-600 ml-1">"{searchTerm}"</span>
-                </div>
+                <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 px-2 py-1 rounded-md">
+                  Search: "{searchTerm}"
+                </span>
               )}
-              <div className="col-span-full pt-2 border-t border-gray-200 dark:border-gray-600">
-                <div className="flex justify-between text-xs">
-                  <span className="text-gray-600 dark:text-gray-400">Total: {data.length}</span>
-                  <span className="text-green-600 font-semibold">Filtered: {filteredData.length}</span>
-                </div>
+              <div className="ml-auto flex items-center gap-3 text-xs">
+                <span className="text-gray-600 dark:text-gray-400">Total: {data.length}</span>
+                <span className="text-green-600 dark:text-green-400 font-medium">Filtered: {filteredData.length}</span>
               </div>
             </div>
           </div>
