@@ -1144,9 +1144,10 @@ export default function DentalDashboard() {
                 </div>
               </div>
 
-              {/* Compact Filters Grid */}
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-4">
+              {/* Filters Grid - Optimized for wide modal */}
+              <div>
+                <h3 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-4">Filters</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-6">
                   <MultiSelectFilter
                     label="Office"
                     options={uniqueOffices}
