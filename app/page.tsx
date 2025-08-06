@@ -1274,9 +1274,7 @@ export default function DentalDashboard() {
 
       <div className="flex relative">
         {/* Main Content */}
-        <div className={`flex-1 space-y-6 transition-all duration-300 ease-in-out ${
-          isFiltersCollapsed ? 'p-4 sm:p-6 ml-0' : 'p-4 sm:p-6'
-        }`}>
+        <div className="flex-1 space-y-6 p-4 sm:p-6">
           {/* Data Loading Status */}
           <DataLoadingStatus
             totalRecords={data.length}
