@@ -221,7 +221,18 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
   const removeYAxisField = (field: string) => {
     setConfig(prev => ({
       ...prev,
-      yAxis: prev.yAxis.filter(f => f !== field)
+      yAxis: prev.yAxis.filter(f => f !== field),
+      customLegendNames: { ...prev.customLegendNames, [field]: undefined }
+    }))
+  }
+
+  const updateCustomLegendName = (field: string, customName: string) => {
+    setConfig(prev => ({
+      ...prev,
+      customLegendNames: {
+        ...prev.customLegendNames,
+        [field]: customName || undefined
+      }
     }))
   }
 
