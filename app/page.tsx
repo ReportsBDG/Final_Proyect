@@ -1069,14 +1069,15 @@ export default function DentalDashboard() {
         </div>
       )}
 
+      {/* Modal Overlay Background */}
+      {!isFiltersCollapsed && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={toggleFilters}
+        />
+      )}
+
       <div className="flex relative">
-        {/* Mobile overlay for filters */}
-        {!isFiltersCollapsed && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 sm:hidden"
-            onClick={toggleFilters}
-          />
-        )}
         
         {/* Collapsible Sidebar Filters */}
         <div
