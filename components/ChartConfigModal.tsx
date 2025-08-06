@@ -159,6 +159,10 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
         yAxis: currentChart.yAxis || [numericFields[0]] || [],
         aggregation: currentChart.aggregation || 'sum',
         showLegend: currentChart.showLegend !== undefined ? currentChart.showLegend : true,
+        legendPosition: currentChart.legendPosition || 'bottom',
+        legendAlign: currentChart.legendAlign || 'center',
+        legendVerticalAlign: currentChart.legendVerticalAlign || 'bottom',
+        customLegendNames: currentChart.customLegendNames || {},
         showGrid: currentChart.showGrid !== undefined ? currentChart.showGrid : true,
         colors: currentChart.colors || ['#0ea5e9']
       })
