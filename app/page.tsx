@@ -275,19 +275,38 @@ export default function DentalDashboard() {
         addRecentChange('data_sync', 'Database synchronized successfully',
           `${patientData.length} total records`)
       }
-    } catch (err) {
-      console.error('Error loading data:', err)
+    } catch (err: any) {
+      console.error('❌ [Page] Error loading data:', {
+        message: err?.message,
+        name: err?.name,
+        stack: err?.stack?.split('\n').slice(0, 3).join('\n')
+      })
+
+      // Analizar el tipo de error para dar mejor contexto al usuario
+      let errorMessage = 'Error desconocido al cargar datos'
+
+      if (err?.message?.includes('Failed to fetch') || err?.message?.includes('Network')) {
+        errorMessage = 'Problema de conectividad a internet'
+      } else if (err?.message?.includes('timeout') || err?.message?.includes('abort')) {
+        errorMessage = 'Tiempo de espera agotado - datos demasiado grandes'
+      } else if (err?.message?.includes('HTTP')) {
+        errorMessage = 'Error del servidor - verifique la configuración'
+      } else if (err?.message?.includes('JSON')) {
+        errorMessage = 'Error en formato de datos recibidos'
+      }
 
       // El DirectDataService ya maneja el fallback automáticamente
       // Si llegamos aquí, significa que incluso el fallback falló
       if (data.length === 0) {
-        const errorMessage = 'Problema de conectividad - usando datos de demostración'
-        setError(errorMessage)
-        addNotification('warning', errorMessage)
+        const fallbackMessage = `${errorMessage} - usando datos de demostración`
+        setError(fallbackMessage)
+        addNotification('error', fallbackMessage)
+        addRecentChange('data_sync', 'Error de conectividad', 'Usando datos de demostración como respaldo')
       } else {
         // Si ya tenemos datos, solo mostrar notificación pero mantener datos existentes
-        const errorMessage = 'Problema temporal de conexión - usando datos previos'
-        addNotification('warning', errorMessage)
+        const warningMessage = `${errorMessage} - manteniendo datos previos`
+        addNotification('warning', warningMessage)
+        addRecentChange('data_sync', 'Error temporal de conexión', 'Datos previos mantienen disponibles')
       }
     } finally {
       if (!silent) {
