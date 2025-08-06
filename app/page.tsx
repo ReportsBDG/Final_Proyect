@@ -160,7 +160,7 @@ export default function DentalDashboard() {
     if (isClient) {
       const savedState = loadPersistedState('dentalDashboard.filtersCollapsed', false)
       setIsFiltersCollapsed(savedState)
-      console.log('🔧 Estado de filtros cargado:', savedState)
+      console.log('�� Estado de filtros cargado:', savedState)
     }
   }, [isClient])
 
@@ -1081,7 +1081,7 @@ export default function DentalDashboard() {
         {/* Sidebar Filters - Wide and Improved */}
         <div
           className={`bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 h-screen overflow-y-auto transition-all duration-300 ease-in-out relative z-50 ${
-            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full lg:w-[900px] xl:w-[1000px] 2xl:w-[1100px]'
+            isFiltersCollapsed ? 'w-0 opacity-0' : 'w-full sm:w-[800px] md:w-[900px] lg:w-[1000px] xl:w-[1100px] 2xl:w-[1200px]'
           }`}
         >
           {/* Header */}
