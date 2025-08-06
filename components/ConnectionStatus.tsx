@@ -18,28 +18,31 @@ export default function ConnectionStatus({
   const checkConnection = async () => {
     setIsChecking(true)
     setErrorMessage('')
-    
-    try {
-      const response = await fetch('/api/proxy', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
 
-      if (response.ok) {
-        const data = await response.json()
+    try {
+      // Import the service dynamically to avoid import issues
+      const { directDataService } = await import('@/services/directDataService')
+
+      console.log('🔍 [ConnectionStatus] Iniciando test de conectividad...')
+      const isConnectedResult = await directDataService.testConnection()
+
+      if (isConnectedResult) {
         setIsConnected(true)
         setLastCheck(new Date())
-        console.log('✅ Conexión exitosa a Google Sheets:', data)
+        console.log('✅ [ConnectionStatus] Conexión exitosa a Google Sheets')
       } else {
         setIsConnected(false)
-        setErrorMessage(`Error HTTP: ${response.status}`)
+        setErrorMessage('No se pudo establecer conexión con la API')
+        console.warn('⚠️ [ConnectionStatus] Test de conectividad falló')
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsConnected(false)
-      setErrorMessage(error instanceof Error ? error.message : 'Error desconocido')
-      console.error('❌ Error de conexión:', error)
+      const errorMsg = error?.message || 'Error desconocido al verificar conectividad'
+      setErrorMessage(errorMsg)
+      console.error('❌ [ConnectionStatus] Error de conexión:', {
+        message: error?.message,
+        name: error?.name
+      })
     } finally {
       setIsChecking(false)
     }
