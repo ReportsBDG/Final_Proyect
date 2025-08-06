@@ -543,69 +543,68 @@ export default function DentalDashboard() {
     const [isOpen, setIsOpen] = useState(false)
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 relative">
-        <label className="block text-xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-          <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mr-3"></div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-200 dark:border-gray-700 relative">
+        <label className="block text-base font-semibold text-gray-800 dark:text-white mb-3">
           {label}
         </label>
 
         {/* Toggle Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-6 py-5 text-left border-3 border-gray-300 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white bg-gray-50 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 shadow-inner"
+          className="w-full px-4 py-3 text-left border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-gray-50 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
         >
-          <span className="text-lg font-semibold overflow-hidden">
+          <span className="text-sm font-medium truncate">
             {selectedValues.length === 0
               ? placeholder
               : selectedValues.length === 1
                 ? selectedValues[0]
-                : `${selectedValues.length} items selected`
+                : `${selectedValues.length} selected`
             }
           </span>
-          <ChevronDown className={`w-7 h-7 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-5 h-5 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-20 mt-3 left-6 right-6 bg-white dark:bg-gray-700 border-3 border-gray-300 dark:border-gray-600 rounded-2xl shadow-2xl max-h-80 overflow-y-auto">
+          <div className="absolute z-20 mt-2 left-0 right-0 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
             {/* Select All / Clear All */}
-            <div className="p-6 border-b-3 border-gray-200 dark:border-gray-600 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
-              <div className="flex gap-4 justify-center">
+            <div className="p-3 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+              <div className="flex gap-2">
                 <button
                   onClick={onSelectAll}
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 font-bold transition-all duration-200 shadow-lg"
+                  className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600 font-medium transition-colors"
                 >
-                  ✓ Select All
+                  Select All
                 </button>
                 <button
                   onClick={onClearAll}
-                  className="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-6 py-3 rounded-xl hover:from-gray-600 hover:to-gray-700 font-bold transition-all duration-200 shadow-lg"
+                  className="bg-gray-500 text-white px-3 py-1.5 rounded text-xs hover:bg-gray-600 font-medium transition-colors"
                 >
-                  ✗ Clear All
+                  Clear All
                 </button>
               </div>
             </div>
 
             {/* Options */}
-            <div className="max-h-60 overflow-y-auto">
+            <div className="max-h-48 overflow-y-auto">
               {options.map((option) => (
                 <label
                   key={option}
-                  className="flex items-center p-5 hover:bg-blue-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors group"
+                  className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
                 >
                   <input
                     type="checkbox"
                     checked={selectedValues.includes(option)}
                     onChange={() => onToggle(option)}
-                    className="mr-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-6 h-6"
+                    className="mr-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-4 h-4"
                   />
-                  <span className="text-lg text-gray-900 dark:text-white min-w-0 leading-relaxed font-medium break-words group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">{option}</span>
+                  <span className="text-sm text-gray-900 dark:text-white min-w-0 leading-relaxed break-words">{option}</span>
                 </label>
               ))}
             </div>
 
             {options.length === 0 && (
-              <div className="p-8 text-lg text-gray-500 dark:text-gray-400 text-center">
+              <div className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
                 No options available
               </div>
             )}
