@@ -1089,116 +1089,117 @@ export default function DentalDashboard() {
           </div>
 
           {/* Filters Content - Optimized Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {/* BÚSQUEDA GLOBAL */}
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
-                  <Search className="w-4 h-4 mr-1.5 text-blue-600" />
-                  Search
-                </h3>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search patients, emails, carriers..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
-                  />
-                  {searchTerm && (
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs font-medium">
-                      {filteredData.length}
-                    </div>
-                  )}
+          <div className="space-y-4">
+            {/* BÚSQUEDA GLOBAL Y DATE RANGE */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Search Section */}
+              <div className="lg:col-span-2">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                    <Search className="w-4 h-4 mr-1.5 text-blue-600" />
+                    Search
+                  </h3>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search patients, emails, carriers..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
+                    />
+                    {searchTerm && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs font-medium">
+                        {filteredData.length}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Date Range Section - Now positioned to the right of search */}
+              <div className="lg:col-span-1">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 h-full">
+                  <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                    <Calendar className="w-4 h-4 mr-1.5 text-green-600" />
+                    Date Range
+                  </h3>
+                  <div className="space-y-2">
+                    <input
+                      type="date"
+                      placeholder="Start Date"
+                      value={dateRange.start}
+                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                      className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                    />
+                    <input
+                      type="date"
+                      placeholder="End Date"
+                      value={dateRange.end}
+                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                      className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* RANGO DE FECHAS */}
-            <div className="lg:col-span-1 xl:col-span-1">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
-                  <Calendar className="w-4 h-4 mr-1.5 text-green-600" />
-                  Date Range
-                </h3>
-                <div className="space-y-2">
-                  <input
-                    type="date"
-                    placeholder="Start Date"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
-                  />
-                  <input
-                    type="date"
-                    placeholder="End Date"
-                    value={dateRange.end}
-                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
-                  />
-                </div>
-              </div>
-            </div>
+            {/* FILTROS SECTION */}
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-3 flex items-center">
+                <Filter className="w-4 h-4 mr-1.5 text-purple-600" />
+                Filters
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <MultiSelectFilter
+                  label="Office"
+                  options={uniqueOffices}
+                  selectedValues={selectedOffices}
+                  onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
+                  onSelectAll={selectAllOffices}
+                  onClearAll={clearAllOffices}
+                  placeholder="All Offices"
+                />
 
-            {/* FILTROS - Más compactos */}
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-2">
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-white flex items-center">
-                  <Filter className="w-4 h-4 mr-1.5 text-purple-600" />
-                  Filters
-                </h3>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                  <MultiSelectFilter
-                    label="Office"
-                    options={uniqueOffices}
-                    selectedValues={selectedOffices}
-                    onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
-                    onSelectAll={selectAllOffices}
-                    onClearAll={clearAllOffices}
-                    placeholder="All Offices"
-                  />
+                <MultiSelectFilter
+                  label="Carrier"
+                  options={uniqueCarriers}
+                  selectedValues={selectedCarriers}
+                  onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
+                  onSelectAll={selectAllCarriers}
+                  onClearAll={clearAllCarriers}
+                  placeholder="All Carriers"
+                />
 
-                  <MultiSelectFilter
-                    label="Carrier"
-                    options={uniqueCarriers}
-                    selectedValues={selectedCarriers}
-                    onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
-                    onSelectAll={selectAllCarriers}
-                    onClearAll={clearAllCarriers}
-                    placeholder="All Carriers"
-                  />
+                <MultiSelectFilter
+                  label="Claim Status"
+                  options={uniqueClaimStatuses}
+                  selectedValues={selectedClaimStatuses}
+                  onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
+                  onSelectAll={selectAllClaimStatuses}
+                  onClearAll={clearAllClaimStatuses}
+                  placeholder="All Claims"
+                />
 
-                  <MultiSelectFilter
-                    label="Claim Status"
-                    options={uniqueClaimStatuses}
-                    selectedValues={selectedClaimStatuses}
-                    onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
-                    onSelectAll={selectAllClaimStatuses}
-                    onClearAll={clearAllClaimStatuses}
-                    placeholder="All Claims"
-                  />
+                <MultiSelectFilter
+                  label="Status"
+                  options={uniqueStatuses}
+                  selectedValues={selectedStatuses}
+                  onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
+                  onSelectAll={selectAllStatuses}
+                  onClearAll={clearAllStatuses}
+                  placeholder="All Status"
+                />
 
-                  <MultiSelectFilter
-                    label="Status"
-                    options={uniqueStatuses}
-                    selectedValues={selectedStatuses}
-                    onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
-                    onSelectAll={selectAllStatuses}
-                    onClearAll={clearAllStatuses}
-                    placeholder="All Status"
-                  />
-
-                  <MultiSelectFilter
-                    label="Interaction"
-                    options={uniqueInteractionTypes}
-                    selectedValues={selectedInteractionTypes}
-                    onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
-                    onSelectAll={selectAllInteractionTypes}
-                    onClearAll={clearAllInteractionTypes}
-                    placeholder="All Types"
-                  />
-                </div>
+                <MultiSelectFilter
+                  label="Interaction"
+                  options={uniqueInteractionTypes}
+                  selectedValues={selectedInteractionTypes}
+                  onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
+                  onSelectAll={selectAllInteractionTypes}
+                  onClearAll={clearAllInteractionTypes}
+                  placeholder="All Types"
+                />
               </div>
             </div>
           </div>
