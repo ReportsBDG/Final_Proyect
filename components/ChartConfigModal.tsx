@@ -667,8 +667,187 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
           </div>
         )
 
+      case 'scatter':
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Scatter
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'bubble':
+        // Para bubble chart, usamos scatter con sizing basado en el valor
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Scatter
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'radar':
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <PolarRadiusAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Radar
+                    key={field}
+                    dataKey={field}
+                    stroke={config.colors[index % config.colors.length]}
+                    fill={config.colors[index % config.colors.length]}
+                    fillOpacity={0.3}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'waterfall':
+        // Para waterfall, usamos un bar chart con colores que indican positivo/negativo
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Bar
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'funnel':
+        // Para funnel, usamos un bar chart horizontal que simule un embudo
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart layout="horizontal" data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis type="number" tick={{ fontSize: 10 }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Bar
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'treemap':
+        // Para treemap, usamos una representación simplificada con cells
+        const treemapData = previewData.map(item => ({
+          name: item.name,
+          size: item[config.yAxis[0]] || 0,
+          value: item[config.yAxis[0]] || 0
+        }))
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <Treemap
+                data={treemapData}
+                dataKey="size"
+                aspectRatio={4/3}
+                stroke="#fff"
+                fill={config.colors[0]}
+                content={<CustomizedContent />}
+              />
+            </ResponsiveContainer>
+          </div>
+        )
+
       default:
-        return null
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+            <div className="text-center">
+              <Database className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">Chart type not supported in preview</p>
+            </div>
+          </div>
+        )
     }
   }
 
