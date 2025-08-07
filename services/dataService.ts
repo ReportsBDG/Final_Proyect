@@ -1,5 +1,6 @@
 import { PatientRecord, APIResponse } from '@/types'
 import { fetchFromGoogleScript, validatePatientData, GOOGLE_SCRIPT_CONFIG } from '@/lib/google-script'
+import { mockPatientData } from '@/utils/mockData'
 
 // Google Apps Script configuration
 const GOOGLE_APPS_SCRIPT_URL = process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_URL || GOOGLE_SCRIPT_CONFIG.url
