@@ -229,7 +229,6 @@ export class DataService {
       
       // Fall back to mock data in case of error
       console.warn('Falling back to mock data due to error')
-      const { mockPatientData } = await import('@/utils/mockData')
       return mockPatientData
     }
   }
