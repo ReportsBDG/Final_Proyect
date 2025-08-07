@@ -32,6 +32,10 @@ export class DirectDataService {
 
     try {
       return await this.activeRequest
+    } catch (error: any) {
+      // If there's a complete failure in the request process, ensure we have fallback
+      console.error('🚨 [DirectDataService] Request process failed completely, using fallback:', error.message)
+      return this.getFallbackData()
     } finally {
       // Limpiar referencias cuando termine la petición
       this.activeRequest = null
