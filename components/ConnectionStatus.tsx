@@ -20,8 +20,8 @@ export default function ConnectionStatus({
     setErrorMessage('')
 
     try {
-      // Import the service dynamically to avoid import issues
-      const { directDataService } = await import('@/services/directDataService')
+      // Use static import - directDataService should be imported at the top
+      const { directDataService } = require('@/services/directDataService')
 
       console.log('🔍 [ConnectionStatus] Iniciando test de conectividad...')
       const isConnectedResult = await directDataService.testConnection()
