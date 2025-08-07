@@ -17,10 +17,11 @@ export async function GET(request: NextRequest) {
   let url = baseUrl
   const params = new URLSearchParams()
   
-  // Si no hay parámetros específicos, intentar obtener todos los datos
+  // Si no hay parámetros específicos, usar límite reducido para evitar timeouts
   if (!action && !limit && !sheet && !range) {
+    // Si no hay parámetros específicos, usar límite reducido para evitar timeouts
     params.append('action', 'getAllRecords')
-    params.append('limit', '15000') // Aumentado para asegurar 6000+ registros
+    params.append('limit', '5000') // Reducido para evitar timeouts del Google Apps Script
     params.append('sheet', 'DB') // Nombre correcto de la hoja
     params.append('range', 'A:AG') // Rango correcto hasta columna AG
   } else {
@@ -34,16 +35,20 @@ export async function GET(request: NextRequest) {
     url += '?' + params.toString()
   }
   
+  let timeoutId: NodeJS.Timeout | null = null
+
   try {
     console.log('🔗 Proxy request to:', url)
     console.log('📋 Parameters:', { action, limit, sheet, range })
-    
-    // Timeout aumentado para datasets grandes
+
+    // Timeout ajustado para datasets más pequeños y manejables
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => {
-      console.log('⏰ Timeout de 3 minutos alcanzado para dataset grande')
+    const timeoutDuration = 90000 // 90 segundos - más que suficiente para 5000 registros
+
+    timeoutId = setTimeout(() => {
+      console.log('⏰ Timeout de 90 segundos alcanzado - Google Script puede estar sobrecargado')
       controller.abort()
-    }, 180000) // 3 minutos para 6000+ registros
+    }, timeoutDuration)
 
     const response = await fetch(url, {
       method: 'GET',
@@ -54,8 +59,11 @@ export async function GET(request: NextRequest) {
       signal: controller.signal
     })
 
-    clearTimeout(timeoutId)
-    
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+
     console.log('📡 Response status:', response.status)
     console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
     
@@ -84,16 +92,45 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json(data)
-  } catch (error) {
-    console.error('❌ Error en proxy:', error)
+  } catch (error: any) {
+    // Clear timeout on error to prevent race conditions
+    if (timeoutId) {
+      try {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      } catch (e) {
+        // Ignore timeout clearing errors
+      }
+    }
+
+    console.error('❌ Error en proxy:', {
+      name: error.name,
+      message: error.message,
+      action: action,
+      url: url
+    })
+
+    // Handle specific error types
+    let errorDetails = error.message || 'Unknown error'
+    let statusCode = 500
+
+    if (error.name === 'AbortError') {
+      errorDetails = 'Request timeout - Google Apps Script may be overloaded'
+      statusCode = 408 // Request Timeout
+    } else if (error.message?.includes('Failed to fetch')) {
+      errorDetails = 'Network connectivity issue'
+      statusCode = 503 // Service Unavailable
+    }
+
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch data from Google Sheets', 
-        details: error instanceof Error ? error.message : 'Unknown error',
+      {
+        error: 'Failed to fetch data from Google Sheets',
+        details: errorDetails,
         timestamp: new Date().toISOString(),
-        url: url
-      }, 
-      { status: 500 }
+        url: url,
+        action: action
+      },
+      { status: statusCode }
     )
   }
 }

@@ -35,7 +35,15 @@ import {
   Pie,
   Cell,
   Area,
-  AreaChart
+  AreaChart,
+  ScatterChart,
+  Scatter,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Treemap
 } from 'recharts'
 
 interface ChartConfigModalProps {
@@ -48,18 +56,100 @@ interface ChartConfigModalProps {
 
 interface ChartConfiguration {
   title: string
-  type: 'bar' | 'line' | 'pie' | 'area'
+  subtitle?: string
+  type: 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'bubble' | 'radar' | 'waterfall' | 'funnel' | 'treemap'
+  subType?: 'stacked' | 'clustered' | 'normalized' | 'smooth' | 'step'
+  orientation?: 'vertical' | 'horizontal'
+
+  // Ejes y datos
   xAxis: string
   yAxis: string[]
-  aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min'
+  aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min' | 'median' | 'std' | 'variance'
+
+  // Leyenda avanzada
   showLegend: boolean
+  legendPosition: 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
+  legendAlign: 'left' | 'center' | 'right'
+  legendVerticalAlign: 'top' | 'middle' | 'bottom'
+  customLegendNames: Record<string, string>
+  legendStyle?: 'horizontal' | 'vertical'
+  legendSize?: 'small' | 'medium' | 'large'
+
+  // Grilla y ejes
   showGrid: boolean
+  gridStyle?: 'solid' | 'dashed' | 'dotted'
+  showXAxisLabel: boolean
+  showYAxisLabel: boolean
+  xAxisLabel?: string
+  yAxisLabel?: string
+  xAxisRotation?: number
+  yAxisRotation?: number
+
+  // Estilos y colores
   colors: string[]
+  colorScheme?: 'categorical' | 'sequential' | 'diverging' | 'custom'
+  gradientFill?: boolean
+  opacity?: number
+  borderWidth?: number
+  borderRadius?: number
+
+  // Datos y etiquetas
+  showDataLabels: boolean
+  dataLabelPosition?: 'top' | 'center' | 'bottom' | 'inside' | 'outside'
+  showTooltips: boolean
+  tooltipFormat?: 'currency' | 'percentage' | 'number' | 'date'
+  showValues: boolean
+
+  // Zoom y interactividad
+  enableZoom: boolean
+  enablePan: boolean
+  enableBrush: boolean
+  enableCrosshair: boolean
+
+  // Filtros avanzados
   filters?: {
     field: string
-    operator: string
-    value: string
+    operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'starts_with' | 'ends_with' | 'between' | 'in' | 'not_in'
+    value: string | number | string[]
+    condition?: 'and' | 'or'
   }[]
+
+  // Formateo
+  numberFormat?: {
+    decimals: number
+    useThousandSeparator: boolean
+    prefix?: string
+    suffix?: string
+  }
+
+  // Animaciones
+  enableAnimations: boolean
+  animationDuration?: number
+  animationType?: 'ease' | 'ease-in' | 'ease-out' | 'linear'
+
+  // Referencias y líneas de tendencia
+  referenceLines?: {
+    value: number
+    label?: string
+    color?: string
+    style?: 'solid' | 'dashed' | 'dotted'
+    axis: 'x' | 'y'
+  }[]
+  trendLines?: {
+    type: 'linear' | 'polynomial' | 'exponential' | 'logarithmic'
+    color?: string
+    style?: 'solid' | 'dashed' | 'dotted'
+  }[]
+
+  // Dimensiones
+  width?: string | number
+  height?: string | number
+  margin?: {
+    top: number
+    right: number
+    bottom: number
+    left: number
+  }
 }
 
 const FIELD_ICONS: Record<string, any> = {
@@ -74,19 +164,150 @@ const FIELD_ICONS: Record<string, any> = {
   id: Hash
 }
 
+// Componente customizado para Treemap
+const CustomizedContent = (props: any) => {
+  const { root, depth = 0, x = 0, y = 0, width = 0, height = 0, index = 0, payload, colors, rank, name } = props;
+
+  // Provide fallback colors if not provided
+  const defaultColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#ff0000'];
+  const colorArray = colors || defaultColors;
+
+  // Ensure we have safe values for calculations
+  const safeDepth = typeof depth === 'number' ? depth : 0;
+  const safeIndex = typeof index === 'number' ? index : 0;
+  const safeX = typeof x === 'number' ? x : 0;
+  const safeY = typeof y === 'number' ? y : 0;
+  const safeWidth = typeof width === 'number' ? width : 0;
+  const safeHeight = typeof height === 'number' ? height : 0;
+
+  // Safe color calculation
+  let fillColor = '#ffffff00';
+  if (safeDepth < 2 && root && root.children && Array.isArray(root.children) && root.children.length > 0) {
+    const colorIndex = Math.floor(safeIndex / root.children.length * colorArray.length);
+    fillColor = colorArray[Math.min(colorIndex, colorArray.length - 1)] || colorArray[0];
+  }
+
+  return (
+    <g>
+      <rect
+        x={safeX}
+        y={safeY}
+        width={safeWidth}
+        height={safeHeight}
+        style={{
+          fill: fillColor,
+          stroke: '#fff',
+          strokeWidth: 2 / (safeDepth + 1e-10),
+          strokeOpacity: 1 / (safeDepth + 1e-10),
+        }}
+      />
+      {safeDepth === 1 && name && safeWidth > 30 && safeHeight > 20 ? (
+        <text
+          x={safeX + safeWidth / 2}
+          y={safeY + safeHeight / 2 + 7}
+          textAnchor="middle"
+          fill="#fff"
+          fontSize={Math.min(14, safeWidth / 6)}
+        >
+          {String(name).substring(0, Math.floor(safeWidth / 8))}
+        </text>
+      ) : null}
+      {safeDepth === 1 && safeWidth > 30 && safeHeight > 30 ? (
+        <text
+          x={safeX + 4}
+          y={safeY + 18}
+          fill="#fff"
+          fontSize={Math.min(16, safeWidth / 5)}
+          fillOpacity={0.9}
+        >
+          {safeIndex + 1}
+        </text>
+      ) : null}
+    </g>
+  );
+}
+
 const CHART_TYPES = [
   { value: 'bar', label: 'Bar Chart', icon: BarChart3, description: 'Compare values across categories' },
   { value: 'line', label: 'Line Chart', icon: LineIcon, description: 'Show trends over time' },
   { value: 'pie', label: 'Pie Chart', icon: PieChart, description: 'Show proportions of a whole' },
-  { value: 'area', label: 'Area Chart', icon: TrendingUp, description: 'Show volume and trends' }
+  { value: 'area', label: 'Area Chart', icon: TrendingUp, description: 'Show volume and trends' },
+  { value: 'scatter', label: 'Scatter Plot', icon: Target, description: 'Show correlation between variables' },
+  { value: 'bubble', label: 'Bubble Chart', icon: Target, description: 'Three-dimensional data visualization' },
+  { value: 'radar', label: 'Radar Chart', icon: Target, description: 'Compare multiple variables' },
+  { value: 'waterfall', label: 'Waterfall', icon: TrendingUp, description: 'Show cumulative effect' },
+  { value: 'funnel', label: 'Funnel Chart', icon: TrendingUp, description: 'Show stages in a process' },
+  { value: 'treemap', label: 'Treemap', icon: Layers, description: 'Hierarchical data visualization' }
 ]
+
+const CHART_SUBTYPES = {
+  bar: [
+    { value: 'clustered', label: 'Clustered', description: 'Side-by-side bars' },
+    { value: 'stacked', label: 'Stacked', description: 'Stacked bars' },
+    { value: 'normalized', label: '100% Stacked', description: 'Normalized to 100%' }
+  ],
+  line: [
+    { value: 'smooth', label: 'Smooth', description: 'Curved lines' },
+    { value: 'step', label: 'Step', description: 'Step lines' }
+  ],
+  area: [
+    { value: 'stacked', label: 'Stacked', description: 'Stacked areas' },
+    { value: 'normalized', label: '100% Stacked', description: 'Normalized areas' }
+  ]
+}
 
 const AGGREGATION_TYPES = [
   { value: 'sum', label: 'Sum', description: 'Add all values together' },
   { value: 'avg', label: 'Average', description: 'Calculate mean value' },
   { value: 'count', label: 'Count', description: 'Count number of records' },
   { value: 'max', label: 'Maximum', description: 'Find highest value' },
-  { value: 'min', label: 'Minimum', description: 'Find lowest value' }
+  { value: 'min', label: 'Minimum', description: 'Find lowest value' },
+  { value: 'median', label: 'Median', description: 'Middle value' },
+  { value: 'std', label: 'Std Dev', description: 'Standard deviation' },
+  { value: 'variance', label: 'Variance', description: 'Statistical variance' }
+]
+
+const COLOR_SCHEMES = [
+  { name: 'Categorical', type: 'categorical', colors: ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'] },
+  { name: 'Sequential Blues', type: 'sequential', colors: ['#dbeafe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8'] },
+  { name: 'Sequential Greens', type: 'sequential', colors: ['#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#10b981', '#059669'] },
+  { name: 'Diverging', type: 'diverging', colors: ['#dc2626', '#f97316', '#facc15', '#ffffff', '#22d3ee', '#3b82f6', '#1e40af'] },
+  { name: 'Viridis', type: 'sequential', colors: ['#440154', '#482878', '#3e4989', '#31688e', '#26828e', '#1f9e89', '#35b779', '#6ece58', '#b5de2b', '#fde725'] }
+]
+
+const DATA_LABEL_POSITIONS = [
+  { value: 'top', label: 'Top', icon: '↑' },
+  { value: 'center', label: 'Center', icon: '●' },
+  { value: 'bottom', label: 'Bottom', icon: '↓' },
+  { value: 'inside', label: 'Inside', icon: '⊙' },
+  { value: 'outside', label: 'Outside', icon: '◯' }
+]
+
+const TOOLTIP_FORMATS = [
+  { value: 'currency', label: 'Currency ($1,234.56)' },
+  { value: 'percentage', label: 'Percentage (12.34%)' },
+  { value: 'number', label: 'Number (1,234.56)' },
+  { value: 'date', label: 'Date (Jan 1, 2024)' }
+]
+
+const ANIMATION_TYPES = [
+  { value: 'ease', label: 'Ease' },
+  { value: 'ease-in', label: 'Ease In' },
+  { value: 'ease-out', label: 'Ease Out' },
+  { value: 'linear', label: 'Linear' }
+]
+
+const GRID_STYLES = [
+  { value: 'solid', label: 'Solid' },
+  { value: 'dashed', label: 'Dashed' },
+  { value: 'dotted', label: 'Dotted' }
+]
+
+const TREND_LINE_TYPES = [
+  { value: 'linear', label: 'Linear' },
+  { value: 'polynomial', label: 'Polynomial' },
+  { value: 'exponential', label: 'Exponential' },
+  { value: 'logarithmic', label: 'Logarithmic' }
 ]
 
 const COLOR_PALETTES = [
@@ -97,16 +318,105 @@ const COLOR_PALETTES = [
   { name: 'Warm', colors: ['#dc2626', '#ea580c', '#d97706', '#ca8a04'] }
 ]
 
+const LEGEND_POSITIONS = [
+  { value: 'top', label: 'Top', icon: '↑' },
+  { value: 'bottom', label: 'Bottom', icon: '↓' },
+  { value: 'left', label: 'Left', icon: '←' },
+  { value: 'right', label: 'Right', icon: '→' },
+  { value: 'topLeft', label: 'Top Left', icon: '↖' },
+  { value: 'topRight', label: 'Top Right', icon: '↗' },
+  { value: 'bottomLeft', label: 'Bottom Left', icon: '↙' },
+  { value: 'bottomRight', label: 'Bottom Right', icon: '↘' }
+]
+
+const LEGEND_ALIGN_OPTIONS = [
+  { value: 'left', label: 'Left', icon: '⊣' },
+  { value: 'center', label: 'Center', icon: '⊥' },
+  { value: 'right', label: 'Right', icon: '⊢' }
+]
+
+const LEGEND_VERTICAL_ALIGN_OPTIONS = [
+  { value: 'top', label: 'Top', icon: '⊤' },
+  { value: 'middle', label: 'Middle', icon: '⊥' },
+  { value: 'bottom', label: 'Bottom', icon: '⊥' }
+]
+
 export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart, data }: ChartConfigModalProps) {
   const [config, setConfig] = useState<ChartConfiguration>({
     title: currentChart?.title || 'New Chart',
+    subtitle: currentChart?.subtitle || '',
     type: currentChart?.type || 'bar',
+    subType: currentChart?.subType || 'clustered',
+    orientation: currentChart?.orientation || 'vertical',
     xAxis: '',
     yAxis: [],
     aggregation: 'sum',
+
+    // Leyenda
     showLegend: true,
+    legendPosition: 'bottom',
+    legendAlign: 'center',
+    legendVerticalAlign: 'bottom',
+    legendStyle: 'horizontal',
+    legendSize: 'medium',
+    customLegendNames: {},
+
+    // Grilla y ejes
     showGrid: true,
-    colors: ['#0ea5e9']
+    gridStyle: 'solid',
+    showXAxisLabel: false,
+    showYAxisLabel: false,
+    xAxisLabel: '',
+    yAxisLabel: '',
+    xAxisRotation: 0,
+    yAxisRotation: 0,
+
+    // Colores y estilos
+    colors: ['#0ea5e9'],
+    colorScheme: 'categorical',
+    gradientFill: false,
+    opacity: 1,
+    borderWidth: 1,
+    borderRadius: 0,
+
+    // Datos y etiquetas
+    showDataLabels: false,
+    dataLabelPosition: 'top',
+    showTooltips: true,
+    tooltipFormat: 'number',
+    showValues: false,
+
+    // Interactividad
+    enableZoom: false,
+    enablePan: false,
+    enableBrush: false,
+    enableCrosshair: false,
+
+    // Formateo
+    numberFormat: {
+      decimals: 0,
+      useThousandSeparator: true,
+      prefix: '',
+      suffix: ''
+    },
+
+    // Animaciones
+    enableAnimations: true,
+    animationDuration: 1000,
+    animationType: 'ease',
+
+    // Referencias
+    referenceLines: [],
+    trendLines: [],
+
+    // Dimensiones
+    height: 300,
+    margin: {
+      top: 20,
+      right: 30,
+      bottom: 50,
+      left: 40
+    }
   })
 
   // Memoize field calculations to prevent infinite loops
@@ -151,8 +461,23 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
         yAxis: currentChart.yAxis || [numericFields[0]] || [],
         aggregation: currentChart.aggregation || 'sum',
         showLegend: currentChart.showLegend !== undefined ? currentChart.showLegend : true,
+        legendPosition: currentChart.legendPosition || 'bottom',
+        legendAlign: currentChart.legendAlign || 'center',
+        legendVerticalAlign: currentChart.legendVerticalAlign || 'bottom',
+        customLegendNames: currentChart.customLegendNames || {},
         showGrid: currentChart.showGrid !== undefined ? currentChart.showGrid : true,
-        colors: currentChart.colors || ['#0ea5e9']
+        colors: currentChart.colors || ['#0ea5e9'],
+        // Add missing required properties with default values
+        showXAxisLabel: currentChart.showXAxisLabel !== undefined ? currentChart.showXAxisLabel : false,
+        showYAxisLabel: currentChart.showYAxisLabel !== undefined ? currentChart.showYAxisLabel : false,
+        showDataLabels: currentChart.showDataLabels !== undefined ? currentChart.showDataLabels : false,
+        showTooltips: currentChart.showTooltips !== undefined ? currentChart.showTooltips : true,
+        showValues: currentChart.showValues !== undefined ? currentChart.showValues : false,
+        enableZoom: currentChart.enableZoom !== undefined ? currentChart.enableZoom : false,
+        enablePan: currentChart.enablePan !== undefined ? currentChart.enablePan : false,
+        enableBrush: currentChart.enableBrush !== undefined ? currentChart.enableBrush : false,
+        enableCrosshair: currentChart.enableCrosshair !== undefined ? currentChart.enableCrosshair : false,
+        enableAnimations: currentChart.enableAnimations !== undefined ? currentChart.enableAnimations : true
       })
     }
   }, [currentChart, categoricalFields, numericFields])
@@ -184,9 +509,26 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
   }
 
   const removeYAxisField = (field: string) => {
+    setConfig(prev => {
+      const { [field]: removed, ...remainingCustomNames } = prev.customLegendNames
+      return {
+        ...prev,
+        yAxis: prev.yAxis.filter(f => f !== field),
+        customLegendNames: remainingCustomNames
+      }
+    })
+  }
+
+  const updateCustomLegendName = (field: string, customName: string) => {
     setConfig(prev => ({
       ...prev,
-      yAxis: prev.yAxis.filter(f => f !== field)
+      customLegendNames: customName ? {
+        ...prev.customLegendNames,
+        [field]: customName
+      } : (() => {
+        const { [field]: removed, ...remaining } = prev.customLegendNames
+        return remaining
+      })()
     }))
   }
 
@@ -276,7 +618,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 {config.yAxis.map((field, index) => (
                   <Bar
                     key={field}
@@ -299,7 +651,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 {config.yAxis.map((field, index) => (
                   <Line
                     key={field}
@@ -324,7 +686,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 {config.yAxis.map((field, index) => (
                   <Area
                     key={field}
@@ -351,7 +723,17 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
             <ResponsiveContainer width="100%" height="100%">
               <RechartsPieChart>
                 <Tooltip formatter={formatTooltipValue} />
-                {config.showLegend && <Legend />}
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    wrapperStyle={{
+                      paddingTop: config.legendPosition === 'top' ? '0px' : '10px',
+                      paddingBottom: config.legendPosition === 'bottom' ? '0px' : '10px'
+                    }}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
                 <Pie
                   data={pieData}
                   cx="50%"
@@ -373,8 +755,187 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
           </div>
         )
 
+      case 'scatter':
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Scatter
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'bubble':
+        // Para bubble chart, usamos scatter con sizing basado en el valor
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Scatter
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </ScatterChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'radar':
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <PolarGrid />
+                <PolarAngleAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <PolarRadiusAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Radar
+                    key={field}
+                    dataKey={field}
+                    stroke={config.colors[index % config.colors.length]}
+                    fill={config.colors[index % config.colors.length]}
+                    fillOpacity={0.3}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'waterfall':
+        // Para waterfall, usamos un bar chart con colores que indican positivo/negativo
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Bar
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'funnel':
+        // Para funnel, usamos un bar chart horizontal que simule un embudo
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart layout="horizontal" data={previewData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+                <XAxis type="number" tick={{ fontSize: 10 }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} />
+                <Tooltip formatter={formatTooltipValue} />
+                {config.showLegend && (
+                  <Legend
+                    verticalAlign={config.legendVerticalAlign as any}
+                    align={config.legendAlign as any}
+                    formatter={(value) => config.customLegendNames[value] || getFieldDisplayName(value)}
+                  />
+                )}
+                {config.yAxis.map((field, index) => (
+                  <Bar
+                    key={field}
+                    dataKey={field}
+                    fill={config.colors[index % config.colors.length]}
+                    name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )
+
+      case 'treemap':
+        // Para treemap, usamos una representación simplificada con cells
+        const treemapData = previewData.map(item => ({
+          name: item.name,
+          size: item[config.yAxis[0]] || 0,
+          value: item[config.yAxis[0]] || 0
+        }))
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg p-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <Treemap
+                data={treemapData}
+                dataKey="size"
+                aspectRatio={4/3}
+                stroke="#fff"
+                fill={config.colors[0]}
+                content={(props: any) => <CustomizedContent {...props} colors={config.colors} />}
+              />
+            </ResponsiveContainer>
+          </div>
+        )
+
       default:
-        return null
+        return (
+          <div className="h-48 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+            <div className="text-center">
+              <Database className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">Chart type not supported in preview</p>
+            </div>
+          </div>
+        )
     }
   }
 
@@ -596,8 +1157,9 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 <Target className="w-5 h-5 mr-2 text-purple-600" />
                 Display Options
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-6">
+                {/* General Options */}
                 <div className="space-y-4">
                   <label className="flex items-center space-x-3">
                     <input
@@ -608,7 +1170,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                     />
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Legend</span>
                   </label>
-                  
+
                   <label className="flex items-center space-x-3">
                     <input
                       type="checkbox"
@@ -620,11 +1182,12 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                   </label>
                 </div>
 
+                {/* Color Palette */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Color Palette
                   </label>
-                  <div className="space-y-2">
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
                     {COLOR_PALETTES.map((palette) => (
                       <button
                         key={palette.name}
@@ -649,6 +1212,115 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 </div>
               </div>
             </div>
+
+            {/* Legend Configuration */}
+            {config.showLegend && (
+              <div className="space-y-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                  <Layers className="w-5 h-5 mr-2 text-blue-600" />
+                  Legend Configuration
+                </h3>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Legend Position */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Position
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {LEGEND_POSITIONS.map((position) => (
+                        <button
+                          key={position.value}
+                          onClick={() => setConfig(prev => ({ ...prev, legendPosition: position.value as any }))}
+                          className={`p-2 rounded-lg border-2 transition-all text-center ${
+                            config.legendPosition === position.value
+                              ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-800 dark:text-blue-200'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:hover:bg-blue-900/20'
+                          }`}
+                        >
+                          <div className="text-lg mb-1">{position.icon}</div>
+                          <div className="text-xs font-medium">{position.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Legend Alignment */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Horizontal Align
+                    </label>
+                    <div className="space-y-2">
+                      {LEGEND_ALIGN_OPTIONS.map((align) => (
+                        <button
+                          key={align.value}
+                          onClick={() => setConfig(prev => ({ ...prev, legendAlign: align.value as any }))}
+                          className={`w-full p-2 rounded-lg border-2 transition-all flex items-center space-x-2 ${
+                            config.legendAlign === align.value
+                              ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-800 dark:text-blue-200'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:hover:bg-blue-900/20'
+                          }`}
+                        >
+                          <span className="text-lg">{align.icon}</span>
+                          <span className="text-sm font-medium">{align.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Vertical Alignment */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Vertical Align
+                    </label>
+                    <div className="space-y-2">
+                      {LEGEND_VERTICAL_ALIGN_OPTIONS.map((align) => (
+                        <button
+                          key={align.value}
+                          onClick={() => setConfig(prev => ({ ...prev, legendVerticalAlign: align.value as any }))}
+                          className={`w-full p-2 rounded-lg border-2 transition-all flex items-center space-x-2 ${
+                            config.legendVerticalAlign === align.value
+                              ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-800 dark:text-blue-200'
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 dark:border-gray-600 dark:hover:bg-blue-900/20'
+                          }`}
+                        >
+                          <span className="text-lg">{align.icon}</span>
+                          <span className="text-sm font-medium">{align.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Legend Names */}
+                {config.yAxis.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      Custom Legend Names
+                    </label>
+                    <div className="space-y-3">
+                      {config.yAxis.map((field) => (
+                        <div key={field} className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 flex-1">
+                            {getFieldIcon(field)}
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-0">
+                              {getFieldDisplayName(field)}:
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            value={config.customLegendNames[field] || ''}
+                            onChange={(e) => updateCustomLegendName(field, e.target.value)}
+                            placeholder={`Default: ${getFieldDisplayName(field)}`}
+                            className="flex-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Panel - Preview */}

@@ -1,7 +1,7 @@
-'use client\'\'use client'
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import {
   Activity,
   DollarSign,
@@ -31,13 +31,22 @@ import {
   ChevronUp,
   Menu
 } from 'lucide-react'
-import SimpleCharts from '@/components/SimpleCharts'
+const SimpleCharts = dynamic(() => import('@/components/SimpleCharts'), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+      <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded-lg flex items-center justify-center">
+        <div className="text-gray-500 dark:text-gray-400">Loading charts...</div>
+      </div>
+    </div>
+  )
+})
 import ConnectionStatus from '@/components/ConnectionStatus'
-import DataLoadingStatus from '@/components/DataLoadingStatus'
 import ImprovedFilterStyles from '@/components/ImprovedFilterStyles'
 import { directDataService } from '@/services/directDataService'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
+import { generateMockData } from '@/utils/mockData'
 
 // Enhanced notification system
 interface Notification {
@@ -94,7 +103,7 @@ const savePersistedState = (key: string, value: any) => {
   }
 }
 
-export default function DentalDashboard() {
+function DentalDashboard() {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedOffices, setSelectedOffices] = useState<string[]>([])
@@ -102,7 +111,20 @@ export default function DentalDashboard() {
   const [selectedClaimStatuses, setSelectedClaimStatuses] = useState<string[]>([])
   const [selectedCarriers, setSelectedCarriers] = useState<string[]>([])
   const [selectedInteractionTypes, setSelectedInteractionTypes] = useState<string[]>([])
+  // Configurar Date Range por defecto al mes actual
+  const getCurrentMonthRange = () => {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    return {
+      start: startOfMonth.toISOString().split('T')[0],
+      end: currentDate.toISOString().split('T')[0]
+    }
+  }
+
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
+  const [initialDateRange, setInitialDateRange] = useState({ start: '', end: '' })
   const [isClient, setIsClient] = useState(false)
   const [data, setData] = useState<PatientRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -151,7 +173,7 @@ export default function DentalDashboard() {
   )
   
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(25)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
   const [sortBy, setSortBy] = useState<keyof PatientRecord | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
@@ -219,7 +241,35 @@ export default function DentalDashboard() {
         setError(null)
       }
 
-      const patientData = await directDataService.fetchPatientRecords()
+      console.log('🔄 [Page] Iniciando carga de datos...')
+
+      // Add extra error handling for network issues with immediate fallback
+      let patientData
+      try {
+        patientData = await directDataService.fetchPatientRecords()
+      } catch (fetchError: any) {
+        console.warn('⚠️ [Page] Error durante carga de datos, generando datos de demostración inmediatamente:', fetchError.message)
+
+        // Generate immediate fallback data if the service fails completely
+        try {
+          patientData = generateMockData(50).map(record => ({
+            ...record,
+            commentsreasons: record.commentsreasons + ' [DATOS DE DEMOSTRACIÓN - PROBLEMA DE CONECTIVIDAD]'
+          }))
+          console.log('✅ [Page] Datos de demostración generados exitosamente:', patientData.length, 'registros')
+        } catch (mockError) {
+          console.error('❌ [Page] Error generando datos de demostración:', mockError)
+          patientData = []
+        }
+      }
+
+      console.log('✅ [Page] Datos cargados exitosamente:', patientData.length, 'registros')
+
+      // Ensure we always have an array
+      if (!Array.isArray(patientData)) {
+        console.warn('⚠️ [Page] Datos recibidos no son un array, usando array vacío')
+        patientData = []
+      }
 
       // Detailed change detection
       if (data.length > 0) {
@@ -273,19 +323,43 @@ export default function DentalDashboard() {
         addRecentChange('data_sync', 'Database synchronized successfully',
           `${patientData.length} total records`)
       }
-    } catch (err) {
-      console.error('Error loading data:', err)
+    } catch (err: any) {
+      // Reduce console noise for common network errors
+      if (err?.message?.includes('Failed to fetch')) {
+        console.warn('🌐 [Page] Network connectivity issue - fallback data will be used')
+      } else {
+        console.error('❌ [Page] Error loading data:', {
+          message: err?.message,
+          name: err?.name,
+          stack: err?.stack?.split('\n').slice(0, 3).join('\n')
+        })
+      }
+
+      // Analizar el tipo de error para dar mejor contexto al usuario
+      let errorMessage = 'Error desconocido al cargar datos'
+
+      if (err?.message?.includes('Failed to fetch') || err?.message?.includes('Network')) {
+        errorMessage = 'Conectividad limitada - usando datos locales'
+      } else if (err?.message?.includes('timeout') || err?.message?.includes('abort')) {
+        errorMessage = 'Carga optimizada - mostrando datos disponibles'
+      } else if (err?.message?.includes('HTTP')) {
+        errorMessage = 'Servicio temporalmente no disponible'
+      } else if (err?.message?.includes('JSON')) {
+        errorMessage = 'Procesando datos en formato alternativo'
+      }
 
       // El DirectDataService ya maneja el fallback automáticamente
       // Si llegamos aquí, significa que incluso el fallback falló
       if (data.length === 0) {
-        const errorMessage = 'Problema de conectividad - usando datos de demostración'
-        setError(errorMessage)
-        addNotification('warning', errorMessage)
+        const fallbackMessage = `${errorMessage} - usando datos de demostración`
+        setError(fallbackMessage)
+        addNotification('error', fallbackMessage)
+        addRecentChange('data_sync', 'Error de conectividad', 'Usando datos de demostración como respaldo')
       } else {
         // Si ya tenemos datos, solo mostrar notificación pero mantener datos existentes
-        const errorMessage = 'Problema temporal de conexión - usando datos previos'
-        addNotification('warning', errorMessage)
+        const warningMessage = `${errorMessage} - manteniendo datos previos`
+        addNotification('warning', warningMessage)
+        addRecentChange('data_sync', 'Error temporal de conexión', 'Datos previos mantienen disponibles')
       }
     } finally {
       if (!silent) {
@@ -309,6 +383,10 @@ export default function DentalDashboard() {
   // Ensure consistent rendering between server and client
   useEffect(() => {
     setIsClient(true)
+    // Initialize date range after component mounts to avoid hydration issues
+    const monthRange = getCurrentMonthRange()
+    setDateRange(monthRange)
+    setInitialDateRange(monthRange)
   }, [])
 
   // Enhanced metrics calculation with proper timestamp filtering
@@ -522,6 +600,139 @@ export default function DentalDashboard() {
     })
   }
 
+  // Searchable multi-select filter component for Carrier
+  const SearchableMultiSelectFilter = ({
+    label,
+    options,
+    selectedValues,
+    onToggle,
+    onSelectAll,
+    onClearAll,
+    placeholder = "Select options..."
+  }: {
+    label: string
+    options: string[]
+    selectedValues: string[]
+    onToggle: (value: string) => void
+    onSelectAll: () => void
+    onClearAll: () => void
+    placeholder?: string
+  }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
+
+    const filteredOptions = options.filter(option =>
+      option.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value)
+    }
+
+    return (
+      <div className="relative">
+        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+          {label}
+        </label>
+
+        {/* Toggle Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-2.5 py-1.5 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-xs"
+        >
+          <span className="truncate text-gray-700 dark:text-gray-300">
+            {selectedValues.length === 0
+              ? placeholder
+              : selectedValues.length === 1
+                ? selectedValues[0]
+                : `${selectedValues.length} selected`
+            }
+          </span>
+          <ChevronDown className={`w-3 h-3 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Dropdown */}
+        {isOpen && (
+          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 flex flex-col">
+            {/* Search Input */}
+            <div className="p-2 border-b border-gray-200 dark:border-gray-600">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  placeholder="Search carriers..."
+                  className="w-full pl-6 pr-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs dark:bg-gray-600 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+
+            {/* Select All / Clear All */}
+            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+              <div className="flex gap-1">
+                <button
+                  onClick={() => {
+                    onSelectAll()
+                    setIsOpen(false)
+                  }}
+                  className="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-blue-600 transition-colors"
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => {
+                    onClearAll()
+                    setIsOpen(false)
+                  }}
+                  className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            {/* Options - Single scroll container */}
+            <div className="flex-1 overflow-y-auto min-h-0">
+              {filteredOptions.map((option) => (
+                <label
+                  key={option}
+                  className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedValues.includes(option)}
+                    onChange={() => onToggle(option)}
+                    className="mr-1.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-3 h-3"
+                  />
+                  <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
+                </label>
+              ))}
+
+              {filteredOptions.length === 0 && (
+                <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                  {searchTerm ? 'No carriers found' : 'No options available'}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Click outside to close */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => {
+              setIsOpen(false)
+              setSearchTerm('')
+            }}
+          ></div>
+        )}
+      </div>
+    )
+  }
+
   // Multi-select filter component
   const MultiSelectFilter = ({
     label,
@@ -566,9 +777,9 @@ export default function DentalDashboard() {
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto">
+          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 flex flex-col">
             {/* Select All / Clear All */}
-            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
               <div className="flex gap-1">
                 <button
                   onClick={() => {
@@ -591,8 +802,8 @@ export default function DentalDashboard() {
               </div>
             </div>
 
-            {/* Options */}
-            <div className="max-h-32 overflow-y-auto">
+            {/* Options - Single scroll container */}
+            <div className="flex-1 overflow-y-auto min-h-0">
               {options.map((option) => (
                 <label
                   key={option}
@@ -607,13 +818,13 @@ export default function DentalDashboard() {
                   <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
                 </label>
               ))}
-            </div>
 
-            {options.length === 0 && (
-              <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                No options available
-              </div>
-            )}
+              {options.length === 0 && (
+                <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                  No options available
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -1066,7 +1277,7 @@ export default function DentalDashboard() {
         </div>
       )}
 
-      <div className="px-4 sm:px-6 space-y-6">
+      <div className="py-4 px-6 space-y-6">
         {/* Filters Container Card */}
         <div
           className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-4 transition-all duration-300 ease-in-out ${
@@ -1079,126 +1290,141 @@ export default function DentalDashboard() {
               <Filter className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters & Search</h2>
             </div>
-            <button
-              onClick={toggleFilters}
-              className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title="Hide Filters"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Clear All Filters Button */}
+              {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                (dateRange.start !== initialDateRange.start || dateRange.end !== initialDateRange.end)) && (
+                <button
+                  onClick={clearAllFilters}
+                  className="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md transition-colors border border-red-200 dark:border-red-800"
+                  title="Clear All Filters"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                onClick={toggleFilters}
+                className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                title="Hide Filters"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Filters Content - Optimized Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            {/* BÚSQUEDA GLOBAL */}
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
-                  <Search className="w-4 h-4 mr-1.5 text-blue-600" />
-                  Search
-                </h3>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search patients, emails, carriers..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
-                  />
-                  {searchTerm && (
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs font-medium">
-                      {filteredData.length}
-                    </div>
-                  )}
+          <div className="space-y-4">
+            {/* BÚSQUEDA GLOBAL Y DATE RANGE */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Search Section */}
+              <div className="lg:col-span-2">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                    <Search className="w-4 h-4 mr-1.5 text-blue-600" />
+                    Search
+                  </h3>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search patients, emails, carriers..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white placeholder:text-gray-400 text-sm"
+                    />
+                    {searchTerm && (
+                      <div className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-1.5 py-0.5 rounded text-xs font-medium">
+                        {filteredData.length}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Date Range Section - Now positioned to the right of search */}
+              <div className="lg:col-span-1">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 h-full">
+                  <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
+                    <Calendar className="w-4 h-4 mr-1.5 text-green-600" />
+                    Date Range
+                  </h3>
+                  <div className="space-y-2">
+                    <input
+                      type="date"
+                      placeholder="Start Date"
+                      value={dateRange.start}
+                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                      className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                    />
+                    <input
+                      type="date"
+                      placeholder="End Date"
+                      value={dateRange.end}
+                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                      className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* RANGO DE FECHAS */}
-            <div className="lg:col-span-1 xl:col-span-1">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-2 flex items-center">
-                  <Calendar className="w-4 h-4 mr-1.5 text-green-600" />
-                  Date Range
-                </h3>
-                <div className="space-y-2">
-                  <input
-                    type="date"
-                    placeholder="Start Date"
-                    value={dateRange.start}
-                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
-                  />
-                  <input
-                    type="date"
-                    placeholder="End Date"
-                    value={dateRange.end}
-                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                    className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white text-xs"
-                  />
-                </div>
-              </div>
-            </div>
+            {/* FILTROS SECTION */}
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-800 dark:text-white mb-3 flex items-center">
+                <Filter className="w-4 h-4 mr-1.5 text-purple-600" />
+                Filters
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <MultiSelectFilter
+                  label="Office"
+                  options={uniqueOffices}
+                  selectedValues={selectedOffices}
+                  onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
+                  onSelectAll={selectAllOffices}
+                  onClearAll={clearAllOffices}
+                  placeholder="All Offices"
+                />
 
-            {/* FILTROS - Más compactos */}
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-2">
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-gray-800 dark:text-white flex items-center">
-                  <Filter className="w-4 h-4 mr-1.5 text-purple-600" />
-                  Filters
-                </h3>
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
-                  <MultiSelectFilter
-                    label="Office"
-                    options={uniqueOffices}
-                    selectedValues={selectedOffices}
-                    onToggle={(value) => toggleFilterSelection(value, selectedOffices, setSelectedOffices)}
-                    onSelectAll={selectAllOffices}
-                    onClearAll={clearAllOffices}
-                    placeholder="All Offices"
-                  />
+                <SearchableMultiSelectFilter
+                  label="Carrier"
+                  options={uniqueCarriers}
+                  selectedValues={selectedCarriers}
+                  onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
+                  onSelectAll={selectAllCarriers}
+                  onClearAll={clearAllCarriers}
+                  placeholder="All Carriers"
+                />
 
-                  <MultiSelectFilter
-                    label="Carrier"
-                    options={uniqueCarriers}
-                    selectedValues={selectedCarriers}
-                    onToggle={(value) => toggleFilterSelection(value, selectedCarriers, setSelectedCarriers)}
-                    onSelectAll={selectAllCarriers}
-                    onClearAll={clearAllCarriers}
-                    placeholder="All Carriers"
-                  />
+                <MultiSelectFilter
+                  label="Claim Status"
+                  options={uniqueClaimStatuses}
+                  selectedValues={selectedClaimStatuses}
+                  onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
+                  onSelectAll={selectAllClaimStatuses}
+                  onClearAll={clearAllClaimStatuses}
+                  placeholder="All Claims"
+                />
 
-                  <MultiSelectFilter
-                    label="Claim Status"
-                    options={uniqueClaimStatuses}
-                    selectedValues={selectedClaimStatuses}
-                    onToggle={(value) => toggleFilterSelection(value, selectedClaimStatuses, setSelectedClaimStatuses)}
-                    onSelectAll={selectAllClaimStatuses}
-                    onClearAll={clearAllClaimStatuses}
-                    placeholder="All Claims"
-                  />
+                <MultiSelectFilter
+                  label="Status"
+                  options={uniqueStatuses}
+                  selectedValues={selectedStatuses}
+                  onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
+                  onSelectAll={selectAllStatuses}
+                  onClearAll={clearAllStatuses}
+                  placeholder="All Status"
+                />
 
-                  <MultiSelectFilter
-                    label="Status"
-                    options={uniqueStatuses}
-                    selectedValues={selectedStatuses}
-                    onToggle={(value) => toggleFilterSelection(value, selectedStatuses, setSelectedStatuses)}
-                    onSelectAll={selectAllStatuses}
-                    onClearAll={clearAllStatuses}
-                    placeholder="All Status"
-                  />
-
-                  <MultiSelectFilter
-                    label="Interaction"
-                    options={uniqueInteractionTypes}
-                    selectedValues={selectedInteractionTypes}
-                    onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
-                    onSelectAll={selectAllInteractionTypes}
-                    onClearAll={clearAllInteractionTypes}
-                    placeholder="All Types"
-                  />
-                </div>
+                <MultiSelectFilter
+                  label="Interaction"
+                  options={uniqueInteractionTypes}
+                  selectedValues={selectedInteractionTypes}
+                  onToggle={(value) => toggleFilterSelection(value, selectedInteractionTypes, setSelectedInteractionTypes)}
+                  onSelectAll={selectAllInteractionTypes}
+                  onClearAll={clearAllInteractionTypes}
+                  placeholder="All Types"
+                />
               </div>
             </div>
           </div>
@@ -1260,16 +1486,18 @@ export default function DentalDashboard() {
 
         {/* Main Content */}
         <div className="space-y-6">
-          {/* Data Loading Status */}
-          <DataLoadingStatus
-            totalRecords={data.length}
-            isLoading={loading}
-            error={error || undefined}
-          />
 
           {/* Interactive Charts Section */}
           <div id="charts-section">
-            <SimpleCharts data={filteredData} />
+            {isClient ? (
+              <SimpleCharts data={filteredData} />
+            ) : (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded-lg flex items-center justify-center">
+                  <div className="text-gray-500 dark:text-gray-400">Loading charts...</div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Enhanced Patient Records Table */}
@@ -1283,6 +1511,26 @@ export default function DentalDashboard() {
                   </p>
                 </div>
                 <div className="flex items-center justify-end space-x-2">
+                  {/* Records Per Page Selector */}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Show:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(parseInt(e.target.value))
+                        setCurrentPage(1) // Reset to first page when changing items per page
+                      }}
+                      className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={25}>25</option>
+                      <option value={30}>30</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+
                   {/* Column Filters Button */}
                   <div className="relative">
                     <button 
@@ -1388,7 +1636,7 @@ export default function DentalDashboard() {
                           <div className="truncate max-w-[80px] sm:max-w-none">
                             Office
                             {sortBy === 'offices' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '��' : '↓'}</span>
                             )}
                           </div>
                         </th>
@@ -1594,3 +1842,5 @@ export default function DentalDashboard() {
     </div>
   )
 }
+
+export default DentalDashboard

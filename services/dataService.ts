@@ -1,5 +1,6 @@
 import { PatientRecord, APIResponse } from '@/types'
 import { fetchFromGoogleScript, validatePatientData, GOOGLE_SCRIPT_CONFIG } from '@/lib/google-script'
+import { mockPatientData } from '@/utils/mockData'
 
 // Google Apps Script configuration
 const GOOGLE_APPS_SCRIPT_URL = process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_URL || GOOGLE_SCRIPT_CONFIG.url
@@ -198,13 +199,11 @@ export class DataService {
 
       if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
         console.warn('No data received from Google Sheets, using mock data')
-        const { mockPatientData } = await import('@/utils/mockData')
         return mockPatientData
       }
 
       if (!validatePatientData(rawData)) {
         console.warn('Invalid data received from Google Sheets, using mock data')
-        const { mockPatientData } = await import('@/utils/mockData')
         return mockPatientData
       }
 
@@ -230,7 +229,6 @@ export class DataService {
       
       // Fall back to mock data in case of error
       console.warn('Falling back to mock data due to error')
-      const { mockPatientData } = await import('@/utils/mockData')
       return mockPatientData
     }
   }
@@ -247,7 +245,6 @@ export class DataService {
   }): Promise<PatientRecord[]> {
     if (!GOOGLE_APPS_SCRIPT_URL) {
       console.warn('Google Apps Script URL not configured, using mock data')
-      const { mockPatientData } = await import('@/utils/mockData')
       return mockPatientData
     }
 

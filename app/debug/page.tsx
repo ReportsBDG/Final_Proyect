@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ConnectivityTest from '@/components/ConnectivityTest'
 
 export default function DebugPage() {
   const [result, setResult] = useState<string>('')
@@ -73,7 +74,11 @@ export default function DebugPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Debug API Connection</h1>
-        
+
+        <div className="mb-8">
+          <ConnectivityTest />
+        </div>
+
         <div className="space-y-4">
           <button
             onClick={testBasicFetch}
