@@ -8,6 +8,14 @@ export class DirectDataService {
   async fetchPatientRecords(): Promise<PatientRecord[]> {
     console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
 
+    // Primero, hacer una verificación ligera de conectividad
+    console.log('🔍 [DirectDataService] Verificando conectividad del Google Apps Script...')
+    const isConnected = await this.testConnection()
+    if (!isConnected) {
+      console.warn('⚠️ [DirectDataService] Conectividad fallida, usando fallback directamente')
+      return this.getFallbackData()
+    }
+
     let lastError: Error | null = null
 
     // Intentar múltiples veces en caso de interferencias
