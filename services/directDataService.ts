@@ -394,75 +394,13 @@ export class DirectDataService {
 
   /**
    * Probar conectividad con la API de forma simple
+   * Simplified to avoid timeout issues - always returns true (optimistic)
    */
   async testConnection(): Promise<boolean> {
-    try {
-      console.log('🔍 [DirectDataService] Probando conectividad...')
-
-      // Use a simple lightweight request instead of ping
-      // Just check if the proxy endpoint responds without fetching actual data
-      const controller = new AbortController()
-      let timeoutId: NodeJS.Timeout | null = null
-
-      try {
-        // Reasonable timeout for connectivity test - Google Apps Script can be slow
-        timeoutId = setTimeout(() => {
-          if (!controller.signal.aborted) {
-            console.log('⏰ [DirectDataService] Connectivity test timeout reached')
-            controller.abort(new Error('Connectivity test timeout after 10 seconds'))
-          }
-        }, 10000) // 10 segundos para test - más tiempo para Google Apps Script
-
-        // Make a simple GET request to proxy - HEAD might not work with Google Apps Script
-        // This will test if the API is reachable, even if it returns an error
-        const response = await fetch('/api/proxy', {
-          method: 'GET', // GET is more reliable than HEAD with Google Apps Script
-          signal: controller.signal,
-          cache: 'no-cache',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-
-        if (timeoutId) {
-          clearTimeout(timeoutId)
-          timeoutId = null
-        }
-
-        // Consider most responses as "connected" - even errors mean the server is reachable
-        // Only treat complete network failures as disconnected
-        const isConnected = response.status < 600 // Accept even 5xx errors as "connected"
-        console.log(`🔗 [DirectDataService] Conectividad: ${isConnected ? 'OK' : 'FAILED'} (status: ${response.status})`)
-        return isConnected
-
-      } catch (fetchError: any) {
-        if (timeoutId) {
-          clearTimeout(timeoutId)
-          timeoutId = null
-        }
-
-        // Handle specific error types
-        if (fetchError.name === 'AbortError') {
-          const reason = fetchError.message || controller.signal.reason || 'Timeout after 10 seconds'
-          console.log(`⏰ [DirectDataService] Connectivity test aborted: ${reason} - assuming connection is possible`)
-          return true // Be optimistic on timeout - connection might still work for actual data
-        }
-
-        if (fetchError.message?.includes('Failed to fetch')) {
-          console.log('🌐 [DirectDataService] Network connection uncertain - will attempt data fetch anyway')
-          return true // Be optimistic - maybe the main data fetch will work
-        }
-
-        // For other errors, be optimistic
-        console.log('❌ [DirectDataService] Connectivity test error:', fetchError.name, fetchError.message, '- assuming connection might work')
-        return true
-      }
-
-    } catch (error: any) {
-      console.error('❌ [DirectDataService] Test de conectividad falló:', error?.name || 'Unknown', '-', error?.message || 'No error message')
-      // Be optimistic - if connectivity test fails, assume connection might still work
-      return true
-    }
+    console.log('🔍 [DirectDataService] Connectivity check skipped - assuming connection is available')
+    // Always return true to avoid delays and timeout issues
+    // The actual data fetching will handle any real connectivity problems
+    return true
   }
 
   /**
