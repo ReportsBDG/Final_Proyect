@@ -28,6 +28,25 @@ export class DirectDataService {
       return this.getFallbackData()
     }
 
+    // Crear un nuevo controller para esta petición
+    this.activeController = new AbortController()
+
+    // Crear la promesa de la petición activa
+    this.activeRequest = this.performRequest()
+
+    try {
+      return await this.activeRequest
+    } finally {
+      // Limpiar referencias cuando termine la petición
+      this.activeRequest = null
+      this.activeController = null
+    }
+  }
+
+  /**
+   * Realizar la petición real con reintentos
+   */
+  private async performRequest(): Promise<PatientRecord[]> {
     let lastError: Error | null = null
 
     // Intentar múltiples veces en caso de interferencias
