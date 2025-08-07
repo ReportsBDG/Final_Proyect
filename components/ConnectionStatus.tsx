@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { CheckCircle, XCircle, RefreshCw } from 'lucide-react'
+import { directDataService } from '@/services/directDataService'
 
 interface ConnectionStatusProps {
   googleScriptUrl?: string
