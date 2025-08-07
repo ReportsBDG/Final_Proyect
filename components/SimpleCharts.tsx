@@ -59,7 +59,7 @@ export default function SimpleCharts({ data }: ChartProps) {
   // Safe dark mode detection after component mounts
   useEffect(() => {
     const checkDarkMode = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'))
+      setIsDarkMode(isDarkMode)
     }
 
     checkDarkMode()
@@ -249,13 +249,13 @@ export default function SimpleCharts({ data }: ChartProps) {
               {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
                 angle={-45}
                 textAnchor="end"
                 height={80}
               />
               <YAxis 
-                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
                 tickFormatter={(value) => {
                   if (chart.yAxis.includes('paidamount')) {
                     return formatCurrency(value)
@@ -266,10 +266,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
-                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
                   borderRadius: '8px',
-                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
+                  color: isDarkMode ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
@@ -292,10 +292,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
               />
               <YAxis 
-                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
                 tickFormatter={(value) => {
                   if (chart.yAxis.includes('paidamount')) {
                     return formatCurrency(value)
@@ -306,10 +306,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
-                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
                   borderRadius: '8px',
-                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
+                  color: isDarkMode ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
@@ -334,13 +334,13 @@ export default function SimpleCharts({ data }: ChartProps) {
               {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
                 angle={-45}
                 textAnchor="end"
                 height={80}
               />
               <YAxis 
-                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
                 tickFormatter={(value) => {
                   if (chart.yAxis.includes('paidamount')) {
                     return formatCurrency(value)
@@ -351,10 +351,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
-                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
                   borderRadius: '8px',
-                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
+                  color: isDarkMode ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
@@ -381,10 +381,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
-                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
                   borderRadius: '8px',
-                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
+                  color: isDarkMode ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
