@@ -73,10 +73,15 @@ export class DirectDataService {
     // Crear AbortController con timeout ajustado
     const controller = new AbortController()
     const timeout = 45000 // Timeout fijo de 45 segundos
+    let timeoutId: NodeJS.Timeout | null = null
 
-    const timeoutId = setTimeout(() => {
+    timeoutId = setTimeout(() => {
       console.log(`⏰ [DirectDataService] Timeout de ${timeout}ms alcanzado en intento ${attempt} (límite: ${limit})`)
-      controller.abort()
+      try {
+        controller.abort()
+      } catch (abortError) {
+        console.warn('⚠️ [DirectDataService] Error al abortar request:', abortError)
+      }
     }, timeout)
 
     try {
