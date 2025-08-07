@@ -273,17 +273,79 @@ const LEGEND_VERTICAL_ALIGN_OPTIONS = [
 export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart, data }: ChartConfigModalProps) {
   const [config, setConfig] = useState<ChartConfiguration>({
     title: currentChart?.title || 'New Chart',
+    subtitle: currentChart?.subtitle || '',
     type: currentChart?.type || 'bar',
+    subType: currentChart?.subType || 'clustered',
+    orientation: currentChart?.orientation || 'vertical',
     xAxis: '',
     yAxis: [],
     aggregation: 'sum',
+
+    // Leyenda
     showLegend: true,
     legendPosition: 'bottom',
     legendAlign: 'center',
     legendVerticalAlign: 'bottom',
+    legendStyle: 'horizontal',
+    legendSize: 'medium',
     customLegendNames: {},
+
+    // Grilla y ejes
     showGrid: true,
-    colors: ['#0ea5e9']
+    gridStyle: 'solid',
+    showXAxisLabel: false,
+    showYAxisLabel: false,
+    xAxisLabel: '',
+    yAxisLabel: '',
+    xAxisRotation: 0,
+    yAxisRotation: 0,
+
+    // Colores y estilos
+    colors: ['#0ea5e9'],
+    colorScheme: 'categorical',
+    gradientFill: false,
+    opacity: 1,
+    borderWidth: 1,
+    borderRadius: 0,
+
+    // Datos y etiquetas
+    showDataLabels: false,
+    dataLabelPosition: 'top',
+    showTooltips: true,
+    tooltipFormat: 'number',
+    showValues: false,
+
+    // Interactividad
+    enableZoom: false,
+    enablePan: false,
+    enableBrush: false,
+    enableCrosshair: false,
+
+    // Formateo
+    numberFormat: {
+      decimals: 0,
+      useThousandSeparator: true,
+      prefix: '',
+      suffix: ''
+    },
+
+    // Animaciones
+    enableAnimations: true,
+    animationDuration: 1000,
+    animationType: 'ease',
+
+    // Referencias
+    referenceLines: [],
+    trendLines: [],
+
+    // Dimensiones
+    height: 300,
+    margin: {
+      top: 20,
+      right: 30,
+      bottom: 50,
+      left: 40
+    }
   })
 
   // Memoize field calculations to prevent infinite loops
