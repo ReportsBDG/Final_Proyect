@@ -17,10 +17,10 @@ export async function GET(request: NextRequest) {
   let url = baseUrl
   const params = new URLSearchParams()
   
-  // Si no hay parámetros específicos, intentar obtener todos los datos
+  // Si no hay parámetros específicos, usar límite reducido para evitar timeouts
   if (!action && !limit && !sheet && !range) {
     params.append('action', 'getAllRecords')
-    params.append('limit', '15000') // Aumentado para asegurar 6000+ registros
+    params.append('limit', '5000') // Reducido para evitar timeouts del Google Apps Script
     params.append('sheet', 'DB') // Nombre correcto de la hoja
     params.append('range', 'A:AG') // Rango correcto hasta columna AG
   } else {
