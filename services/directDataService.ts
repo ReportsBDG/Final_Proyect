@@ -8,6 +8,16 @@ export class DirectDataService {
    * Obtener datos directamente de la API proxy con reintentos y fallback
    */
   async fetchPatientRecords(): Promise<PatientRecord[]> {
+    // Si ya hay una petición activa, cancelarla antes de hacer una nueva
+    if (this.activeRequest && this.activeController) {
+      console.log('🔄 [DirectDataService] Cancelando petición anterior en curso...')
+      try {
+        this.activeController.abort(new Error('New request initiated, cancelling previous one'))
+      } catch (error) {
+        // Ignorar errores al cancelar
+      }
+    }
+
     console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
 
     // Primero, hacer una verificación ligera de conectividad
