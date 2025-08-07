@@ -431,7 +431,7 @@ export default function SimpleCharts({ data }: ChartProps) {
         {charts.filter(chart => chart.visible).map((chart) => (
           <div key={chart.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
             {/* Chart Header with + Button */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {chart.title}
