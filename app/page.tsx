@@ -42,7 +42,6 @@ const SimpleCharts = dynamic(() => import('@/components/SimpleCharts'), {
   )
 })
 import ConnectionStatus from '@/components/ConnectionStatus'
-import DataLoadingStatus from '@/components/DataLoadingStatus'
 import ImprovedFilterStyles from '@/components/ImprovedFilterStyles'
 import { directDataService } from '@/services/directDataService'
 import { PatientRecord } from '@/types'
