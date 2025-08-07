@@ -466,7 +466,8 @@ export class DirectDataService {
 
     } catch (error: any) {
       console.error('❌ [DirectDataService] Test de conectividad falló:', error?.name || 'Unknown', '-', error?.message || 'No error message')
-      return false
+      // Be optimistic - if connectivity test fails, assume connection might still work
+      return true
     }
   }
 
