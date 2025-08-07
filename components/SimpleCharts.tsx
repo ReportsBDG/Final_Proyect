@@ -71,7 +71,7 @@ interface ChartConfig {
   colors: string[]
 }
 
-export default function SimpleCharts({ data }: ChartProps) {
+function ChartsSection({ data }: ChartProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [showConfigModal, setShowConfigModal] = useState(false)
   const [currentChart, setCurrentChart] = useState<ChartConfig | null>(null)
