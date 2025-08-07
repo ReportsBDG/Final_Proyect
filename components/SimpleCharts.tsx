@@ -488,7 +488,7 @@ export default function SimpleCharts({ data }: ChartProps) {
         const pieData = chartData.slice(0, 8) // Limit pie chart to 8 slices for readability
         return (
           <ResponsiveContainer width="100%" height={300}>
-            <RechartsPieChart>
+            <PieChart>
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
@@ -515,7 +515,7 @@ export default function SimpleCharts({ data }: ChartProps) {
                   />
                 ))}
               </Pie>
-            </RechartsPieChart>
+            </PieChart>
           </ResponsiveContainer>
         )
 
