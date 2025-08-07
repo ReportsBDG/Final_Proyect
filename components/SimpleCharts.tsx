@@ -16,35 +16,10 @@ import {
 } from 'lucide-react'
 import { PatientRecord } from '@/types'
 
-// Dynamic import of ChartConfigModal to avoid SSR issues
+// Dynamic import to avoid SSR issues
 const ChartConfigModal = dynamic(() => import('./ChartConfigModal'), {
   ssr: false
 })
-
-// Dynamic import of recharts components to avoid SSR issues
-const RechartsComponents = dynamic(
-  () => import('recharts').then((mod) => ({
-    BarChart: mod.BarChart,
-    Bar: mod.Bar,
-    XAxis: mod.XAxis,
-    YAxis: mod.YAxis,
-    CartesianGrid: mod.CartesianGrid,
-    Tooltip: mod.Tooltip,
-    Legend: mod.Legend,
-    ResponsiveContainer: mod.ResponsiveContainer,
-    LineChart: mod.LineChart,
-    Line: mod.Line,
-    PieChart: mod.PieChart,
-    Pie: mod.Pie,
-    Cell: mod.Cell,
-    Area: mod.Area,
-    AreaChart: mod.AreaChart
-  })),
-  {
-    ssr: false,
-    loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
-  }
-)
 
 interface ChartProps {
   data: PatientRecord[]
