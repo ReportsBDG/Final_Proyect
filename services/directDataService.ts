@@ -235,7 +235,7 @@ export class DirectDataService {
         emailaddress: item.emailaddress || item['Email Address'] || item.email || '',
         status: item.status || item.Status || '',
         timestampbyinteraction: item.timestampbyinteraction || item['Timestamp By Interaction'] || '',
-        eftCheckIssuedDate: item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || ''
+        eftCheckIssuedDate: this.getColumnValue(item, 'AA') || item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || ''
       }
 
       return record
