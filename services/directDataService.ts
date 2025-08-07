@@ -20,12 +20,14 @@ export class DirectDataService {
 
     console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
 
-    // Primero, hacer una verificación ligera de conectividad
+    // Hacer una verificación rápida de conectividad, pero no bloquear si falla
     console.log('🔍 [DirectDataService] Verificando conectividad del Google Apps Script...')
     const isConnected = await this.testConnection()
     if (!isConnected) {
-      console.warn('⚠️ [DirectDataService] Conectividad fallida, usando fallback directamente')
-      return this.getFallbackData()
+      console.warn('⚠️ [DirectDataService] Conectividad incierta, continuando con intento de carga de datos...')
+      // No usar fallback directamente, intentar cargar datos de todas formas
+    } else {
+      console.log('✅ [DirectDataService] Conectividad confirmada')
     }
 
     // Crear un nuevo controller para esta petición
