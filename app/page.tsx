@@ -102,7 +102,19 @@ export default function DentalDashboard() {
   const [selectedClaimStatuses, setSelectedClaimStatuses] = useState<string[]>([])
   const [selectedCarriers, setSelectedCarriers] = useState<string[]>([])
   const [selectedInteractionTypes, setSelectedInteractionTypes] = useState<string[]>([])
-  const [dateRange, setDateRange] = useState({ start: '', end: '' })
+  // Configurar Date Range por defecto al mes actual
+  const getCurrentMonthRange = () => {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    return {
+      start: startOfMonth.toISOString().split('T')[0],
+      end: currentDate.toISOString().split('T')[0]
+    }
+  }
+
+  const [dateRange, setDateRange] = useState(getCurrentMonthRange())
   const [isClient, setIsClient] = useState(false)
   const [data, setData] = useState<PatientRecord[]>([])
   const [loading, setLoading] = useState(true)
