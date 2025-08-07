@@ -48,22 +48,100 @@ interface ChartConfigModalProps {
 
 interface ChartConfiguration {
   title: string
-  type: 'bar' | 'line' | 'pie' | 'area'
+  subtitle?: string
+  type: 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'bubble' | 'radar' | 'waterfall' | 'funnel' | 'treemap'
+  subType?: 'stacked' | 'clustered' | 'normalized' | 'smooth' | 'step'
+  orientation?: 'vertical' | 'horizontal'
+
+  // Ejes y datos
   xAxis: string
   yAxis: string[]
-  aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min'
+  aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min' | 'median' | 'std' | 'variance'
+
+  // Leyenda avanzada
   showLegend: boolean
   legendPosition: 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight'
   legendAlign: 'left' | 'center' | 'right'
   legendVerticalAlign: 'top' | 'middle' | 'bottom'
   customLegendNames: Record<string, string>
+  legendStyle?: 'horizontal' | 'vertical'
+  legendSize?: 'small' | 'medium' | 'large'
+
+  // Grilla y ejes
   showGrid: boolean
+  gridStyle?: 'solid' | 'dashed' | 'dotted'
+  showXAxisLabel: boolean
+  showYAxisLabel: boolean
+  xAxisLabel?: string
+  yAxisLabel?: string
+  xAxisRotation?: number
+  yAxisRotation?: number
+
+  // Estilos y colores
   colors: string[]
+  colorScheme?: 'categorical' | 'sequential' | 'diverging' | 'custom'
+  gradientFill?: boolean
+  opacity?: number
+  borderWidth?: number
+  borderRadius?: number
+
+  // Datos y etiquetas
+  showDataLabels: boolean
+  dataLabelPosition?: 'top' | 'center' | 'bottom' | 'inside' | 'outside'
+  showTooltips: boolean
+  tooltipFormat?: 'currency' | 'percentage' | 'number' | 'date'
+  showValues: boolean
+
+  // Zoom y interactividad
+  enableZoom: boolean
+  enablePan: boolean
+  enableBrush: boolean
+  enableCrosshair: boolean
+
+  // Filtros avanzados
   filters?: {
     field: string
-    operator: string
-    value: string
+    operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'starts_with' | 'ends_with' | 'between' | 'in' | 'not_in'
+    value: string | number | string[]
+    condition?: 'and' | 'or'
   }[]
+
+  // Formateo
+  numberFormat?: {
+    decimals: number
+    useThousandSeparator: boolean
+    prefix?: string
+    suffix?: string
+  }
+
+  // Animaciones
+  enableAnimations: boolean
+  animationDuration?: number
+  animationType?: 'ease' | 'ease-in' | 'ease-out' | 'linear'
+
+  // Referencias y líneas de tendencia
+  referenceLines?: {
+    value: number
+    label?: string
+    color?: string
+    style?: 'solid' | 'dashed' | 'dotted'
+    axis: 'x' | 'y'
+  }[]
+  trendLines?: {
+    type: 'linear' | 'polynomial' | 'exponential' | 'logarithmic'
+    color?: string
+    style?: 'solid' | 'dashed' | 'dotted'
+  }[]
+
+  // Dimensiones
+  width?: string | number
+  height?: string | number
+  margin?: {
+    top: number
+    right: number
+    bottom: number
+    left: number
+  }
 }
 
 const FIELD_ICONS: Record<string, any> = {
