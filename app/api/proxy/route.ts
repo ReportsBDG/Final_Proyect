@@ -38,12 +38,12 @@ export async function GET(request: NextRequest) {
     console.log('🔗 Proxy request to:', url)
     console.log('📋 Parameters:', { action, limit, sheet, range })
     
-    // Timeout aumentado para datasets grandes
+    // Timeout ajustado para datasets más pequeños y manejables
     const controller = new AbortController()
     const timeoutId = setTimeout(() => {
-      console.log('⏰ Timeout de 3 minutos alcanzado para dataset grande')
+      console.log('⏰ Timeout de 90 segundos alcanzado - Google Script puede estar sobrecargado')
       controller.abort()
-    }, 180000) // 3 minutos para 6000+ registros
+    }, 90000) // 90 segundos - más que suficiente para 5000 registros
 
     const response = await fetch(url, {
       method: 'GET',
