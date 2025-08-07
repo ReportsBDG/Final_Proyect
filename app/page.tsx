@@ -241,8 +241,25 @@ export default function DentalDashboard() {
       }
 
       console.log('🔄 [Page] Iniciando carga de datos...')
-      const patientData = await directDataService.fetchPatientRecords()
+
+      // Add extra error handling for network issues
+      let patientData
+      try {
+        patientData = await directDataService.fetchPatientRecords()
+      } catch (fetchError: any) {
+        console.warn('⚠️ [Page] Error durante carga de datos, usando fallback:', fetchError.message)
+        // If the service fails completely, it should have already returned fallback data
+        // But if it doesn't, we'll create some minimal fallback
+        patientData = []
+      }
+
       console.log('✅ [Page] Datos cargados exitosamente:', patientData.length, 'registros')
+
+      // Ensure we always have an array
+      if (!Array.isArray(patientData)) {
+        console.warn('⚠️ [Page] Datos recibidos no son un array, usando array vacío')
+        patientData = []
+      }
 
       // Detailed change detection
       if (data.length > 0) {
