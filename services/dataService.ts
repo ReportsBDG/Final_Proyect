@@ -199,7 +199,6 @@ export class DataService {
 
       if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
         console.warn('No data received from Google Sheets, using mock data')
-        const { mockPatientData } = await import('@/utils/mockData')
         return mockPatientData
       }
 
