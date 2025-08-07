@@ -16,10 +16,8 @@ import {
 } from 'lucide-react'
 import { PatientRecord } from '@/types'
 
-// Dynamic imports to avoid SSR and chunk loading issues
-const ChartConfigModal = dynamic(() => import('./ChartConfigModal'), {
-  ssr: false
-})
+// Static import to avoid chunk loading issues
+import ChartConfigModal from './ChartConfigModal'
 
 
 // Import recharts components statically since we're wrapping the whole component
