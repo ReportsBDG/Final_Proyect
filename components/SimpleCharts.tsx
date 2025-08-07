@@ -423,8 +423,224 @@ export default function SimpleCharts({ data }: ChartProps) {
           </ResponsiveContainer>
         )
 
+      case 'scatter':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <ScatterChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+                tickFormatter={(value) => {
+                  if (chart.yAxis.includes('paidamount')) {
+                    return formatCurrency(value)
+                  }
+                  return formatNumber(value)
+                }}
+              />
+              <Tooltip
+                formatter={formatTooltipValue}
+                contentStyle={{
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: isDarkMode ? '#f9fafb' : '#111827'
+                }}
+              />
+              {chart.showLegend && <Legend />}
+              {chart.yAxis.map((field, index) => (
+                <Scatter
+                  key={field}
+                  dataKey={field}
+                  fill={chart.colors[index % chart.colors.length]}
+                />
+              ))}
+            </ScatterChart>
+          </ResponsiveContainer>
+        )
+
+      case 'bubble':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <ScatterChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+                tickFormatter={(value) => {
+                  if (chart.yAxis.includes('paidamount')) {
+                    return formatCurrency(value)
+                  }
+                  return formatNumber(value)
+                }}
+              />
+              <Tooltip
+                formatter={formatTooltipValue}
+                contentStyle={{
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: isDarkMode ? '#f9fafb' : '#111827'
+                }}
+              />
+              {chart.showLegend && <Legend />}
+              {chart.yAxis.map((field, index) => (
+                <Scatter
+                  key={field}
+                  dataKey={field}
+                  fill={chart.colors[index % chart.colors.length]}
+                />
+              ))}
+            </ScatterChart>
+          </ResponsiveContainer>
+        )
+
+      case 'radar':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <RadarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="name" tick={{ fontSize: 12 }} />
+              <PolarRadiusAxis tick={{ fontSize: 12 }} />
+              <Tooltip
+                formatter={formatTooltipValue}
+                contentStyle={{
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: isDarkMode ? '#f9fafb' : '#111827'
+                }}
+              />
+              {chart.showLegend && <Legend />}
+              {chart.yAxis.map((field, index) => (
+                <Radar
+                  key={field}
+                  dataKey={field}
+                  stroke={chart.colors[index % chart.colors.length]}
+                  fill={chart.colors[index % chart.colors.length]}
+                  fillOpacity={0.3}
+                />
+              ))}
+            </RadarChart>
+          </ResponsiveContainer>
+        )
+
+      case 'waterfall':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+                tickFormatter={(value) => {
+                  if (chart.yAxis.includes('paidamount')) {
+                    return formatCurrency(value)
+                  }
+                  return formatNumber(value)
+                }}
+              />
+              <Tooltip
+                formatter={formatTooltipValue}
+                contentStyle={{
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: isDarkMode ? '#f9fafb' : '#111827'
+                }}
+              />
+              {chart.showLegend && <Legend />}
+              {chart.yAxis.map((field, index) => (
+                <Bar
+                  key={field}
+                  dataKey={field}
+                  fill={chart.colors[index % chart.colors.length]}
+                  radius={[4, 4, 0, 0]}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        )
+
+      case 'funnel':
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart layout="horizontal" data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis
+                type="number"
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+                tickFormatter={(value) => {
+                  if (chart.yAxis.includes('paidamount')) {
+                    return formatCurrency(value)
+                  }
+                  return formatNumber(value)
+                }}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+              />
+              <Tooltip
+                formatter={formatTooltipValue}
+                contentStyle={{
+                  backgroundColor: isDarkMode ? '#374151' : '#fff',
+                  border: isDarkMode ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: isDarkMode ? '#f9fafb' : '#111827'
+                }}
+              />
+              {chart.showLegend && <Legend />}
+              {chart.yAxis.map((field, index) => (
+                <Bar
+                  key={field}
+                  dataKey={field}
+                  fill={chart.colors[index % chart.colors.length]}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        )
+
+      case 'treemap':
+        const treemapData = chartData.map(item => ({
+          name: item.name,
+          size: item[chart.yAxis[0]] || 0
+        }))
+        return (
+          <ResponsiveContainer width="100%" height={300}>
+            <Treemap
+              data={treemapData}
+              dataKey="size"
+              aspectRatio={4/3}
+              stroke="#fff"
+              fill={chart.colors[0]}
+            />
+          </ResponsiveContainer>
+        )
+
       default:
-        return null
+        return (
+          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="text-center text-gray-500 dark:text-gray-400">
+              <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p>Chart type not supported</p>
+            </div>
+          </div>
+        )
     }
   }
 
