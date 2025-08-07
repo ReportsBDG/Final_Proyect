@@ -53,21 +53,29 @@ export class DirectDataService {
   }
 
   /**
-   * Intento individual de fetch con configuraciones anti-interferencia
+   * Intento individual de fetch con degradación gradual de límites
    */
   private async attemptFetch(attempt: number): Promise<PatientRecord[]> {
-    // Crear AbortController con timeout progresivo
+    // Estrategia de degradación: reducir límite en cada intento
+    const limits = [5000, 3000, 1000] // Límites progresivamente menores
+    const limit = limits[attempt - 1] || 500
+
+    // Crear AbortController con timeout ajustado
     const controller = new AbortController()
-    const timeout = 30000 + (attempt * 15000) // 30s, 45s, 60s
+    const timeout = 45000 // Timeout fijo de 45 segundos
 
     const timeoutId = setTimeout(() => {
-      console.log(`⏰ [DirectDataService] Timeout de ${timeout}ms alcanzado en intento ${attempt}`)
+      console.log(`⏰ [DirectDataService] Timeout de ${timeout}ms alcanzado en intento ${attempt} (límite: ${limit})`)
       controller.abort()
     }, timeout)
 
     try {
+      // Construir URL con límite específico para este intento
+      const url = `/api/proxy?action=getAllRecords&limit=${limit}&sheet=DB&range=A:AG`
+      console.log(`🔄 [DirectDataService] Intento ${attempt} con límite ${limit} registros`)
+
       // Configuraciones anti-interferencia
-      const response = await fetch('/api/proxy', {
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
