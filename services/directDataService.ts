@@ -189,20 +189,41 @@ export class DirectDataService {
   private processRawData(rawData: any[]): PatientRecord[] {
     console.log('🔄 [DirectDataService] Procesando datos...', rawData.length, 'registros')
 
-    const processedRecords = rawData.map((item, index) => {
-      // Log detallado del primer registro
+    // Filtrar la primera fila si contiene headers
+    const dataToProcess = rawData.filter((item, index) => {
+      // Si la primera fila contiene headers (strings que coinciden con nombres de columnas), la eliminamos
+      if (index === 0) {
+        const firstRowValues = Object.values(item).map(v => String(v).toLowerCase())
+        const hasHeaders = firstRowValues.some(value =>
+          value.includes('patient') || value.includes('office') || value.includes('insurance') ||
+          value.includes('claim') || value.includes('status') || value.includes('timestamp') ||
+          value.includes('amount') || value.includes('email')
+        )
+        if (hasHeaders) {
+          console.log('🔍 [DirectDataService] Primera fila detectada como headers, eliminando...')
+          return false
+        }
+      }
+      return true
+    })
+
+    const processedRecords = dataToProcess.map((item, index) => {
+      // Log detallado del primer registro real (después de filtrar headers)
       if (index === 0) {
         console.log('📝 [DirectDataService] Estructura del primer registro:', Object.keys(item))
+        console.log('📝 [DirectDataService] Valores del primer registro:', item)
       }
 
       // Mapear campos con múltiples posibles nombres
+      // CORRECCIÓN: claimstatus debe mapear de la columna X específicamente
       const record: PatientRecord = {
         timestamp: item.timestamp || item.Timestamp || new Date().toISOString(),
         insurancecarrier: item.insurancecarrier || item['Insurance Carrier'] || item.carrier || '',
         offices: item.offices || item.Office || item['Office'] || '',
         patientname: item.patientname || item['Patient Name'] || item.patient || '',
         paidamount: this.parseNumber(item.paidamount || item['Paid Amount'] || item.amount || 0),
-        claimstatus: item.claimstatus || item['Claim Status'] || item.status || '',
+        // CORRECCIÓN: Mapear claimstatus específicamente de la columna X (índice 23, basado en 0)
+        claimstatus: this.getColumnValue(item, 'X') || item.claimstatus || item['Claim Status'] || '',
         typeofinteraction: item.typeofinteraction || item['Type of Interaction'] || item.type || '',
         patientdob: item.patientdob || item['Patient DOB'] || item.dob || '',
         dos: item.dos || item.DOS || item['DOS'] || '',
@@ -220,13 +241,52 @@ export class DirectDataService {
       return record
     })
 
-    // Filtrar registros válidos
-    const validRecords = processedRecords.filter(record => 
-      record.patientname && record.patientname.trim().length > 0
-    )
+    // Filtrar registros válidos (excluir headers restantes y registros inválidos)
+    const validRecords = processedRecords.filter(record => {
+      // Verificar que tiene nombre de paciente válido
+      const hasValidPatientName = record.patientname &&
+        record.patientname.trim().length > 0 &&
+        !record.patientname.toLowerCase().includes('patient') &&
+        !record.patientname.toLowerCase().includes('name')
+
+      return hasValidPatientName
+    })
 
     console.log(`✅ [DirectDataService] Procesamiento completado: ${validRecords.length}/${processedRecords.length} registros válidos`)
     return validRecords
+  }
+
+  /**
+   * Obtener valor de una columna específica (A, B, C, ..., X, Y, Z)
+   */
+  private getColumnValue(item: any, columnLetter: string): string {
+    // Convertir letra de columna a índice (A=0, B=1, ..., X=23, Y=24, Z=25)
+    const columnIndex = columnLetter.charCodeAt(0) - 65
+
+    // Intentar obtener el valor por índice de array si el item es un array
+    if (Array.isArray(item) && item[columnIndex] !== undefined) {
+      return String(item[columnIndex] || '')
+    }
+
+    // Intentar obtener por clave de objeto con la letra de columna
+    if (item[columnLetter] !== undefined) {
+      return String(item[columnLetter] || '')
+    }
+
+    // Intentar obtener por clave de objeto con nombre completo de columna
+    const columnNames = {
+      'X': ['claimstatus', 'claim_status', 'Claim Status', 'X']
+    }
+
+    if (columnNames[columnLetter as keyof typeof columnNames]) {
+      for (const possibleName of columnNames[columnLetter as keyof typeof columnNames]) {
+        if (item[possibleName] !== undefined) {
+          return String(item[possibleName] || '')
+        }
+      }
+    }
+
+    return ''
   }
 
   /**
