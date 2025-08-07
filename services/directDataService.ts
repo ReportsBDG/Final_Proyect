@@ -1,4 +1,5 @@
 import { PatientRecord } from '@/types'
+import { generateMockData } from '@/utils/mockData'
 
 // Servicio de datos directo que usa la API proxy sin capas adicionales
 export class DirectDataService {
