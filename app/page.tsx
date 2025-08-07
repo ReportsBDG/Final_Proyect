@@ -1254,7 +1254,7 @@ export default function DentalDashboard() {
               {/* Clear All Filters Button */}
               {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
                 selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
-                (dateRange.start !== getCurrentMonthRange().start || dateRange.end !== getCurrentMonthRange().end)) && (
+                (dateRange.start !== initialDateRange.start || dateRange.end !== initialDateRange.end)) && (
                 <button
                   onClick={clearAllFilters}
                   className="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md transition-colors border border-red-200 dark:border-red-800"
