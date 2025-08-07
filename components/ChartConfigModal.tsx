@@ -921,7 +921,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 aspectRatio={4/3}
                 stroke="#fff"
                 fill={config.colors[0]}
-                content={<CustomizedContent colors={config.colors} />}
+                content={(props: any) => <CustomizedContent {...props} colors={config.colors} />}
               />
             </ResponsiveContainer>
           </div>
