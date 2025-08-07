@@ -247,9 +247,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #ccc',
-                  borderRadius: '8px'
+                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
@@ -286,9 +287,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #ccc',
-                  borderRadius: '8px'
+                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
@@ -330,9 +332,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #ccc',
-                  borderRadius: '8px'
+                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
@@ -359,9 +362,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               <Tooltip 
                 formatter={formatTooltipValue}
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #ccc',
-                  borderRadius: '8px'
+                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                  border: document.documentElement.classList.contains('dark') ? '1px solid #6b7280' : '1px solid #ccc',
+                  borderRadius: '8px',
+                  color: document.documentElement.classList.contains('dark') ? '#f9fafb' : '#111827'
                 }}
               />
               {chart.showLegend && <Legend />}
