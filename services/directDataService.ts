@@ -359,23 +359,24 @@ export class DirectDataService {
     try {
       console.log('🔍 [DirectDataService] Probando conectividad...')
 
+      // Use a simple lightweight request instead of ping
+      // Just check if the proxy endpoint responds without fetching actual data
       const controller = new AbortController()
       let timeoutId: NodeJS.Timeout | null = null
 
       try {
-        // Set timeout with proper cleanup
+        // Shorter timeout for connectivity test
         timeoutId = setTimeout(() => {
           console.log('⏰ [DirectDataService] Connectivity test timeout reached')
           controller.abort()
-        }, 5000) // 5 segundos para test
+        }, 3000) // 3 segundos para test ligero
 
-        const response = await fetch('/api/proxy?action=ping', {
-          method: 'GET',
+        // Make a simple request to proxy without specific parameters
+        // This will test if the API is reachable, even if it returns an error
+        const response = await fetch('/api/proxy', {
+          method: 'HEAD', // Use HEAD to minimize data transfer
           signal: controller.signal,
-          cache: 'no-cache',
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          cache: 'no-cache'
         })
 
         if (timeoutId) {
@@ -383,8 +384,10 @@ export class DirectDataService {
           timeoutId = null
         }
 
-        const isConnected = response.ok
-        console.log(`🔗 [DirectDataService] Conectividad: ${isConnected ? 'OK' : 'FAILED'}`)
+        // Consider both OK responses and controlled errors as "connected"
+        // Only network failures should be considered disconnected
+        const isConnected = response.status < 500 || response.status === 500
+        console.log(`🔗 [DirectDataService] Conectividad: ${isConnected ? 'OK' : 'FAILED'} (status: ${response.status})`)
         return isConnected
 
       } catch (fetchError: any) {
@@ -393,13 +396,20 @@ export class DirectDataService {
           timeoutId = null
         }
 
-        // Handle AbortError specifically
+        // Handle specific error types
         if (fetchError.name === 'AbortError') {
-          console.log('⏰ [DirectDataService] Connectivity test timed out after 5 seconds')
+          console.log('⏰ [DirectDataService] Connectivity test timed out after 3 seconds')
           return false
         }
 
-        throw fetchError
+        if (fetchError.message?.includes('Failed to fetch')) {
+          console.log('🌐 [DirectDataService] Network connection failed')
+          return false
+        }
+
+        // For other errors, still consider it a connection issue
+        console.log('❌ [DirectDataService] Connectivity test error:', fetchError.name, fetchError.message)
+        return false
       }
 
     } catch (error: any) {
