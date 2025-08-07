@@ -44,6 +44,7 @@ export class DirectDataService {
    */
   private async performRequest(): Promise<PatientRecord[]> {
     let lastError: Error | null = null
+    let networkFailureCount = 0
 
     // Intentar múltiples veces en caso de interferencias
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -65,6 +66,19 @@ export class DirectDataService {
 
       } catch (error: any) {
         lastError = error
+
+        // Track network failures specifically
+        if (error.message?.includes('Failed to fetch') || error.message?.includes('Network connectivity issue')) {
+          networkFailureCount++
+          console.warn(`🌐 [DirectDataService] Network failure detected (${networkFailureCount}/${attempt})`)
+
+          // If we have 2+ consecutive network failures, use fallback immediately
+          if (networkFailureCount >= 2) {
+            console.warn(`🔄 [DirectDataService] Multiple consecutive network failures detected, switching to fallback data`)
+            return this.getFallbackData()
+          }
+        }
+
         console.warn(`⚠️ [DirectDataService] Intento ${attempt} falló:`, {
           message: error.message,
           name: error.name,
