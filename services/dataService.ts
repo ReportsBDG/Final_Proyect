@@ -204,7 +204,6 @@ export class DataService {
 
       if (!validatePatientData(rawData)) {
         console.warn('Invalid data received from Google Sheets, using mock data')
-        const { mockPatientData } = await import('@/utils/mockData')
         return mockPatientData
       }
 
