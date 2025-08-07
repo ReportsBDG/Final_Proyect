@@ -101,10 +101,15 @@ export class DirectDataService {
     const limits = [5000, 3000, 1000] // Límites progresivamente menores
     const limit = limits[attempt - 1] || 500
 
-    // Crear AbortController con timeout ajustado
-    const controller = new AbortController()
+    // Usar el controller compartido para poder cancelar desde el método principal
+    const controller = this.activeController!
     const timeout = 45000 // Timeout fijo de 45 segundos
     let timeoutId: NodeJS.Timeout | null = null
+
+    // Verificar si ya fue cancelado antes de empezar
+    if (controller.signal.aborted) {
+      throw new Error('Request was cancelled before starting')
+    }
 
     timeoutId = setTimeout(() => {
       console.log(`⏰ [DirectDataService] Timeout de ${timeout}ms alcanzado en intento ${attempt} (límite: ${limit})`)
