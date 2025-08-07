@@ -46,6 +46,7 @@ import ImprovedFilterStyles from '@/components/ImprovedFilterStyles'
 import { directDataService } from '@/services/directDataService'
 import { PatientRecord } from '@/types'
 import { exportService } from '@/services/exportService'
+import { generateMockData } from '@/utils/mockData'
 
 // Enhanced notification system
 interface Notification {
