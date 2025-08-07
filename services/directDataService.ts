@@ -118,9 +118,12 @@ export class DirectDataService {
         lastError = error
 
         // Track network failures specifically and switch to fallback immediately
-        if (error.message?.includes('Failed to fetch') || error.message?.includes('Network connectivity issue')) {
+        if (error.message?.includes('Failed to fetch') ||
+            error.message?.includes('Network connectivity issue') ||
+            error.message?.includes('Unable to reach server') ||
+            error.name === 'TypeError') {
           networkFailureCount++
-          console.warn(`🌐 [DirectDataService] Network failure detected, activating offline mode`)
+          console.warn(`🌐 [DirectDataService] Network/connectivity failure detected (${error.name}: ${error.message}), activating offline mode`)
 
           // Activate offline mode to prevent repeated failed requests
           this.isOfflineMode = true
