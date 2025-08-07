@@ -349,21 +349,53 @@ export class DirectDataService {
       console.log('🔍 [DirectDataService] Probando conectividad...')
 
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 segundos para test
+      let timeoutId: NodeJS.Timeout | null = null
 
-      const response = await fetch('/api/proxy', {
-        method: 'GET',
-        signal: controller.signal,
-        cache: 'no-cache'
+      try {
+        // Set timeout with proper cleanup
+        timeoutId = setTimeout(() => {
+          console.log('⏰ [DirectDataService] Connectivity test timeout reached')
+          controller.abort()
+        }, 5000) // 5 segundos para test
+
+        const response = await fetch('/api/proxy?action=ping', {
+          method: 'GET',
+          signal: controller.signal,
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+        }
+
+        const isConnected = response.ok
+        console.log(`🔗 [DirectDataService] Conectividad: ${isConnected ? 'OK' : 'FAILED'}`)
+        return isConnected
+
+      } catch (fetchError: any) {
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+        }
+
+        // Handle AbortError specifically
+        if (fetchError.name === 'AbortError') {
+          console.log('⏰ [DirectDataService] Connectivity test timed out after 5 seconds')
+          return false
+        }
+
+        throw fetchError
+      }
+
+    } catch (error: any) {
+      console.error('❌ [DirectDataService] Test de conectividad falló:', {
+        name: error.name,
+        message: error.message
       })
-
-      clearTimeout(timeoutId)
-      const isConnected = response.ok
-      console.log(`🔗 [DirectDataService] Conectividad: ${isConnected ? 'OK' : 'FAILED'}`)
-      return isConnected
-      
-    } catch (error) {
-      console.error('❌ [DirectDataService] Test de conectividad falló:', error)
       return false
     }
   }
