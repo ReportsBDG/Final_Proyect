@@ -252,7 +252,6 @@ export default function DentalDashboard() {
 
         // Generate immediate fallback data if the service fails completely
         try {
-          const { generateMockData } = await import('@/utils/mockData')
           patientData = generateMockData(50).map(record => ({
             ...record,
             commentsreasons: record.commentsreasons + ' [DATOS DE DEMOSTRACIÓN - PROBLEMA DE CONECTIVIDAD]'
