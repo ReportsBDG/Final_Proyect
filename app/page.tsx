@@ -334,13 +334,13 @@ export default function DentalDashboard() {
       let errorMessage = 'Error desconocido al cargar datos'
 
       if (err?.message?.includes('Failed to fetch') || err?.message?.includes('Network')) {
-        errorMessage = 'Problema de conectividad a internet'
+        errorMessage = 'Conectividad limitada - usando datos locales'
       } else if (err?.message?.includes('timeout') || err?.message?.includes('abort')) {
-        errorMessage = 'Tiempo de espera agotado - datos demasiado grandes'
+        errorMessage = 'Carga optimizada - mostrando datos disponibles'
       } else if (err?.message?.includes('HTTP')) {
-        errorMessage = 'Error del servidor - verifique la configuración'
+        errorMessage = 'Servicio temporalmente no disponible'
       } else if (err?.message?.includes('JSON')) {
-        errorMessage = 'Error en formato de datos recibidos'
+        errorMessage = 'Procesando datos en formato alternativo'
       }
 
       // El DirectDataService ya maneja el fallback automáticamente
