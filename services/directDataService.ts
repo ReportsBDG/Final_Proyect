@@ -126,6 +126,11 @@ export class DirectDataService {
       console.log(`🔄 [DirectDataService] Intento ${attempt} con límite ${limit} registros`)
 
       // Configuraciones anti-interferencia
+      // Verificar nuevamente antes de hacer la petición
+      if (controller.signal.aborted) {
+        throw new Error('Request was cancelled before fetch')
+      }
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
