@@ -102,10 +102,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data)
   } catch (error: any) {
     // Clear timeout on error to prevent race conditions
-    try {
-      clearTimeout(timeoutId)
-    } catch (e) {
-      // Ignore timeout clearing errors
+    if (timeoutId) {
+      try {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      } catch (e) {
+        // Ignore timeout clearing errors
+      }
     }
 
     console.error('❌ Error en proxy:', {
