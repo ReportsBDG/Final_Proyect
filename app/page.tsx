@@ -103,7 +103,7 @@ const savePersistedState = (key: string, value: any) => {
   }
 }
 
-export default function DentalDashboard() {
+function DentalDashboard() {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedOffices, setSelectedOffices] = useState<string[]>([])
