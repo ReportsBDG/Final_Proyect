@@ -103,16 +103,14 @@ export class DirectDataService {
       } catch (error: any) {
         lastError = error
 
-        // Track network failures specifically
+        // Track network failures specifically and switch to fallback immediately
         if (error.message?.includes('Failed to fetch') || error.message?.includes('Network connectivity issue')) {
           networkFailureCount++
-          console.warn(`🌐 [DirectDataService] Network failure detected (${networkFailureCount}/${attempt})`)
+          console.warn(`🌐 [DirectDataService] Network failure detected (${networkFailureCount}/${attempt}) - switching to offline mode`)
 
-          // If we have 2+ consecutive network failures, use fallback immediately
-          if (networkFailureCount >= 2) {
-            console.warn(`🔄 [DirectDataService] Multiple consecutive network failures detected, switching to fallback data`)
-            return this.getFallbackData()
-          }
+          // Use fallback immediately on first network failure to avoid delays
+          console.warn(`🔄 [DirectDataService] Network connectivity issue detected, switching to demonstration data`)
+          return this.getFallbackData()
         }
 
         console.warn(`⚠️ [DirectDataService] Intento ${attempt} falló:`, {
