@@ -165,7 +165,21 @@ const FIELD_ICONS: Record<string, any> = {
 }
 
 // Componente customizado para Treemap
-const CustomizedContent = (props: any) => {
+interface TreemapContentProps {
+  root?: any
+  depth?: number
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  index?: number
+  payload?: any
+  colors?: string[]
+  rank?: number
+  name?: string
+}
+
+const CustomizedContent = (props: TreemapContentProps) => {
   const { root, depth = 0, x = 0, y = 0, width = 0, height = 0, index = 0, payload, colors, rank, name } = props;
 
   // Provide fallback colors if not provided
@@ -921,7 +935,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
                 aspectRatio={4/3}
                 stroke="#fff"
                 fill={config.colors[0]}
-                content={(props: any) => <CustomizedContent {...props} colors={config.colors} />}
+
               />
             </ResponsiveContainer>
           </div>

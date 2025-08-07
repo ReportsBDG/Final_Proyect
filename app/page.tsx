@@ -244,7 +244,7 @@ function DentalDashboard() {
       console.log('🔄 [Page] Iniciando carga de datos...')
 
       // Add extra error handling for network issues with immediate fallback
-      let patientData
+      let patientData: PatientRecord[]
       try {
         patientData = await directDataService.fetchPatientRecords()
       } catch (fetchError: any) {
