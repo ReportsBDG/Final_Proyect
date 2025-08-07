@@ -435,7 +435,8 @@ export class DirectDataService {
 
         // Handle specific error types
         if (fetchError.name === 'AbortError') {
-          console.log('⏰ [DirectDataService] Connectivity test timed out after 3 seconds')
+          const reason = fetchError.message || controller.signal.reason || 'Timeout after 3 seconds'
+          console.log(`⏰ [DirectDataService] Connectivity test aborted: ${reason}`)
           return false
         }
 
