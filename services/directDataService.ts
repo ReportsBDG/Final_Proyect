@@ -172,10 +172,18 @@ export class DirectDataService {
       // Importar dinámicamente los datos mock con manejo de errores
       try {
         const mockModule = await import('@/utils/mockData')
-        const mockData = mockModule.generateMockData(50) // 50 registros mock
+        const mockData = mockModule.generateMockData(150) // Más registros mock para mejor experiencia
 
         console.log(`📝 [DirectDataService] Datos mock cargados: ${mockData.length} registros`)
-        return mockData
+        console.log('🔔 [DirectDataService] NOTA: Usando datos de demostración debido a problemas con Google Sheets')
+
+        // Agregar indicador visual de que son datos mock
+        const mockDataWithIndicator = mockData.map((record, index) => ({
+          ...record,
+          commentsreasons: record.commentsreasons + ' [DATOS DE DEMOSTRACIÓN]'
+        }))
+
+        return mockDataWithIndicator
       } catch (importError) {
         console.warn('⚠️ [DirectDataService] Error importando módulo mock:', importError)
         // Fallback to inline mock data if import fails
