@@ -240,9 +240,9 @@ export default function SimpleCharts({ data }: ChartProps) {
     return new Intl.NumberFormat('en-US').format(value)
   }
 
-  const renderChart = (chart: ChartConfig) => {
+  const ChartRenderer = ({ chart }: { chart: ChartConfig }) => {
     const chartData = processChartData(chart)
-    
+
     if (chartData.length === 0) {
       return (
         <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -253,6 +253,94 @@ export default function SimpleCharts({ data }: ChartProps) {
         </div>
       )
     }
+
+    return (
+      <RechartsComponents>
+        {(components: any) => {
+          if (!components) return <div className="h-64 flex items-center justify-center">Loading...</div>
+
+          const {
+            BarChart,
+            Bar,
+            XAxis,
+            YAxis,
+            CartesianGrid,
+            Tooltip,
+            Legend,
+            ResponsiveContainer,
+            LineChart,
+            Line,
+            PieChart,
+            Pie,
+            Cell,
+            Area,
+            AreaChart,
+            ScatterChart,
+            Scatter,
+            RadarChart,
+            PolarGrid,
+            PolarAngleAxis,
+            PolarRadiusAxis,
+            Radar,
+            Treemap
+          } = components
+
+          return renderChartContent(chart, chartData, {
+            BarChart,
+            Bar,
+            XAxis,
+            YAxis,
+            CartesianGrid,
+            Tooltip,
+            Legend,
+            ResponsiveContainer,
+            LineChart,
+            Line,
+            PieChart,
+            Pie,
+            Cell,
+            Area,
+            AreaChart,
+            ScatterChart,
+            Scatter,
+            RadarChart,
+            PolarGrid,
+            PolarAngleAxis,
+            PolarRadiusAxis,
+            Radar,
+            Treemap
+          })
+        }}
+      </RechartsComponents>
+    )
+  }
+
+  const renderChartContent = (chart: ChartConfig, chartData: any[], components: any) => {
+    const {
+      BarChart,
+      Bar,
+      XAxis,
+      YAxis,
+      CartesianGrid,
+      Tooltip,
+      Legend,
+      ResponsiveContainer,
+      LineChart,
+      Line,
+      PieChart,
+      Pie,
+      Cell,
+      Area,
+      AreaChart,
+      ScatterChart,
+      Scatter,
+      RadarChart,
+      PolarGrid,
+      PolarAngleAxis,
+      PolarRadiusAxis,
+      Radar,
+      Treemap
+    } = components
 
     const formatTooltipValue = (value: any, name: string) => {
       if (name === 'paidamount') {
