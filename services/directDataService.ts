@@ -48,6 +48,8 @@ export class DirectDataService {
     // Si todos los intentos fallaron, usar datos mock como fallback
     console.warn('❌ [DirectDataService] Todos los intentos fallaron, usando datos mock como fallback')
     console.warn('🔍 [DirectDataService] Último error:', lastError?.message || 'Unknown error')
+    console.log('📋 [DirectDataService] Intentos realizados: límites [5000, 3000, 1000] registros')
+    console.log('💡 [DirectDataService] Sugerencia: Verifique el estado del Google Apps Script o reduzca el volumen de datos')
 
     return this.getFallbackData()
   }
