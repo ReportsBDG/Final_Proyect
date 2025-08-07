@@ -283,14 +283,13 @@ export class DirectDataService {
     try {
       console.log('🔄 [DirectDataService] Cargando datos mock como fallback...')
 
-      // Importar dinámicamente los datos mock con manejo de errores
+      // Generar datos mock con manejo de errores
       try {
-        const mockModule = await import('@/utils/mockData')
-        const mockData = mockModule.generateMockData(150) // Más registros mock para mejor experiencia
+        const mockData = generateMockData(150) // Más registros mock para mejor experiencia
 
         console.log(`📝 [DirectDataService] Datos mock cargados: ${mockData.length} registros`)
         console.log('🔔 [DirectDataService] NOTA: Usando datos de demostración debido a problemas de conectividad de red')
-        console.log('💡 [DirectDataService] Los datos reales se cargarán automáticamente cuando la conexión se restablezca')
+        console.log('��� [DirectDataService] Los datos reales se cargarán automáticamente cuando la conexión se restablezca')
 
         // Agregar indicador visual de que son datos mock
         const mockDataWithIndicator = mockData.map((record, index) => ({
