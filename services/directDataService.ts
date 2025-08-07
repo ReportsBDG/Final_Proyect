@@ -24,9 +24,20 @@ export class DirectDataService {
 
     console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
 
-    // Skip connectivity test to avoid timeout delays - proceed directly to data loading
-    console.log('🔍 [DirectDataService] Skipping connectivity test, proceeding directly to data loading...')
-    // Note: Previous connectivity tests were causing timeouts, so we're being optimistic
+    // Check if we're in offline mode to avoid repeated failed requests
+    const now = Date.now()
+    if (this.isOfflineMode && (now - this.lastOfflineCheck) < this.offlineCheckInterval) {
+      console.log('🔄 [DirectDataService] In offline mode, using cached fallback data...')
+      return this.getFallbackData()
+    }
+
+    // Reset offline mode if enough time has passed
+    if (this.isOfflineMode && (now - this.lastOfflineCheck) >= this.offlineCheckInterval) {
+      console.log('🔄 [DirectDataService] Attempting to reconnect after offline period...')
+      this.isOfflineMode = false
+    }
+
+    console.log('🔍 [DirectDataService] Proceeding with data loading...')
 
     // Crear un nuevo controller para esta petición
     this.activeController = new AbortController()
@@ -449,7 +460,7 @@ export class DirectDataService {
    * Simplified to avoid timeout issues - always returns true (optimistic)
    */
   async testConnection(): Promise<boolean> {
-    console.log('🔍 [DirectDataService] Connectivity check skipped - assuming connection is available')
+    console.log('���� [DirectDataService] Connectivity check skipped - assuming connection is available')
     // Always return true to avoid delays and timeout issues
     // The actual data fetching will handle any real connectivity problems
     return true
