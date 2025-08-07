@@ -115,6 +115,7 @@ export default function DentalDashboard() {
   }
 
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
+  const [initialDateRange, setInitialDateRange] = useState({ start: '', end: '' })
   const [isClient, setIsClient] = useState(false)
   const [data, setData] = useState<PatientRecord[]>([])
   const [loading, setLoading] = useState(true)
