@@ -403,20 +403,26 @@ export default function AdvancedChartConfigModal({ isOpen, onClose, onSave, curr
   }
 
   const removeYAxisField = (field: string) => {
-    setConfig(prev => ({
-      ...prev,
-      yAxis: prev.yAxis.filter(f => f !== field),
-      customLegendNames: { ...prev.customLegendNames, [field]: undefined }
-    }))
+    setConfig(prev => {
+      const { [field]: removed, ...remainingCustomNames } = prev.customLegendNames
+      return {
+        ...prev,
+        yAxis: prev.yAxis.filter(f => f !== field),
+        customLegendNames: remainingCustomNames
+      }
+    })
   }
 
   const updateCustomLegendName = (field: string, customName: string) => {
     setConfig(prev => ({
       ...prev,
-      customLegendNames: {
+      customLegendNames: customName ? {
         ...prev.customLegendNames,
-        [field]: customName || undefined
-      }
+        [field]: customName
+      } : (() => {
+        const { [field]: removed, ...remaining } = prev.customLegendNames
+        return remaining
+      })()
     }))
   }
 
