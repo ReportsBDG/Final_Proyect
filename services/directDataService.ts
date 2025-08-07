@@ -12,87 +12,123 @@ export class DirectDataService {
    * Obtener datos directamente de la API proxy con reintentos y fallback
    */
   async fetchPatientRecords(): Promise<PatientRecord[]> {
-    // Si ya hay una petición activa, cancelarla antes de hacer una nueva
-    if (this.activeRequest && this.activeController) {
-      console.log('🔄 [DirectDataService] Cancelando petición anterior en curso...')
-      try {
-        this.activeController.abort(new Error('New request initiated, cancelling previous one'))
-      } catch (error) {
-        // Ignorar errores al cancelar
-      }
-    }
-
-    console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
-
-    // Check if we're in offline mode to avoid repeated failed requests
-    const now = Date.now()
-    if (this.isOfflineMode && (now - this.lastOfflineCheck) < this.offlineCheckInterval) {
-      console.log('🔄 [DirectDataService] In offline mode, using cached fallback data...')
-      return this.getFallbackData()
-    }
-
-    // Reset offline mode if enough time has passed
-    if (this.isOfflineMode && (now - this.lastOfflineCheck) >= this.offlineCheckInterval) {
-      console.log('🔄 [DirectDataService] Attempting to reconnect after offline period...')
-      this.isOfflineMode = false
-    }
-
-    console.log('🔍 [DirectDataService] Proceeding with data loading...')
-
-    // Crear un nuevo controller para esta petición
-    this.activeController = new AbortController()
-
-    // Crear la promesa de la petición activa
-    this.activeRequest = this.performRequest()
-
     try {
-      return await this.activeRequest
-    } catch (error: any) {
-      // If there's a complete failure in the request process, ensure we have fallback
-      if (error.message?.includes('Failed to fetch') ||
-          error.message?.includes('Network connectivity issue') ||
-          error.message?.includes('Unable to reach server') ||
-          error.name === 'TypeError') {
-        console.log('🌐 [DirectDataService] Network connectivity issue detected, switching to demonstration data')
-
-        // Ensure offline mode is activated
-        this.isOfflineMode = true
-        this.lastOfflineCheck = Date.now()
-      } else {
-        console.warn('⚠️ [DirectDataService] Request process failed, using fallback data:', error.message)
+      // Si ya hay una petición activa, cancelarla antes de hacer una nueva
+      if (this.activeRequest && this.activeController) {
+        console.log('🔄 [DirectDataService] Cancelando petición anterior en curso...')
+        try {
+          this.activeController.abort(new Error('New request initiated, cancelling previous one'))
+        } catch (error) {
+          // Ignorar errores al cancelar
+        }
       }
 
-      // Always provide fallback data to prevent app failure
+      console.log('🚀 [DirectDataService] Cargando datos desde API proxy...')
+
+      // Check if we're in offline mode to avoid repeated failed requests
+      const now = Date.now()
+      if (this.isOfflineMode && (now - this.lastOfflineCheck) < this.offlineCheckInterval) {
+        console.log('🔄 [DirectDataService] In offline mode, using cached fallback data...')
+        return this.getFallbackData()
+      }
+
+      // Reset offline mode if enough time has passed
+      if (this.isOfflineMode && (now - this.lastOfflineCheck) >= this.offlineCheckInterval) {
+        console.log('🔄 [DirectDataService] Attempting to reconnect after offline period...')
+        this.isOfflineMode = false
+      }
+
+      console.log('🔍 [DirectDataService] Proceeding with data loading...')
+
+      // Crear un nuevo controller para esta petición
+      this.activeController = new AbortController()
+
+      // Crear la promesa de la petición activa
+      this.activeRequest = this.performRequest()
+
+      try {
+        return await this.activeRequest
+      } catch (error: any) {
+        // If there's a complete failure in the request process, ensure we have fallback
+        if (error.message?.includes('Failed to fetch') ||
+            error.message?.includes('Network connectivity issue') ||
+            error.message?.includes('Unable to reach server') ||
+            error.name === 'TypeError') {
+          console.log('🌐 [DirectDataService] Network connectivity issue detected, switching to demonstration data')
+
+          // Ensure offline mode is activated
+          this.isOfflineMode = true
+          this.lastOfflineCheck = Date.now()
+        } else {
+          console.warn('⚠️ [DirectDataService] Request process failed, using fallback data:', error.message)
+        }
+
+        // Always provide fallback data to prevent app failure
+        try {
+          return await this.getFallbackData()
+        } catch (fallbackError) {
+          console.error('❌ [DirectDataService] Even fallback failed, returning minimal data:', fallbackError)
+          // Return minimal valid data structure as last resort
+          return [{
+            timestamp: new Date().toISOString(),
+            insurancecarrier: 'Sistema no disponible',
+            offices: 'Demostración',
+            patientname: 'Datos de ejemplo',
+            paidamount: 0,
+            claimstatus: 'Demo',
+            typeofinteraction: 'Sistema offline',
+            patientdob: '1990-01-01',
+            dos: '2024-01-01',
+            productivityamount: 0,
+            missingdocsorinformation: '',
+            howweproceeded: 'Datos de ejemplo mientras se restablece la conectividad',
+            escalatedto: '',
+            commentsreasons: 'Sistema en modo offline - datos de demostración',
+            emailaddress: 'demo@example.com',
+            status: 'Offline',
+            timestampbyinteraction: new Date().toISOString(),
+            eftCheckIssuedDate: '2024-01-01'
+          }]
+        }
+      } finally {
+        // Limpiar referencias cuando termine la petición
+        this.activeRequest = null
+        this.activeController = null
+      }
+    } catch (outerError: any) {
+      // Catch any uncaught errors from the entire method to prevent app crashes
+      console.error('❌ [DirectDataService] Unexpected error in fetchPatientRecords:', outerError)
+
+      // Activate offline mode as a safety measure
+      this.isOfflineMode = true
+      this.lastOfflineCheck = Date.now()
+
+      // Return fallback data as a safety net
       try {
         return await this.getFallbackData()
       } catch (fallbackError) {
-        console.error('❌ [DirectDataService] Even fallback failed, returning minimal data:', fallbackError)
-        // Return minimal valid data structure as last resort
+        console.error('❌ [DirectDataService] Complete service failure, returning emergency data')
         return [{
           timestamp: new Date().toISOString(),
-          insurancecarrier: 'Sistema no disponible',
-          offices: 'Demostración',
-          patientname: 'Datos de ejemplo',
+          insurancecarrier: 'Emergency Mode',
+          offices: 'Offline Demo',
+          patientname: 'Service Unavailable',
           paidamount: 0,
-          claimstatus: 'Demo',
-          typeofinteraction: 'Sistema offline',
+          claimstatus: 'Offline',
+          typeofinteraction: 'Emergency',
           patientdob: '1990-01-01',
           dos: '2024-01-01',
           productivityamount: 0,
           missingdocsorinformation: '',
-          howweproceeded: 'Datos de ejemplo mientras se restablece la conectividad',
+          howweproceeded: 'Service temporarily unavailable',
           escalatedto: '',
-          commentsreasons: 'Sistema en modo offline - datos de demostración',
-          emailaddress: 'demo@example.com',
-          status: 'Offline',
+          commentsreasons: 'Emergency offline mode - service will retry automatically',
+          emailaddress: 'emergency@example.com',
+          status: 'Emergency',
           timestampbyinteraction: new Date().toISOString(),
           eftCheckIssuedDate: '2024-01-01'
         }]
       }
-    } finally {
-      // Limpiar referencias cuando termine la petición
-      this.activeRequest = null
-      this.activeController = null
     }
   }
 
