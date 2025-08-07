@@ -324,11 +324,16 @@ export default function DentalDashboard() {
           `${patientData.length} total records`)
       }
     } catch (err: any) {
-      console.error('❌ [Page] Error loading data:', {
-        message: err?.message,
-        name: err?.name,
-        stack: err?.stack?.split('\n').slice(0, 3).join('\n')
-      })
+      // Reduce console noise for common network errors
+      if (err?.message?.includes('Failed to fetch')) {
+        console.warn('🌐 [Page] Network connectivity issue - fallback data will be used')
+      } else {
+        console.error('❌ [Page] Error loading data:', {
+          message: err?.message,
+          name: err?.name,
+          stack: err?.stack?.split('\n').slice(0, 3).join('\n')
+        })
+      }
 
       // Analizar el tipo de error para dar mejor contexto al usuario
       let errorMessage = 'Error desconocido al cargar datos'
