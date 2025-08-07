@@ -17,8 +17,12 @@ export async function GET(request: NextRequest) {
   let url = baseUrl
   const params = new URLSearchParams()
   
-  // Si no hay parámetros específicos, usar límite reducido para evitar timeouts
-  if (!action && !limit && !sheet && !range) {
+  // Handle ping action for connectivity testing
+  if (action === 'ping') {
+    // For ping, just make a minimal request to check if the script is responding
+    params.append('action', 'ping')
+  } else if (!action && !limit && !sheet && !range) {
+    // Si no hay parámetros específicos, usar límite reducido para evitar timeouts
     params.append('action', 'getAllRecords')
     params.append('limit', '5000') // Reducido para evitar timeouts del Google Apps Script
     params.append('sheet', 'DB') // Nombre correcto de la hoja
