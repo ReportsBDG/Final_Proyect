@@ -21,40 +21,38 @@ const ChartConfigModal = dynamic(() => import('./ChartConfigModal'), {
   ssr: false
 })
 
-// Dynamic import for all recharts components
-const RechartsComponents = dynamic(
-  () => import('recharts').then((mod) => ({
-    default: {
-      BarChart: mod.BarChart,
-      Bar: mod.Bar,
-      XAxis: mod.XAxis,
-      YAxis: mod.YAxis,
-      CartesianGrid: mod.CartesianGrid,
-      Tooltip: mod.Tooltip,
-      Legend: mod.Legend,
-      ResponsiveContainer: mod.ResponsiveContainer,
-      LineChart: mod.LineChart,
-      Line: mod.Line,
-      PieChart: mod.PieChart,
-      Pie: mod.Pie,
-      Cell: mod.Cell,
-      Area: mod.Area,
-      AreaChart: mod.AreaChart,
-      ScatterChart: mod.ScatterChart,
-      Scatter: mod.Scatter,
-      RadarChart: mod.RadarChart,
-      PolarGrid: mod.PolarGrid,
-      PolarAngleAxis: mod.PolarAngleAxis,
-      PolarRadiusAxis: mod.PolarRadiusAxis,
-      Radar: mod.Radar,
-      Treemap: mod.Treemap
-    }
-  })),
-  {
-    ssr: false,
-    loading: () => <div className="h-64 flex items-center justify-center">Loading chart...</div>
-  }
-)
+// Dynamic import wrapper for the entire component to avoid SSR issues
+const DynamicChartsSection = dynamic(() => Promise.resolve(ChartsSection), {
+  ssr: false,
+  loading: () => <div className="h-64 flex items-center justify-center">Loading charts...</div>
+})
+
+// Import recharts components statically since we're wrapping the whole component
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  Area,
+  AreaChart,
+  ScatterChart,
+  Scatter,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Treemap
+} from 'recharts'
 
 interface ChartProps {
   data: PatientRecord[]
