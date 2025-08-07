@@ -47,7 +47,7 @@ interface ChartProps {
 interface ChartConfig {
   id: string
   title: string
-  type: 'bar' | 'line' | 'pie' | 'area'
+  type: 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'bubble' | 'radar' | 'waterfall' | 'funnel' | 'treemap'
   visible: boolean
   showLegend: boolean
   showGrid: boolean
