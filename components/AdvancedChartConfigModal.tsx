@@ -50,7 +50,10 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar
+  Radar,
+  Treemap,
+  ComposedChart,
+  ReferenceLine
 } from 'recharts'
 
 interface AdvancedChartConfigModalProps {
