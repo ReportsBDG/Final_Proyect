@@ -5,6 +5,9 @@ import { generateMockData } from '@/utils/mockData'
 export class DirectDataService {
   private activeRequest: Promise<PatientRecord[]> | null = null
   private activeController: AbortController | null = null
+  private isOfflineMode: boolean = false
+  private lastOfflineCheck: number = 0
+  private offlineCheckInterval: number = 60000 // 1 minute
   /**
    * Obtener datos directamente de la API proxy con reintentos y fallback
    */
