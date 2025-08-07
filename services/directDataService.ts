@@ -78,7 +78,7 @@ export class DirectDataService {
     timeoutId = setTimeout(() => {
       console.log(`⏰ [DirectDataService] Timeout de ${timeout}ms alcanzado en intento ${attempt} (límite: ${limit})`)
       try {
-        controller.abort()
+        controller.abort(new Error(`Request timeout after ${timeout}ms`))
       } catch (abortError) {
         console.warn('⚠️ [DirectDataService] Error al abortar request:', abortError)
       }
