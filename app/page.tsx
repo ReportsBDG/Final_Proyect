@@ -1454,12 +1454,6 @@ export default function DentalDashboard() {
 
         {/* Main Content */}
         <div className="space-y-6">
-          {/* Data Loading Status */}
-          <DataLoadingStatus
-            totalRecords={data.length}
-            isLoading={loading}
-            error={error || undefined}
-          />
 
           {/* Interactive Charts Section */}
           <div id="charts-section">
