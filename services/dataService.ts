@@ -245,7 +245,6 @@ export class DataService {
   }): Promise<PatientRecord[]> {
     if (!GOOGLE_APPS_SCRIPT_URL) {
       console.warn('Google Apps Script URL not configured, using mock data')
-      const { mockPatientData } = await import('@/utils/mockData')
       return mockPatientData
     }
 
