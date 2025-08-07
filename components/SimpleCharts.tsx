@@ -10,7 +10,7 @@ import {
   Trash2,
   BarChart3,
   LineChart as LineIcon,
-  PieChart,
+  PieChart as PieChartIcon,
   Grid3x3,
   X
 } from 'lucide-react'
