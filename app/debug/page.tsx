@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ConnectivityTest from '@/components/ConnectivityTest'
 
 export default function DebugPage() {
   const [result, setResult] = useState<string>('')
