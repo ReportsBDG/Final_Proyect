@@ -1087,7 +1087,7 @@ export default function DentalDashboard() {
         </div>
       )}
 
-      <div className="px-4 sm:px-6 space-y-6">
+      <div className="py-4 px-6 space-y-6">
         {/* Filters Container Card */}
         <div
           className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-4 transition-all duration-300 ease-in-out ${
