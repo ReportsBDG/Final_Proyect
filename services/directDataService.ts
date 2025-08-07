@@ -103,7 +103,10 @@ export class DirectDataService {
         credentials: 'same-origin'
       })
 
-      clearTimeout(timeoutId)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'No error details available')
@@ -234,7 +237,7 @@ export class DirectDataService {
    * Procesar datos en bruto de Google Sheets
    */
   private processRawData(rawData: any[]): PatientRecord[] {
-    console.log('🔄 [DirectDataService] Procesando datos...', rawData.length, 'registros')
+    console.log('�� [DirectDataService] Procesando datos...', rawData.length, 'registros')
 
     // Filtrar la primera fila si contiene headers
     const dataToProcess = rawData.filter((item, index) => {
