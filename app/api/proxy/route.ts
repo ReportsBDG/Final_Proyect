@@ -95,16 +95,42 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json(data)
-  } catch (error) {
-    console.error('❌ Error en proxy:', error)
+  } catch (error: any) {
+    // Clear timeout on error to prevent race conditions
+    try {
+      clearTimeout(timeoutId)
+    } catch (e) {
+      // Ignore timeout clearing errors
+    }
+
+    console.error('❌ Error en proxy:', {
+      name: error.name,
+      message: error.message,
+      action: action,
+      url: url
+    })
+
+    // Handle specific error types
+    let errorDetails = error.message || 'Unknown error'
+    let statusCode = 500
+
+    if (error.name === 'AbortError') {
+      errorDetails = action === 'ping' ? 'Connectivity test timeout' : 'Request timeout - Google Apps Script may be overloaded'
+      statusCode = 408 // Request Timeout
+    } else if (error.message?.includes('Failed to fetch')) {
+      errorDetails = 'Network connectivity issue'
+      statusCode = 503 // Service Unavailable
+    }
+
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch data from Google Sheets', 
-        details: error instanceof Error ? error.message : 'Unknown error',
+      {
+        error: 'Failed to fetch data from Google Sheets',
+        details: errorDetails,
         timestamp: new Date().toISOString(),
-        url: url
-      }, 
-      { status: 500 }
+        url: url,
+        action: action
+      },
+      { status: statusCode }
     )
   }
 }
