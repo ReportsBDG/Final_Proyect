@@ -21,8 +21,13 @@ const ChartConfigModal = dynamic(() => import('./ChartConfigModal'), {
   ssr: false
 })
 
+// Create a wrapper component that will be dynamically imported
+const ChartsWrapper = ({ data }: ChartProps) => {
+  return <ChartsSection data={data} />
+}
+
 // Dynamic import wrapper for the entire component to avoid SSR issues
-const DynamicChartsSection = dynamic(() => Promise.resolve(ChartsSection), {
+const DynamicChartsSection = dynamic(() => Promise.resolve({ default: ChartsWrapper }), {
   ssr: false,
   loading: () => <div className="h-64 flex items-center justify-center">Loading charts...</div>
 })
