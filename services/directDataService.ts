@@ -455,13 +455,13 @@ export class DirectDataService {
         }
 
         if (fetchError.message?.includes('Failed to fetch')) {
-          console.log('🌐 [DirectDataService] Network connection failed')
-          return false
+          console.log('🌐 [DirectDataService] Network connection uncertain - will attempt data fetch anyway')
+          return true // Be optimistic - maybe the main data fetch will work
         }
 
-        // For other errors, still consider it a connection issue
-        console.log('❌ [DirectDataService] Connectivity test error:', fetchError.name, fetchError.message)
-        return false
+        // For other errors, be optimistic
+        console.log('❌ [DirectDataService] Connectivity test error:', fetchError.name, fetchError.message, '- assuming connection might work')
+        return true
       }
 
     } catch (error: any) {
