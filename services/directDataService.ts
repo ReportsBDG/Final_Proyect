@@ -203,8 +203,9 @@ export class DirectDataService {
 
       // Analizar el tipo de error para mejor debugging
       if (error.name === 'AbortError') {
-        console.error(`⏰ [DirectDataService] Request aborted (timeout) en intento ${attempt}`)
-        throw new Error(`Request timeout after ${timeout}ms`)
+        const reason = controller.signal.reason || 'No reason provided'
+        console.error(`⏰ [DirectDataService] Request aborted en intento ${attempt}:`, reason)
+        throw new Error(`Request aborted: ${reason}`)
       }
 
       if (error.message?.includes('Failed to fetch')) {
