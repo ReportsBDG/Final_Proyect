@@ -403,10 +403,7 @@ export class DirectDataService {
       }
 
     } catch (error: any) {
-      console.error('❌ [DirectDataService] Test de conectividad falló:', {
-        name: error.name,
-        message: error.message
-      })
+      console.error('❌ [DirectDataService] Test de conectividad falló:', error?.name || 'Unknown', '-', error?.message || 'No error message')
       return false
     }
   }
