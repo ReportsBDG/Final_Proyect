@@ -344,7 +344,9 @@ export default function DentalDashboard() {
   useEffect(() => {
     setIsClient(true)
     // Initialize date range after component mounts to avoid hydration issues
-    setDateRange(getCurrentMonthRange())
+    const monthRange = getCurrentMonthRange()
+    setDateRange(monthRange)
+    setInitialDateRange(monthRange)
   }, [])
 
   // Enhanced metrics calculation with proper timestamp filtering
