@@ -62,7 +62,7 @@ interface ChartConfig {
   showGrid: boolean
   xAxis: string
   yAxis: string[]
-  aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min'
+  aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min' | 'median' | 'std' | 'variance'
   colors: string[]
 }
 
