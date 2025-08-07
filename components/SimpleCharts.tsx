@@ -16,37 +16,45 @@ import {
 } from 'lucide-react'
 import { PatientRecord } from '@/types'
 
-// Dynamic import to avoid SSR issues
+// Dynamic imports to avoid SSR and chunk loading issues
 const ChartConfigModal = dynamic(() => import('./ChartConfigModal'), {
   ssr: false
 })
 
-// Import recharts components
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  Area,
-  AreaChart,
-  ScatterChart,
-  Scatter,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  Treemap
-} from 'recharts'
+// Dynamic import for all recharts components
+const RechartsComponents = dynamic(
+  () => import('recharts').then((mod) => ({
+    default: {
+      BarChart: mod.BarChart,
+      Bar: mod.Bar,
+      XAxis: mod.XAxis,
+      YAxis: mod.YAxis,
+      CartesianGrid: mod.CartesianGrid,
+      Tooltip: mod.Tooltip,
+      Legend: mod.Legend,
+      ResponsiveContainer: mod.ResponsiveContainer,
+      LineChart: mod.LineChart,
+      Line: mod.Line,
+      PieChart: mod.PieChart,
+      Pie: mod.Pie,
+      Cell: mod.Cell,
+      Area: mod.Area,
+      AreaChart: mod.AreaChart,
+      ScatterChart: mod.ScatterChart,
+      Scatter: mod.Scatter,
+      RadarChart: mod.RadarChart,
+      PolarGrid: mod.PolarGrid,
+      PolarAngleAxis: mod.PolarAngleAxis,
+      PolarRadiusAxis: mod.PolarRadiusAxis,
+      Radar: mod.Radar,
+      Treemap: mod.Treemap
+    }
+  })),
+  {
+    ssr: false,
+    loading: () => <div className="h-64 flex items-center justify-center">Loading chart...</div>
+  }
+)
 
 interface ChartProps {
   data: PatientRecord[]
