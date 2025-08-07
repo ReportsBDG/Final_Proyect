@@ -166,42 +166,61 @@ const FIELD_ICONS: Record<string, any> = {
 
 // Componente customizado para Treemap
 const CustomizedContent = (props: any) => {
-  const { root, depth, x, y, width, height, index, payload, colors, rank, name } = props;
+  const { root, depth = 0, x = 0, y = 0, width = 0, height = 0, index = 0, payload, colors, rank, name } = props;
+
+  // Provide fallback colors if not provided
+  const defaultColors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#ff0000'];
+  const colorArray = colors || defaultColors;
+
+  // Ensure we have safe values for calculations
+  const safeDepth = typeof depth === 'number' ? depth : 0;
+  const safeIndex = typeof index === 'number' ? index : 0;
+  const safeX = typeof x === 'number' ? x : 0;
+  const safeY = typeof y === 'number' ? y : 0;
+  const safeWidth = typeof width === 'number' ? width : 0;
+  const safeHeight = typeof height === 'number' ? height : 0;
+
+  // Safe color calculation
+  let fillColor = '#ffffff00';
+  if (safeDepth < 2 && root && root.children && Array.isArray(root.children) && root.children.length > 0) {
+    const colorIndex = Math.floor(safeIndex / root.children.length * colorArray.length);
+    fillColor = colorArray[Math.min(colorIndex, colorArray.length - 1)] || colorArray[0];
+  }
 
   return (
     <g>
       <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
+        x={safeX}
+        y={safeY}
+        width={safeWidth}
+        height={safeHeight}
         style={{
-          fill: depth < 2 ? colors[Math.floor(index / root.children.length * 6)] : '#ffffff00',
+          fill: fillColor,
           stroke: '#fff',
-          strokeWidth: 2 / (depth + 1e-10),
-          strokeOpacity: 1 / (depth + 1e-10),
+          strokeWidth: 2 / (safeDepth + 1e-10),
+          strokeOpacity: 1 / (safeDepth + 1e-10),
         }}
       />
-      {depth === 1 ? (
+      {safeDepth === 1 && name && safeWidth > 30 && safeHeight > 20 ? (
         <text
-          x={x + width / 2}
-          y={y + height / 2 + 7}
+          x={safeX + safeWidth / 2}
+          y={safeY + safeHeight / 2 + 7}
           textAnchor="middle"
           fill="#fff"
-          fontSize={14}
+          fontSize={Math.min(14, safeWidth / 6)}
         >
-          {name}
+          {String(name).substring(0, Math.floor(safeWidth / 8))}
         </text>
       ) : null}
-      {depth === 1 ? (
+      {safeDepth === 1 && safeWidth > 30 && safeHeight > 30 ? (
         <text
-          x={x + 4}
-          y={y + 18}
+          x={safeX + 4}
+          y={safeY + 18}
           fill="#fff"
-          fontSize={16}
+          fontSize={Math.min(16, safeWidth / 5)}
           fillOpacity={0.9}
         >
-          {index + 1}
+          {safeIndex + 1}
         </text>
       ) : null}
     </g>
