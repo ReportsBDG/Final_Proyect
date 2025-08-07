@@ -38,16 +38,18 @@ export async function GET(request: NextRequest) {
     url += '?' + params.toString()
   }
   
+  let timeoutId: NodeJS.Timeout | null = null
+
   try {
     console.log('🔗 Proxy request to:', url)
     console.log('📋 Parameters:', { action, limit, sheet, range })
-    
+
     // Timeout ajustado dependiendo del tipo de request
     const controller = new AbortController()
     const isPingRequest = action === 'ping'
     const timeoutDuration = isPingRequest ? 8000 : 90000 // 8 segundos para ping, 90 para datos
 
-    const timeoutId = setTimeout(() => {
+    timeoutId = setTimeout(() => {
       if (isPingRequest) {
         console.log('⏰ Ping timeout de 8 segundos alcanzado')
       } else {
