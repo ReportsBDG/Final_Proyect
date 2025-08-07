@@ -923,5 +923,5 @@ function ChartsSection({ data }: ChartProps) {
   )
 }
 
-// Export the component wrapped in dynamic import to prevent SSR and chunk loading issues
-export default DynamicChartsSection
+// Export the component directly
+export default ChartsSection
