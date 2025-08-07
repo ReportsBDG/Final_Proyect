@@ -49,8 +49,15 @@ export class DirectDataService {
       return await this.activeRequest
     } catch (error: any) {
       // If there's a complete failure in the request process, ensure we have fallback
-      if (error.message?.includes('Failed to fetch')) {
+      if (error.message?.includes('Failed to fetch') ||
+          error.message?.includes('Network connectivity issue') ||
+          error.message?.includes('Unable to reach server') ||
+          error.name === 'TypeError') {
         console.log('🌐 [DirectDataService] Network connectivity issue detected, switching to demonstration data')
+
+        // Ensure offline mode is activated
+        this.isOfflineMode = true
+        this.lastOfflineCheck = Date.now()
       } else {
         console.warn('⚠️ [DirectDataService] Request process failed, using fallback data:', error.message)
       }
