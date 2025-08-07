@@ -114,7 +114,17 @@ export class DirectDataService {
 
       // Verificar si la API reporta error
       if (apiData.error) {
-        throw new Error(`API Error: ${apiData.error} - ${apiData.details || ''}`)
+        const errorMsg = `API Error: ${apiData.error} - ${apiData.details || ''}`
+
+        // Manejo específico para error "terminated" de Google Apps Script
+        if (apiData.details === 'terminated') {
+          console.warn(`⚠️ [DirectDataService] Google Apps Script terminado (timeout/recursos) en intento ${attempt}`)
+          if (attempt < 3) {
+            console.log(`🔄 [DirectDataService] Reintentando con límite menor...`)
+          }
+        }
+
+        throw new Error(errorMsg)
       }
 
       const rawData = apiData.data || []
