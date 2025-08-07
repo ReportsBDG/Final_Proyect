@@ -139,14 +139,9 @@ export async function fetchFromGoogleScript(): Promise<any[]> {
     } catch (error) {
       console.error(`❌ Intento ${attempt}/${retries} falló:`, error)
 
-      // Si es AbortError por timeout con dataset grande, usar chunk loading
+      // Si es AbortError por timeout, usar datos de respaldo directamente
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('🔄 Timeout detectado, intentando carga por chunks...')
-        try {
-          return await loadDataInChunks()
-        } catch (chunkError) {
-          console.error('❌ Error en carga por chunks:', chunkError)
-        }
+        console.log('🔄 Timeout detectado, usando datos de respaldo...')
       }
 
       if (attempt === retries) {
