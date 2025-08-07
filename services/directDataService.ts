@@ -435,9 +435,9 @@ export class DirectDataService {
           timeoutId = null
         }
 
-        // Consider both OK responses and controlled errors as "connected"
-        // Only network failures should be considered disconnected
-        const isConnected = response.status < 500 || response.status === 500
+        // Consider most responses as "connected" - even errors mean the server is reachable
+        // Only treat complete network failures as disconnected
+        const isConnected = response.status < 600 // Accept even 5xx errors as "connected"
         console.log(`🔗 [DirectDataService] Conectividad: ${isConnected ? 'OK' : 'FAILED'} (status: ${response.status})`)
         return isConnected
 
