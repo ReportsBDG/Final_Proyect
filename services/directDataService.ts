@@ -148,14 +148,20 @@ export class DirectDataService {
   private async getFallbackData(): Promise<PatientRecord[]> {
     try {
       console.log('🔄 [DirectDataService] Cargando datos mock como fallback...')
-      
-      // Importar dinámicamente los datos mock
-      const { generateMockData } = await import('@/utils/mockData')
-      const mockData = generateMockData(50) // 50 registros mock
-      
-      console.log(`📝 [DirectDataService] Datos mock cargados: ${mockData.length} registros`)
-      return mockData
-      
+
+      // Importar dinámicamente los datos mock con manejo de errores
+      try {
+        const mockModule = await import('@/utils/mockData')
+        const mockData = mockModule.generateMockData(50) // 50 registros mock
+
+        console.log(`📝 [DirectDataService] Datos mock cargados: ${mockData.length} registros`)
+        return mockData
+      } catch (importError) {
+        console.warn('⚠️ [DirectDataService] Error importando módulo mock:', importError)
+        // Fallback to inline mock data if import fails
+        throw importError
+      }
+
     } catch (error) {
       console.error('❌ [DirectDataService] Error cargando datos mock:', error)
       
