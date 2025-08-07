@@ -21,6 +21,25 @@ const ChartConfigModal = dynamic(() => import('./ChartConfigModal'), {
   ssr: false
 })
 
+// Import recharts components
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  Area,
+  AreaChart
+} from 'recharts'
+
 interface ChartProps {
   data: PatientRecord[]
 }
