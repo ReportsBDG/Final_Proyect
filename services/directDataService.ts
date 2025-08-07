@@ -195,18 +195,31 @@ export class DirectDataService {
         throw new Error('Request was cancelled before fetch')
       }
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        },
-        signal: controller.signal,
-        cache: 'no-cache',
-        credentials: 'same-origin'
-      })
+      let response: Response
+      try {
+        response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          },
+          signal: controller.signal,
+          cache: 'no-cache',
+          credentials: 'same-origin'
+        })
+      } catch (fetchError: any) {
+        // Immediate handling of fetch failures to prevent "Failed to fetch" from propagating
+        console.log(`🌐 [DirectDataService] Network fetch failed in attempt ${attempt}:`, fetchError.message)
+
+        // Activate offline mode immediately to prevent repeated attempts
+        this.isOfflineMode = true
+        this.lastOfflineCheck = Date.now()
+
+        // Throw a more specific error for better handling
+        throw new Error(`Network connectivity issue: Unable to reach server`)
+      }
 
       if (timeoutId) {
         clearTimeout(timeoutId)
