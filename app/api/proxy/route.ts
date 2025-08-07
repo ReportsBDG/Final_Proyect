@@ -67,8 +67,11 @@ export async function GET(request: NextRequest) {
       signal: controller.signal
     })
 
-    clearTimeout(timeoutId)
-    
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+
     console.log('📡 Response status:', response.status)
     console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
     
