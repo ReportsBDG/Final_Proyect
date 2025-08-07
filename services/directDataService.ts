@@ -300,9 +300,16 @@ export class DirectDataService {
         throw new Error(`Request aborted: ${reason}`)
       }
 
-      if (error.message?.includes('Failed to fetch')) {
+      if (error.message?.includes('Failed to fetch') ||
+          error.message?.includes('Unable to reach server') ||
+          error.name === 'TypeError') {
         // Reduce console noise - network issues are common and handled gracefully
         console.log(`🌐 [DirectDataService] Conectividad limitada en intento ${attempt}, cambiando a modo offline`)
+
+        // Activate offline mode immediately
+        this.isOfflineMode = true
+        this.lastOfflineCheck = Date.now()
+
         throw new Error(`Network connectivity issue: ${error.message}`)
       }
 
