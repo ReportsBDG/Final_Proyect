@@ -443,6 +443,314 @@ export default function AdvancedChartConfigModal({ isOpen, onClose, onSave, curr
     }))
   }
 
+  // Process data for charts
+  const processChartData = () => {
+    if (!data || data.length === 0 || !config.xAxis || config.yAxis.length === 0) return []
+
+    const grouped: Record<string, any> = {}
+
+    data.forEach(record => {
+      const key = record[config.xAxis] || 'Unknown'
+      const keyStr = String(key)
+
+      if (!grouped[keyStr]) {
+        grouped[keyStr] = {
+          name: keyStr,
+          count: 0,
+          records: []
+        }
+        config.yAxis.forEach(field => {
+          grouped[keyStr][field] = 0
+        })
+      }
+
+      grouped[keyStr].count += 1
+      grouped[keyStr].records.push(record)
+
+      config.yAxis.forEach(field => {
+        const value = record[field] || 0
+        if (config.aggregation === 'sum') {
+          grouped[keyStr][field] += Number(value) || 0
+        } else if (config.aggregation === 'count') {
+          grouped[keyStr][field] = grouped[keyStr].count
+        } else if (config.aggregation === 'avg') {
+          grouped[keyStr][field] = (grouped[keyStr][field] * (grouped[keyStr].count - 1) + (Number(value) || 0)) / grouped[keyStr].count
+        } else if (config.aggregation === 'max') {
+          grouped[keyStr][field] = Math.max(grouped[keyStr][field], Number(value) || 0)
+        } else if (config.aggregation === 'min') {
+          grouped[keyStr][field] = grouped[keyStr].count === 1 ? (Number(value) || 0) : Math.min(grouped[keyStr][field], Number(value) || 0)
+        }
+      })
+    })
+
+    return Object.values(grouped).slice(0, 10) // Limit for preview
+  }
+
+  const formatTooltipValue = (value: any, name: string) => {
+    if (name === 'paidamount' || name.toLowerCase().includes('amount')) {
+      return [new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value)), name]
+    }
+    return [new Intl.NumberFormat('en-US').format(Number(value)), name]
+  }
+
+  // Render chart based on type
+  const renderChart = () => {
+    const chartData = processChartData()
+
+    if (chartData.length === 0) {
+      return (
+        <div className="h-64 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+          <div className="text-center">
+            <Settings className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+            <p className="text-sm text-gray-500 dark:text-gray-400">Configure chart to see preview</p>
+          </div>
+        </div>
+      )
+    }
+
+    const commonProps = {
+      width: '100%',
+      height: config.height || 300,
+      data: chartData,
+      margin: config.margin
+    }
+
+    switch (config.type) {
+      case 'bar':
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <BarChart data={chartData}>
+              {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              {config.yAxis.map((field, index) => (
+                <Bar
+                  key={field}
+                  dataKey={field}
+                  fill={config.colors[index % config.colors.length]}
+                  radius={config.borderRadius || 0}
+                  opacity={config.opacity || 1}
+                  name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                />
+              ))}
+              {config.referenceLines?.map((line, index) => (
+                <ReferenceLine
+                  key={index}
+                  y={line.value}
+                  stroke={line.color}
+                  strokeDasharray={line.style === 'dashed' ? '5 5' : undefined}
+                  label={line.label}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        )
+
+      case 'line':
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <LineChart data={chartData}>
+              {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              {config.yAxis.map((field, index) => (
+                <Line
+                  key={field}
+                  type={config.subType === 'smooth' ? 'monotone' : config.subType === 'step' ? 'step' : 'linear'}
+                  dataKey={field}
+                  stroke={config.colors[index % config.colors.length]}
+                  strokeWidth={config.borderWidth || 2}
+                  opacity={config.opacity || 1}
+                  name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                  dot={{ r: 4 }}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        )
+
+      case 'area':
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <AreaChart data={chartData}>
+              {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              {config.yAxis.map((field, index) => (
+                <Area
+                  key={field}
+                  type="monotone"
+                  dataKey={field}
+                  stackId={config.subType === 'stacked' ? '1' : undefined}
+                  stroke={config.colors[index % config.colors.length]}
+                  fill={config.colors[index % config.colors.length]}
+                  fillOpacity={config.opacity || 0.6}
+                  name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        )
+
+      case 'pie':
+        const pieData = chartData.map(item => ({
+          name: item.name,
+          value: item[config.yAxis[0]] || 0
+        }))
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <RechartsPieChart>
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={config.showDataLabels}
+              >
+                {pieData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={config.colors[index % config.colors.length]}
+                    opacity={config.opacity || 1}
+                  />
+                ))}
+              </Pie>
+            </RechartsPieChart>
+          </ResponsiveContainer>
+        )
+
+      case 'scatter':
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <ScatterChart data={chartData}>
+              {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              {config.yAxis.map((field, index) => (
+                <Scatter
+                  key={field}
+                  dataKey={field}
+                  fill={config.colors[index % config.colors.length]}
+                  opacity={config.opacity || 1}
+                  name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                />
+              ))}
+            </ScatterChart>
+          </ResponsiveContainer>
+        )
+
+      case 'radar':
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <RadarChart data={chartData}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="name" />
+              <PolarRadiusAxis />
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              {config.yAxis.map((field, index) => (
+                <Radar
+                  key={field}
+                  dataKey={field}
+                  stroke={config.colors[index % config.colors.length]}
+                  fill={config.colors[index % config.colors.length]}
+                  fillOpacity={config.opacity || 0.3}
+                  name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                />
+              ))}
+            </RadarChart>
+          </ResponsiveContainer>
+        )
+
+      case 'treemap':
+        const treemapData = chartData.map(item => ({
+          name: item.name,
+          size: item[config.yAxis[0]] || 0,
+          value: item[config.yAxis[0]] || 0
+        }))
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <Treemap
+              data={treemapData}
+              dataKey="size"
+              aspectRatio={4/3}
+              stroke="#fff"
+              fill={config.colors[0]}
+            />
+          </ResponsiveContainer>
+        )
+
+      case 'waterfall':
+      case 'funnel':
+        // Para estos tipos de chart, usaremos un bar chart con styling especial
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <BarChart data={chartData}>
+              {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              {config.yAxis.map((field, index) => (
+                <Bar
+                  key={field}
+                  dataKey={field}
+                  fill={config.colors[index % config.colors.length]}
+                  opacity={config.opacity || 1}
+                  name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        )
+
+      case 'bubble':
+        // Para bubble chart, usamos scatter con tamaño variable
+        return (
+          <ResponsiveContainer {...commonProps}>
+            <ScatterChart data={chartData}>
+              {config.showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={formatTooltipValue} />
+              {config.showLegend && <Legend />}
+              {config.yAxis.map((field, index) => (
+                <Scatter
+                  key={field}
+                  dataKey={field}
+                  fill={config.colors[index % config.colors.length]}
+                  opacity={config.opacity || 0.7}
+                  name={config.customLegendNames[field] || getFieldDisplayName(field)}
+                />
+              ))}
+            </ScatterChart>
+          </ResponsiveContainer>
+        )
+
+      default:
+        return (
+          <div className="h-64 bg-white dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+            <div className="text-center">
+              <Settings className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">Chart type not implemented</p>
+            </div>
+          </div>
+        )
+    }
+  }
+
   if (!isOpen) return null
 
   return (
