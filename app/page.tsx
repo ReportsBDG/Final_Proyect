@@ -163,7 +163,7 @@ export default function DentalDashboard() {
   )
   
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(25)
+  const [itemsPerPage, setItemsPerPage] = useState(25)
   const [sortBy, setSortBy] = useState<keyof PatientRecord | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
