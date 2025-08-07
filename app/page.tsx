@@ -1489,7 +1489,15 @@ export default function DentalDashboard() {
 
           {/* Interactive Charts Section */}
           <div id="charts-section">
-            <SimpleCharts data={filteredData} />
+            {isClient ? (
+              <SimpleCharts data={filteredData} />
+            ) : (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="h-64 bg-gray-100 dark:bg-gray-700 animate-pulse rounded-lg flex items-center justify-center">
+                  <div className="text-gray-500 dark:text-gray-400">Loading charts...</div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Enhanced Patient Records Table */}
