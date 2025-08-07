@@ -2,6 +2,8 @@ import { PatientRecord } from '@/types'
 
 // Servicio de datos directo que usa la API proxy sin capas adicionales
 export class DirectDataService {
+  private activeRequest: Promise<PatientRecord[]> | null = null
+  private activeController: AbortController | null = null
   /**
    * Obtener datos directamente de la API proxy con reintentos y fallback
    */
