@@ -242,15 +242,25 @@ export default function DentalDashboard() {
 
       console.log('🔄 [Page] Iniciando carga de datos...')
 
-      // Add extra error handling for network issues
+      // Add extra error handling for network issues with immediate fallback
       let patientData
       try {
         patientData = await directDataService.fetchPatientRecords()
       } catch (fetchError: any) {
-        console.warn('⚠️ [Page] Error durante carga de datos, usando fallback:', fetchError.message)
-        // If the service fails completely, it should have already returned fallback data
-        // But if it doesn't, we'll create some minimal fallback
-        patientData = []
+        console.warn('⚠️ [Page] Error durante carga de datos, generando datos de demostración inmediatamente:', fetchError.message)
+
+        // Generate immediate fallback data if the service fails completely
+        try {
+          const { generateMockData } = await import('@/utils/mockData')
+          patientData = generateMockData(50).map(record => ({
+            ...record,
+            commentsreasons: record.commentsreasons + ' [DATOS DE DEMOSTRACIÓN - PROBLEMA DE CONECTIVIDAD]'
+          }))
+          console.log('✅ [Page] Datos de demostración generados exitosamente:', patientData.length, 'registros')
+        } catch (mockError) {
+          console.error('❌ [Page] Error generando datos de demostración:', mockError)
+          patientData = []
+        }
       }
 
       console.log('✅ [Page] Datos cargados exitosamente:', patientData.length, 'registros')
