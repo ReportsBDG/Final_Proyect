@@ -260,12 +260,8 @@ export class DirectDataService {
       }
 
       if (error.message?.includes('Failed to fetch')) {
-        console.error(`🌐 [DirectDataService] Network error en intento ${attempt}:`, error.message)
-        // For network failures, if this is the last attempt or we've tried multiple times,
-        // consider using fallback immediately
-        if (attempt >= 2) {
-          console.warn(`🔄 [DirectDataService] Multiple network failures detected, will use fallback after all attempts`)
-        }
+        // Reduce console noise - network issues are common and handled gracefully
+        console.log(`🌐 [DirectDataService] Conectividad limitada en intento ${attempt}, cambiando a modo offline`)
         throw new Error(`Network connectivity issue: ${error.message}`)
       }
 
