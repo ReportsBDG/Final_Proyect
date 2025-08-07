@@ -54,6 +54,25 @@ export default function SimpleCharts({ data }: ChartProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [showConfigModal, setShowConfigModal] = useState(false)
   const [currentChart, setCurrentChart] = useState<ChartConfig | null>(null)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  // Safe dark mode detection after component mounts
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'))
+    }
+
+    checkDarkMode()
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    })
+
+    return () => observer.disconnect()
+  }, [])
   const [charts, setCharts] = useState<ChartConfig[]>([
     {
       id: '1',
