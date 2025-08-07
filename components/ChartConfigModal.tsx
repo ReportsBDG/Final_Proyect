@@ -447,7 +447,18 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
         legendVerticalAlign: currentChart.legendVerticalAlign || 'bottom',
         customLegendNames: currentChart.customLegendNames || {},
         showGrid: currentChart.showGrid !== undefined ? currentChart.showGrid : true,
-        colors: currentChart.colors || ['#0ea5e9']
+        colors: currentChart.colors || ['#0ea5e9'],
+        // Add missing required properties with default values
+        showXAxisLabel: currentChart.showXAxisLabel !== undefined ? currentChart.showXAxisLabel : false,
+        showYAxisLabel: currentChart.showYAxisLabel !== undefined ? currentChart.showYAxisLabel : false,
+        showDataLabels: currentChart.showDataLabels !== undefined ? currentChart.showDataLabels : false,
+        showTooltips: currentChart.showTooltips !== undefined ? currentChart.showTooltips : true,
+        showValues: currentChart.showValues !== undefined ? currentChart.showValues : false,
+        enableZoom: currentChart.enableZoom !== undefined ? currentChart.enableZoom : false,
+        enablePan: currentChart.enablePan !== undefined ? currentChart.enablePan : false,
+        enableBrush: currentChart.enableBrush !== undefined ? currentChart.enableBrush : false,
+        enableCrosshair: currentChart.enableCrosshair !== undefined ? currentChart.enableCrosshair : false,
+        enableAnimations: currentChart.enableAnimations !== undefined ? currentChart.enableAnimations : true
       })
     }
   }, [currentChart, categoricalFields, numericFields])
