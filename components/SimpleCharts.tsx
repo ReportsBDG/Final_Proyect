@@ -230,13 +230,13 @@ export default function SimpleCharts({ data }: ChartProps) {
               {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
                 angle={-45}
                 textAnchor="end"
                 height={80}
               />
               <YAxis 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
                 tickFormatter={(value) => {
                   if (chart.yAxis.includes('paidamount')) {
                     return formatCurrency(value)
@@ -273,10 +273,10 @@ export default function SimpleCharts({ data }: ChartProps) {
               {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
               />
               <YAxis 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
                 tickFormatter={(value) => {
                   if (chart.yAxis.includes('paidamount')) {
                     return formatCurrency(value)
@@ -315,13 +315,13 @@ export default function SimpleCharts({ data }: ChartProps) {
               {chart.showGrid && <CartesianGrid strokeDasharray="3 3" />}
               <XAxis 
                 dataKey="name" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
                 angle={-45}
                 textAnchor="end"
                 height={80}
               />
               <YAxis 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 12, fill: document.documentElement.classList.contains('dark') ? '#d1d5db' : '#374151' }}
                 tickFormatter={(value) => {
                   if (chart.yAxis.includes('paidamount')) {
                     return formatCurrency(value)
