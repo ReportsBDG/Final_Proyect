@@ -1112,13 +1112,27 @@ export default function DentalDashboard() {
               <Filter className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters & Search</h2>
             </div>
-            <button
-              onClick={toggleFilters}
-              className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title="Hide Filters"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center space-x-2">
+              {/* Clear All Filters Button */}
+              {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                (dateRange.start !== getCurrentMonthRange().start || dateRange.end !== getCurrentMonthRange().end)) && (
+                <button
+                  onClick={clearAllFilters}
+                  className="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-md transition-colors border border-red-200 dark:border-red-800"
+                  title="Clear All Filters"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                onClick={toggleFilters}
+                className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                title="Hide Filters"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Filters Content - Optimized Layout */}
