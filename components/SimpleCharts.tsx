@@ -37,7 +37,15 @@ import {
   Pie,
   Cell,
   Area,
-  AreaChart
+  AreaChart,
+  ScatterChart,
+  Scatter,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Treemap
 } from 'recharts'
 
 interface ChartProps {
