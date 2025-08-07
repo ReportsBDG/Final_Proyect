@@ -120,10 +120,14 @@ export class DirectDataService {
         // Track network failures specifically and switch to fallback immediately
         if (error.message?.includes('Failed to fetch') || error.message?.includes('Network connectivity issue')) {
           networkFailureCount++
-          console.warn(`🌐 [DirectDataService] Network failure detected (${networkFailureCount}/${attempt}) - switching to offline mode`)
+          console.warn(`🌐 [DirectDataService] Network failure detected, activating offline mode`)
+
+          // Activate offline mode to prevent repeated failed requests
+          this.isOfflineMode = true
+          this.lastOfflineCheck = Date.now()
 
           // Use fallback immediately on first network failure to avoid delays
-          console.warn(`🔄 [DirectDataService] Network connectivity issue detected, switching to demonstration data`)
+          console.log(`🔄 [DirectDataService] Switching to demonstration data mode`)
           return this.getFallbackData()
         }
 
@@ -460,7 +464,7 @@ export class DirectDataService {
    * Simplified to avoid timeout issues - always returns true (optimistic)
    */
   async testConnection(): Promise<boolean> {
-    console.log('���� [DirectDataService] Connectivity check skipped - assuming connection is available')
+    console.log('🔍 [DirectDataService] Connectivity check skipped - assuming connection is available')
     // Always return true to avoid delays and timeout issues
     // The actual data fetching will handle any real connectivity problems
     return true
