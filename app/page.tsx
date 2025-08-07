@@ -1341,7 +1341,7 @@ export default function DentalDashboard() {
                   placeholder="All Offices"
                 />
 
-                <MultiSelectFilter
+                <SearchableMultiSelectFilter
                   label="Carrier"
                   options={uniqueCarriers}
                   selectedValues={selectedCarriers}
