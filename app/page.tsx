@@ -1464,6 +1464,26 @@ export default function DentalDashboard() {
                   </p>
                 </div>
                 <div className="flex items-center justify-end space-x-2">
+                  {/* Records Per Page Selector */}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Show:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(parseInt(e.target.value))
+                        setCurrentPage(1) // Reset to first page when changing items per page
+                      }}
+                      className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={25}>25</option>
+                      <option value={30}>30</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+
                   {/* Column Filters Button */}
                   <div className="relative">
                     <button 
