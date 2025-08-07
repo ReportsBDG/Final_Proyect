@@ -1842,3 +1842,5 @@ function DentalDashboard() {
     </div>
   )
 }
+
+export default DentalDashboard
