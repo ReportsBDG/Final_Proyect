@@ -63,7 +63,7 @@ export class DirectDataService {
   }
 
   /**
-   * Intento individual de fetch con degradación gradual de límites
+   * Intento individual de fetch con degradaci��n gradual de límites
    */
   private async attemptFetch(attempt: number): Promise<PatientRecord[]> {
     // Estrategia de degradación: reducir límite en cada intento
@@ -160,7 +160,10 @@ export class DirectDataService {
       return this.processRawData(rawData)
 
     } catch (error: any) {
-      clearTimeout(timeoutId)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
 
       // Analizar el tipo de error para mejor debugging
       if (error.name === 'AbortError') {
@@ -237,7 +240,7 @@ export class DirectDataService {
    * Procesar datos en bruto de Google Sheets
    */
   private processRawData(rawData: any[]): PatientRecord[] {
-    console.log('�� [DirectDataService] Procesando datos...', rawData.length, 'registros')
+    console.log('🔄 [DirectDataService] Procesando datos...', rawData.length, 'registros')
 
     // Filtrar la primera fila si contiene headers
     const dataToProcess = rawData.filter((item, index) => {
