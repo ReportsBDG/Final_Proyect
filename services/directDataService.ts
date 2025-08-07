@@ -257,11 +257,20 @@ export class DirectDataService {
   }
 
   /**
-   * Obtener valor de una columna específica (A, B, C, ..., X, Y, Z)
+   * Obtener valor de una columna específica (A, B, C, ..., X, Y, Z, AA, AB, etc.)
    */
   private getColumnValue(item: any, columnLetter: string): string {
-    // Convertir letra de columna a índice (A=0, B=1, ..., X=23, Y=24, Z=25)
-    const columnIndex = columnLetter.charCodeAt(0) - 65
+    // Convertir letra de columna a índice
+    let columnIndex = 0
+    if (columnLetter.length === 1) {
+      // Columnas simples A-Z
+      columnIndex = columnLetter.charCodeAt(0) - 65
+    } else if (columnLetter.length === 2) {
+      // Columnas dobles AA-ZZ
+      const firstChar = columnLetter.charCodeAt(0) - 65
+      const secondChar = columnLetter.charCodeAt(1) - 65
+      columnIndex = 26 + (firstChar * 26) + secondChar
+    }
 
     // Intentar obtener el valor por índice de array si el item es un array
     if (Array.isArray(item) && item[columnIndex] !== undefined) {
@@ -275,7 +284,8 @@ export class DirectDataService {
 
     // Intentar obtener por clave de objeto con nombre completo de columna
     const columnNames = {
-      'X': ['claimstatus', 'claim_status', 'Claim Status', 'X']
+      'X': ['claimstatus', 'claim_status', 'Claim Status', 'X'],
+      'AA': ['eftCheckIssuedDate', 'eft_check_issued_date', 'EFT/Check Issued Date', 'AA']
     }
 
     if (columnNames[columnLetter as keyof typeof columnNames]) {
