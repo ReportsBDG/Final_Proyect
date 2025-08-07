@@ -34,8 +34,39 @@ export class DirectDataService {
       return await this.activeRequest
     } catch (error: any) {
       // If there's a complete failure in the request process, ensure we have fallback
-      console.error('🚨 [DirectDataService] Request process failed completely, using fallback:', error.message)
-      return this.getFallbackData()
+      if (error.message?.includes('Failed to fetch')) {
+        console.log('🌐 [DirectDataService] Network connectivity issue detected, switching to demonstration data')
+      } else {
+        console.warn('⚠️ [DirectDataService] Request process failed, using fallback data:', error.message)
+      }
+
+      // Always provide fallback data to prevent app failure
+      try {
+        return await this.getFallbackData()
+      } catch (fallbackError) {
+        console.error('❌ [DirectDataService] Even fallback failed, returning minimal data:', fallbackError)
+        // Return minimal valid data structure as last resort
+        return [{
+          timestamp: new Date().toISOString(),
+          insurancecarrier: 'Sistema no disponible',
+          offices: 'Demostración',
+          patientname: 'Datos de ejemplo',
+          paidamount: 0,
+          claimstatus: 'Demo',
+          typeofinteraction: 'Sistema offline',
+          patientdob: '1990-01-01',
+          dos: '2024-01-01',
+          productivityamount: 0,
+          missingdocsorinformation: '',
+          howweproceeded: 'Datos de ejemplo mientras se restablece la conectividad',
+          escalatedto: '',
+          commentsreasons: 'Sistema en modo offline - datos de demostración',
+          emailaddress: 'demo@example.com',
+          status: 'Offline',
+          timestampbyinteraction: new Date().toISOString(),
+          eftCheckIssuedDate: '2024-01-01'
+        }]
+      }
     } finally {
       // Limpiar referencias cuando termine la petición
       this.activeRequest = null
