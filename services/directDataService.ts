@@ -411,8 +411,10 @@ export class DirectDataService {
       try {
         // Shorter timeout for connectivity test
         timeoutId = setTimeout(() => {
-          console.log('⏰ [DirectDataService] Connectivity test timeout reached')
-          controller.abort(new Error('Connectivity test timeout after 3 seconds'))
+          if (!controller.signal.aborted) {
+            console.log('⏰ [DirectDataService] Connectivity test timeout reached')
+            controller.abort(new Error('Connectivity test timeout after 3 seconds'))
+          }
         }, 3000) // 3 segundos para test ligero
 
         // Make a simple request to proxy without specific parameters
