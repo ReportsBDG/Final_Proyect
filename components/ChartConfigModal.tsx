@@ -160,15 +160,83 @@ const CHART_TYPES = [
   { value: 'bar', label: 'Bar Chart', icon: BarChart3, description: 'Compare values across categories' },
   { value: 'line', label: 'Line Chart', icon: LineIcon, description: 'Show trends over time' },
   { value: 'pie', label: 'Pie Chart', icon: PieChart, description: 'Show proportions of a whole' },
-  { value: 'area', label: 'Area Chart', icon: TrendingUp, description: 'Show volume and trends' }
+  { value: 'area', label: 'Area Chart', icon: TrendingUp, description: 'Show volume and trends' },
+  { value: 'scatter', label: 'Scatter Plot', icon: Target, description: 'Show correlation between variables' },
+  { value: 'bubble', label: 'Bubble Chart', icon: Target, description: 'Three-dimensional data visualization' },
+  { value: 'radar', label: 'Radar Chart', icon: Target, description: 'Compare multiple variables' },
+  { value: 'waterfall', label: 'Waterfall', icon: TrendingUp, description: 'Show cumulative effect' },
+  { value: 'funnel', label: 'Funnel Chart', icon: TrendingUp, description: 'Show stages in a process' },
+  { value: 'treemap', label: 'Treemap', icon: Layers, description: 'Hierarchical data visualization' }
 ]
+
+const CHART_SUBTYPES = {
+  bar: [
+    { value: 'clustered', label: 'Clustered', description: 'Side-by-side bars' },
+    { value: 'stacked', label: 'Stacked', description: 'Stacked bars' },
+    { value: 'normalized', label: '100% Stacked', description: 'Normalized to 100%' }
+  ],
+  line: [
+    { value: 'smooth', label: 'Smooth', description: 'Curved lines' },
+    { value: 'step', label: 'Step', description: 'Step lines' }
+  ],
+  area: [
+    { value: 'stacked', label: 'Stacked', description: 'Stacked areas' },
+    { value: 'normalized', label: '100% Stacked', description: 'Normalized areas' }
+  ]
+}
 
 const AGGREGATION_TYPES = [
   { value: 'sum', label: 'Sum', description: 'Add all values together' },
   { value: 'avg', label: 'Average', description: 'Calculate mean value' },
   { value: 'count', label: 'Count', description: 'Count number of records' },
   { value: 'max', label: 'Maximum', description: 'Find highest value' },
-  { value: 'min', label: 'Minimum', description: 'Find lowest value' }
+  { value: 'min', label: 'Minimum', description: 'Find lowest value' },
+  { value: 'median', label: 'Median', description: 'Middle value' },
+  { value: 'std', label: 'Std Dev', description: 'Standard deviation' },
+  { value: 'variance', label: 'Variance', description: 'Statistical variance' }
+]
+
+const COLOR_SCHEMES = [
+  { name: 'Categorical', type: 'categorical', colors: ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'] },
+  { name: 'Sequential Blues', type: 'sequential', colors: ['#dbeafe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8'] },
+  { name: 'Sequential Greens', type: 'sequential', colors: ['#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#10b981', '#059669'] },
+  { name: 'Diverging', type: 'diverging', colors: ['#dc2626', '#f97316', '#facc15', '#ffffff', '#22d3ee', '#3b82f6', '#1e40af'] },
+  { name: 'Viridis', type: 'sequential', colors: ['#440154', '#482878', '#3e4989', '#31688e', '#26828e', '#1f9e89', '#35b779', '#6ece58', '#b5de2b', '#fde725'] }
+]
+
+const DATA_LABEL_POSITIONS = [
+  { value: 'top', label: 'Top', icon: '↑' },
+  { value: 'center', label: 'Center', icon: '●' },
+  { value: 'bottom', label: 'Bottom', icon: '↓' },
+  { value: 'inside', label: 'Inside', icon: '⊙' },
+  { value: 'outside', label: 'Outside', icon: '◯' }
+]
+
+const TOOLTIP_FORMATS = [
+  { value: 'currency', label: 'Currency ($1,234.56)' },
+  { value: 'percentage', label: 'Percentage (12.34%)' },
+  { value: 'number', label: 'Number (1,234.56)' },
+  { value: 'date', label: 'Date (Jan 1, 2024)' }
+]
+
+const ANIMATION_TYPES = [
+  { value: 'ease', label: 'Ease' },
+  { value: 'ease-in', label: 'Ease In' },
+  { value: 'ease-out', label: 'Ease Out' },
+  { value: 'linear', label: 'Linear' }
+]
+
+const GRID_STYLES = [
+  { value: 'solid', label: 'Solid' },
+  { value: 'dashed', label: 'Dashed' },
+  { value: 'dotted', label: 'Dotted' }
+]
+
+const TREND_LINE_TYPES = [
+  { value: 'linear', label: 'Linear' },
+  { value: 'polynomial', label: 'Polynomial' },
+  { value: 'exponential', label: 'Exponential' },
+  { value: 'logarithmic', label: 'Logarithmic' }
 ]
 
 const COLOR_PALETTES = [
