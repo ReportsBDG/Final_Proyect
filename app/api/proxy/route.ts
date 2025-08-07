@@ -41,17 +41,12 @@ export async function GET(request: NextRequest) {
     console.log('🔗 Proxy request to:', url)
     console.log('📋 Parameters:', { action, limit, sheet, range })
 
-    // Timeout ajustado dependiendo del tipo de request
+    // Timeout ajustado para datasets más pequeños y manejables
     const controller = new AbortController()
-    const isPingRequest = action === 'ping'
-    const timeoutDuration = isPingRequest ? 8000 : 90000 // 8 segundos para ping, 90 para datos
+    const timeoutDuration = 90000 // 90 segundos - más que suficiente para 5000 registros
 
     timeoutId = setTimeout(() => {
-      if (isPingRequest) {
-        console.log('⏰ Ping timeout de 8 segundos alcanzado')
-      } else {
-        console.log('⏰ Timeout de 90 segundos alcanzado - Google Script puede estar sobrecargado')
-      }
+      console.log('⏰ Timeout de 90 segundos alcanzado - Google Script puede estar sobrecargado')
       controller.abort()
     }, timeoutDuration)
 
