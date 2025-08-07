@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
     let statusCode = 500
 
     if (error.name === 'AbortError') {
-      errorDetails = action === 'ping' ? 'Connectivity test timeout' : 'Request timeout - Google Apps Script may be overloaded'
+      errorDetails = 'Request timeout - Google Apps Script may be overloaded'
       statusCode = 408 // Request Timeout
     } else if (error.message?.includes('Failed to fetch')) {
       errorDetails = 'Network connectivity issue'
