@@ -409,20 +409,23 @@ export class DirectDataService {
       let timeoutId: NodeJS.Timeout | null = null
 
       try {
-        // Shorter timeout for connectivity test
+        // Reasonable timeout for connectivity test - Google Apps Script can be slow
         timeoutId = setTimeout(() => {
           if (!controller.signal.aborted) {
             console.log('⏰ [DirectDataService] Connectivity test timeout reached')
-            controller.abort(new Error('Connectivity test timeout after 3 seconds'))
+            controller.abort(new Error('Connectivity test timeout after 10 seconds'))
           }
-        }, 3000) // 3 segundos para test ligero
+        }, 10000) // 10 segundos para test - más tiempo para Google Apps Script
 
-        // Make a simple request to proxy without specific parameters
+        // Make a simple GET request to proxy - HEAD might not work with Google Apps Script
         // This will test if the API is reachable, even if it returns an error
         const response = await fetch('/api/proxy', {
-          method: 'HEAD', // Use HEAD to minimize data transfer
+          method: 'GET', // GET is more reliable than HEAD with Google Apps Script
           signal: controller.signal,
-          cache: 'no-cache'
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         })
 
         if (timeoutId) {
