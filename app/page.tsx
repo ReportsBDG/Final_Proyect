@@ -390,9 +390,8 @@ function DentalDashboard() {
   // Ensure consistent rendering between server and client
   useEffect(() => {
     setIsClient(true)
-    // Initialize date range after component mounts to avoid hydration issues
+    // Initialize only the reference range; do not apply date filtering by default
     const monthRange = getCurrentMonthRange()
-    setDateRange(monthRange)
     setInitialDateRange(monthRange)
   }, [])
 
@@ -420,10 +419,17 @@ function DentalDashboard() {
     // Type of Interaction filter (Column B) - Multi-select
     const matchesInteractionType = selectedInteractionTypes.length === 0 || selectedInteractionTypes.includes(item.typeofinteraction || '')
 
-    // Date range filter using DOS (column G)
-    const matchesDateRange = !dateRange.start || !dateRange.end || 
-      (item.dos && item.dos >= dateRange.start && item.dos <= dateRange.end)
-    
+    // Date range filter: use DOS when available; fallback to timestamp (AG). Compare as dates.
+    const matchesDateRange = !dateRange.start || !dateRange.end || (() => {
+      const raw = item.dos || item.timestamp
+      if (!raw) return false
+      const d = new Date(raw)
+      const start = new Date(dateRange.start)
+      const end = new Date(dateRange.end + 'T23:59:59')
+      if (isNaN(d.getTime()) || isNaN(start.getTime()) || isNaN(end.getTime())) return false
+      return d >= start && d <= end
+    })()
+
     return matchesSearch && matchesOffice && matchesStatus &&
            matchesClaimStatus && matchesCarrier && matchesInteractionType && matchesDateRange
   })
