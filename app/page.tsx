@@ -396,6 +396,13 @@ function DentalDashboard() {
   }, [])
 
 
+  const normalize = (v: any) => (v ?? '').toString().trim().toLowerCase()
+  const selOffices = new Set(selectedOffices.map(normalize))
+  const selStatuses = new Set(selectedStatuses.map(normalize))
+  const selClaimStatuses = new Set(selectedClaimStatuses.map(normalize))
+  const selCarriers = new Set(selectedCarriers.map(normalize))
+  const selInteractionTypes = new Set(selectedInteractionTypes.map(normalize))
+
   // Enhanced global search that filters across all relevant fields
   const filteredData = data.filter(item => {
     // Enhanced search filter - searches across multiple fields
@@ -411,13 +418,13 @@ function DentalDashboard() {
     )
     
     // Multi-select filters
-    const matchesOffice = selectedOffices.length === 0 || selectedOffices.includes(item.offices || '')
-    const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(item.status || '')
-    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selectedClaimStatuses.includes(item.claimstatus || '')
-    const matchesCarrier = selectedCarriers.length === 0 || selectedCarriers.includes(item.insurancecarrier || '')
+    const matchesOffice = selectedOffices.length === 0 || selOffices.has(normalize(item.offices))
+    const matchesStatus = selectedStatuses.length === 0 || selStatuses.has(normalize(item.status))
+    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selClaimStatuses.has(normalize(item.claimstatus))
+    const matchesCarrier = selectedCarriers.length === 0 || selCarriers.has(normalize(item.insurancecarrier))
 
     // Type of Interaction filter (Column B) - Multi-select
-    const matchesInteractionType = selectedInteractionTypes.length === 0 || selectedInteractionTypes.includes(item.typeofinteraction || '')
+    const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
 
     // Date range filter: use DOS when available; fallback to timestamp (AG). Compare as dates.
     const matchesDateRange = !dateRange.start || !dateRange.end || (() => {
@@ -436,22 +443,22 @@ function DentalDashboard() {
 
   // Metrics calculated from filtered data and specialized time logic
   const baseFilteredNoDate = data.filter(item => {
-    const searchLower = searchTerm.toLowerCase()
+    const s = searchTerm.toLowerCase()
     const matchesSearch = !searchTerm || (
-      item.patientname?.toLowerCase().includes(searchLower) ||
-      item.emailaddress?.toLowerCase().includes(searchLower) ||
-      item.insurancecarrier?.toLowerCase().includes(searchLower) ||
-      item.offices?.toLowerCase().includes(searchLower) ||
-      item.claimstatus?.toLowerCase().includes(searchLower) ||
-      item.commentsreasons?.toLowerCase().includes(searchLower) ||
-      item.dos?.toLowerCase().includes(searchLower)
+      (item.patientname || '').toLowerCase().includes(s) ||
+      (item.emailaddress || '').toLowerCase().includes(s) ||
+      (item.insurancecarrier || '').toLowerCase().includes(s) ||
+      (item.offices || '').toLowerCase().includes(s) ||
+      (item.claimstatus || '').toLowerCase().includes(s) ||
+      (item.commentsreasons || '').toLowerCase().includes(s) ||
+      (item.dos || '').toLowerCase().includes(s)
     )
 
-    const matchesOffice = selectedOffices.length === 0 || selectedOffices.includes(item.offices || '')
-    const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(item.status || '')
-    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selectedClaimStatuses.includes(item.claimstatus || '')
-    const matchesCarrier = selectedCarriers.length === 0 || selectedCarriers.includes(item.insurancecarrier || '')
-    const matchesInteractionType = selectedInteractionTypes.length === 0 || selectedInteractionTypes.includes(item.typeofinteraction || '')
+    const matchesOffice = selectedOffices.length === 0 || selOffices.has(normalize(item.offices))
+    const matchesStatus = selectedStatuses.length === 0 || selStatuses.has(normalize(item.status))
+    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selClaimStatuses.has(normalize(item.claimstatus))
+    const matchesCarrier = selectedCarriers.length === 0 || selCarriers.has(normalize(item.insurancecarrier))
+    const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
 
     return matchesSearch && matchesOffice && matchesStatus && matchesClaimStatus && matchesCarrier && matchesInteractionType
   })
@@ -502,16 +509,16 @@ function DentalDashboard() {
   const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage)
 
   // Get unique values for filters
-  const uniqueOfficesRaw = Array.from(new Set(data.map(item => item.offices).filter((item): item is string => Boolean(item))))
+  const uniqueOfficesRaw = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.offices; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
   const preferredOfficesOrder = ['Kona', 'Hollywood', 'Parks', 'Leon Springs', 'Pleasanton', 'Potranco']
   const uniqueOffices = [
-    ...preferredOfficesOrder.filter(o => uniqueOfficesRaw.includes(o)),
-    ...uniqueOfficesRaw.filter(o => !preferredOfficesOrder.includes(o)).sort()
+    ...preferredOfficesOrder.filter(o => uniqueOfficesRaw.some(u => normalize(u) === normalize(o))).map(o => uniqueOfficesRaw.find(u => normalize(u) === normalize(o)) as string),
+    ...uniqueOfficesRaw.filter(o => !preferredOfficesOrder.some(p => normalize(p) === normalize(o))).sort((a,b) => a.localeCompare(b))
   ]
-  const uniqueStatuses = Array.from(new Set(data.map(item => item.status).filter((item): item is string => Boolean(item))))
-  const uniqueClaimStatuses = Array.from(new Set(data.map(item => item.claimstatus).filter((item): item is string => Boolean(item))))
-  const uniqueCarriers = Array.from(new Set(data.map(item => item.insurancecarrier).filter((item): item is string => Boolean(item))))
-  const uniqueInteractionTypes = Array.from(new Set(data.map(item => item.typeofinteraction).filter((item): item is string => Boolean(item))))
+  const uniqueStatuses = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.status; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueClaimStatuses = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.claimstatus; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueCarriers = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.insurancecarrier; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueInteractionTypes = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.typeofinteraction; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
 
   // Complete Dashboard PDF Export functionality - TODOS LOS REGISTROS
   const handleCompleteDashboardPDFExport = async () => {
