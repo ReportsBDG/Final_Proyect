@@ -273,9 +273,23 @@ export class DirectDataService {
       }
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'No error details available')
-        console.error(`❌ [DirectDataService] HTTP Error ${response.status}:`, errorText)
-        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`)
+        let details = ''
+        try {
+          const ct = response.headers.get('content-type') || ''
+          if (ct.includes('application/json')) {
+            const json = await response.json()
+            details = JSON.stringify(json)
+          } else {
+            details = await response.text()
+          }
+        } catch {
+          details = 'No error details available'
+        }
+        console.error(`❌ [DirectDataService] HTTP Error ${response.status}:`, details)
+        // Switch to fallback immediately to avoid breaking the app
+        this.isOfflineMode = true
+        this.lastOfflineCheck = Date.now()
+        return this.getFallbackData()
       }
 
       const contentType = response.headers.get('content-type')
