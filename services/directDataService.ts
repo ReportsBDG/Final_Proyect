@@ -17,7 +17,7 @@ export class DirectDataService {
       if (this.activeRequest && this.activeController) {
         console.log('🔄 [DirectDataService] Cancelando petición anterior en curso...')
         try {
-          this.activeController.abort(new Error('New request initiated, cancelling previous one'))
+          this.activeController.abort()
         } catch (error) {
           // Ignorar errores al cancelar
         }
@@ -331,9 +331,8 @@ export class DirectDataService {
 
       // Analizar el tipo de error para mejor debugging
       if (error.name === 'AbortError') {
-        const reason = controller.signal.reason || 'No reason provided'
-        console.error(`⏰ [DirectDataService] Request aborted en intento ${attempt}:`, reason)
-        throw new Error(`Request aborted: ${reason}`)
+        console.log(`⏰ [DirectDataService] Request aborted en intento ${attempt} (refresh/duplicate request)`)
+        return []
       }
 
       if (error.message?.includes('Failed to fetch') ||
