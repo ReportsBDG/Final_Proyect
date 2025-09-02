@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import {
   Activity,
@@ -235,8 +235,12 @@ function DentalDashboard() {
     loadData()
   }
 
+  const isLoadingRef = useRef(false)
+
   // Enhanced reload function with detailed change tracking
   const loadData = async (silent = false) => {
+    if (isLoadingRef.current) return
+    isLoadingRef.current = true
     try {
       if (!silent) {
         setLoading(true)
@@ -367,6 +371,7 @@ function DentalDashboard() {
       if (!silent) {
         setLoading(false)
       }
+      isLoadingRef.current = false
     }
   }
 
