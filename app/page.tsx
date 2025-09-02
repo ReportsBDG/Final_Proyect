@@ -148,6 +148,7 @@ function DentalDashboard() {
     patientName: boolean
     carrier: boolean
     offices: boolean
+    dob: boolean
     dos: boolean
     claimStatus: boolean
     comments: boolean
@@ -162,6 +163,7 @@ function DentalDashboard() {
       patientName: true,
       carrier: true,
       offices: true,
+      dob: true,
       dos: true,
       claimStatus: true,
       comments: true,
@@ -1633,8 +1635,34 @@ function DentalDashboard() {
                 <table className="w-full min-w-max">
                   <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
+                      {selectedColumns.offices && (
+                        <th
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          onClick={() => handleSort('offices')}
+                        >
+                          <div className="truncate max-w-[80px] sm:max-w-none">
+                            Office
+                            {sortBy === 'offices' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
+                        </th>
+                      )}
+                      {selectedColumns.carrier && (
+                        <th
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          onClick={() => handleSort('insurancecarrier')}
+                        >
+                          <div className="truncate max-w-[100px] sm:max-w-none">
+                            Carrier
+                            {sortBy === 'insurancecarrier' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
+                        </th>
+                      )}
                       {selectedColumns.patientName && (
-                        <th 
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('patientname')}
                         >
@@ -1646,49 +1674,29 @@ function DentalDashboard() {
                           </div>
                         </th>
                       )}
-                      {selectedColumns.carrier && (
-                        <th 
+                      {selectedColumns.dob && (
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-                          onClick={() => handleSort('insurancecarrier')}
+                          onClick={() => handleSort('patientdob')}
                         >
-                          <div className="truncate max-w-[100px] sm:max-w-none">
-                            Carrier
-                            {sortBy === 'insurancecarrier' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '���'}</span>
-                            )}
-                          </div>
-                        </th>
-                      )}
-                      {selectedColumns.offices && (
-                        <th 
-                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-                          onClick={() => handleSort('offices')}
-                        >
-                          <div className="truncate max-w-[80px] sm:max-w-none">
-                            Office
-                            {sortBy === 'offices' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '��' : '↓'}</span>
+                          <div className="truncate">
+                            DOB
+                            {sortBy === 'patientdob' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                             )}
                           </div>
                         </th>
                       )}
                       {selectedColumns.dos && (
-                        <th 
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('dos')}
                         >
                           <div className="truncate">
                             DOS
                             {sortBy === 'dos' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '��'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                             )}
-                          </div>
-                        </th>
-                      )}
-                      {selectedColumns.claimStatus && (
-                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          <div className="truncate">
-                            Claim Status
                           </div>
                         </th>
                       )}
@@ -1699,15 +1707,8 @@ function DentalDashboard() {
                           </div>
                         </th>
                       )}
-                      {selectedColumns.email && (
-                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          <div className="truncate max-w-[120px] sm:max-w-none">
-                            Email
-                          </div>
-                        </th>
-                      )}
                       {selectedColumns.patientPortion && (
-                        <th 
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('paidamount')}
                         >
@@ -1719,10 +1720,24 @@ function DentalDashboard() {
                           </div>
                         </th>
                       )}
+                      {selectedColumns.claimStatus && (
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate">
+                            Claim Status
+                          </div>
+                        </th>
+                      )}
                       {selectedColumns.eftCheckDate && (
                         <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           <div className="truncate">
                             EFT/Check Date
+                          </div>
+                        </th>
+                      )}
+                      {selectedColumns.email && (
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate max-w-[120px] sm:max-w-none">
+                            Email Status
                           </div>
                         </th>
                       )}
@@ -1739,10 +1754,10 @@ function DentalDashboard() {
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {paginatedData.map((record, index) => (
                       <tr key={`${record.timestamp || 'no-timestamp'}-${record.patientname || 'no-name'}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                        {selectedColumns.patientName && (
-                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px] sm:max-w-none">
-                              {record.patientname}
+                        {selectedColumns.offices && (
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[80px] sm:max-w-none">
+                              {record.offices}
                             </div>
                           </td>
                         )}
@@ -1753,10 +1768,17 @@ function DentalDashboard() {
                             </div>
                           </td>
                         )}
-                        {selectedColumns.offices && (
+                        {selectedColumns.patientName && (
+                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px] sm:max-w-none">
+                              {record.patientname}
+                            </div>
+                          </td>
+                        )}
+                        {selectedColumns.dob && (
                           <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            <div className="truncate max-w-[80px] sm:max-w-none">
-                              {record.offices}
+                            <div className="truncate">
+                              {record.patientdob ? formatDate(record.patientdob) : 'N/A'}
                             </div>
                           </td>
                         )}
@@ -1767,24 +1789,10 @@ function DentalDashboard() {
                             </div>
                           </td>
                         )}
-                        {selectedColumns.claimStatus && (
-                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.claimstatus)}`}>
-                              {record.claimstatus}
-                            </span>
-                          </td>
-                        )}
                         {selectedColumns.comments && (
                           <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
                             <div className="truncate max-w-[150px] sm:max-w-xs" title={record.commentsreasons}>
                               {record.commentsreasons || 'N/A'}
-                            </div>
-                          </td>
-                        )}
-                        {selectedColumns.email && (
-                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            <div className="truncate max-w-[120px] sm:max-w-none">
-                              {record.emailaddress || 'N/A'}
                             </div>
                           </td>
                         )}
@@ -1795,10 +1803,24 @@ function DentalDashboard() {
                             </div>
                           </td>
                         )}
+                        {selectedColumns.claimStatus && (
+                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.claimstatus)}`}>
+                              {record.claimstatus}
+                            </span>
+                          </td>
+                        )}
                         {selectedColumns.eftCheckDate && (
                           <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
                             <div className="truncate">
                               {record.eftCheckIssuedDate ? formatDate(record.eftCheckIssuedDate) : 'N/A'}
+                            </div>
+                          </td>
+                        )}
+                        {selectedColumns.email && (
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[120px] sm:max-w-none">
+                              {record.emailaddress || 'N/A'}
                             </div>
                           </td>
                         )}
