@@ -389,28 +389,6 @@ function DentalDashboard() {
     setInitialDateRange(monthRange)
   }, [])
 
-  // Enhanced metrics calculation with proper timestamp filtering
-  const totalRevenue = data.reduce((sum, item) => sum + item.paidamount, 0)
-  
-  // Modified Claims Processed - only count 'complete' status from column AF (status field)
-  const claimsProcessed = data.filter(item => 
-    item.status?.toLowerCase() === 'complete' || 
-    item.status?.toLowerCase() === 'completed'
-  ).length
-  
-  // Calculate monthly claims using timestamp from column AG (timestamp field)
-  const monthlyClaims = data.filter(item => {
-    // Use timestamp field (column AG) for filtering
-    return isCurrentMonth(item.timestamp)
-  }).length
-  
-  // Calculate today's claims using timestamp from column AG (timestamp field)
-  const todaysClaims = data.filter(item => {
-    // Use timestamp field (column AG) for filtering
-    return isToday(item.timestamp)
-  }).length
-  
-  const activeOffices = new Set(data.map(item => item.offices).filter(Boolean)).size
 
   // Enhanced global search that filters across all relevant fields
   const filteredData = data.filter(item => {
@@ -443,6 +421,54 @@ function DentalDashboard() {
            matchesClaimStatus && matchesCarrier && matchesInteractionType && matchesDateRange
   })
 
+  // Metrics calculated from filtered data and specialized time logic
+  const baseFilteredNoDate = data.filter(item => {
+    const searchLower = searchTerm.toLowerCase()
+    const matchesSearch = !searchTerm || (
+      item.patientname?.toLowerCase().includes(searchLower) ||
+      item.emailaddress?.toLowerCase().includes(searchLower) ||
+      item.insurancecarrier?.toLowerCase().includes(searchLower) ||
+      item.offices?.toLowerCase().includes(searchLower) ||
+      item.claimstatus?.toLowerCase().includes(searchLower) ||
+      item.commentsreasons?.toLowerCase().includes(searchLower) ||
+      item.dos?.toLowerCase().includes(searchLower)
+    )
+
+    const matchesOffice = selectedOffices.length === 0 || selectedOffices.includes(item.offices || '')
+    const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(item.status || '')
+    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selectedClaimStatuses.includes(item.claimstatus || '')
+    const matchesCarrier = selectedCarriers.length === 0 || selectedCarriers.includes(item.insurancecarrier || '')
+    const matchesInteractionType = selectedInteractionTypes.length === 0 || selectedInteractionTypes.includes(item.typeofinteraction || '')
+
+    return matchesSearch && matchesOffice && matchesStatus && matchesClaimStatus && matchesCarrier && matchesInteractionType
+  })
+
+  const totalRevenue = filteredData.reduce((sum, item) => sum + (item.paidamount || 0), 0)
+
+  const claimsProcessed = filteredData.filter(item => {
+    const s = (item.status || '').toLowerCase()
+    return s === 'complete' || s === 'completed'
+  }).length
+
+  const activeOffices = new Set(filteredData.map(item => item.offices).filter(Boolean)).size
+
+  const todaysClaims = baseFilteredNoDate.filter(item => {
+    const s = (item.status || '').toLowerCase()
+    return (s === 'submitting' || s === 'posting') && isToday(item.timestamp)
+  }).length
+
+  const selectedMonthDate = (dateRange.end || dateRange.start || new Date().toISOString().split('T')[0])
+  const selectedDateObj = new Date(selectedMonthDate)
+  const monthlyClaims = baseFilteredNoDate.filter(item => {
+    const ts = item.timestamp
+    if (!ts) return false
+    const s = (item.status || '').toLowerCase()
+    const allowed = s === 'submitting' || s === 'tracking' || s === 'posting'
+    if (!allowed) return false
+    const d = new Date(ts)
+    return d.getMonth() === selectedDateObj.getMonth() && d.getFullYear() === selectedDateObj.getFullYear()
+  }).length
+
   // Sorting functionality
   const sortedData = [...filteredData].sort((a, b) => {
     if (!sortBy) return 0
@@ -463,7 +489,12 @@ function DentalDashboard() {
   const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage)
 
   // Get unique values for filters
-  const uniqueOffices = Array.from(new Set(data.map(item => item.offices).filter((item): item is string => Boolean(item))))
+  const uniqueOfficesRaw = Array.from(new Set(data.map(item => item.offices).filter((item): item is string => Boolean(item))))
+  const preferredOfficesOrder = ['Kona', 'Hollywood', 'Parks', 'Leon Springs', 'Pleasanton', 'Potranco']
+  const uniqueOffices = [
+    ...preferredOfficesOrder.filter(o => uniqueOfficesRaw.includes(o)),
+    ...uniqueOfficesRaw.filter(o => !preferredOfficesOrder.includes(o)).sort()
+  ]
   const uniqueStatuses = Array.from(new Set(data.map(item => item.status).filter((item): item is string => Boolean(item))))
   const uniqueClaimStatuses = Array.from(new Set(data.map(item => item.claimstatus).filter((item): item is string => Boolean(item))))
   const uniqueCarriers = Array.from(new Set(data.map(item => item.insurancecarrier).filter((item): item is string => Boolean(item))))
