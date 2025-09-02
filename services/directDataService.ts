@@ -443,12 +443,12 @@ export class DirectDataService {
       // Mapear campos con múltiples posibles nombres
       // CORRECCIÓN: claimstatus debe mapear de la columna X específicamente
       const record: PatientRecord = {
-        timestamp: item.timestamp || item.Timestamp || new Date().toISOString(),
+        timestamp: this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp || new Date().toISOString(),
         insurancecarrier: item.insurancecarrier || item['Insurance Carrier'] || item.carrier || '',
         offices: item.offices || item.Office || item['Office'] || '',
         patientname: item.patientname || item['Patient Name'] || item.patient || '',
         paidamount: this.parseNumber(item.paidamount || item['Paid Amount'] || item.amount || 0),
-        // CORRECCIÓN: Mapear claimstatus específicamente de la columna X (índice 23, basado en 0)
+        // Claim Status debe venir de la columna X
         claimstatus: this.getColumnValue(item, 'X') || item.claimstatus || item['Claim Status'] || '',
         typeofinteraction: item.typeofinteraction || item['Type of Interaction'] || item.type || '',
         patientdob: item.patientdob || item['Patient DOB'] || item.dob || '',
@@ -458,9 +458,12 @@ export class DirectDataService {
         howweproceeded: item.howweproceeded || item['How We Proceeded'] || '',
         escalatedto: item.escalatedto || item['Escalated To'] || '',
         commentsreasons: item.commentsreasons || item['Comments/Reasons'] || item.comments || '',
-        emailaddress: item.emailaddress || item['Email Address'] || item.email || '',
-        status: item.status || item.Status || '',
+        // Email Status debe usar columna T (Email Address)
+        emailaddress: this.getColumnValue(item, 'T') || item.emailaddress || item['Email Address'] || item.email || '',
+        // Status general desde columna Y
+        status: this.getColumnValue(item, 'Y') || item.status || item.Status || '',
         timestampbyinteraction: item.timestampbyinteraction || item['Timestamp By Interaction'] || '',
+        // EFT/Check Issued Date desde AA
         eftCheckIssuedDate: this.getColumnValue(item, 'AA') || item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || ''
       }
 
@@ -510,8 +513,11 @@ export class DirectDataService {
 
     // Intentar obtener por clave de objeto con nombre completo de columna
     const columnNames = {
+      'T': ['emailaddress', 'email_address', 'Email Address', 'T'],
       'X': ['claimstatus', 'claim_status', 'Claim Status', 'X'],
-      'AA': ['eftCheckIssuedDate', 'eft_check_issued_date', 'EFT/Check Issued Date', 'AA']
+      'Y': ['status', 'Status', 'Y'],
+      'AA': ['eftCheckIssuedDate', 'eft_check_issued_date', 'EFT/Check Issued Date', 'AA'],
+      'AG': ['timestamp', 'Timestamp', 'AG']
     }
 
     if (columnNames[columnLetter as keyof typeof columnNames]) {
