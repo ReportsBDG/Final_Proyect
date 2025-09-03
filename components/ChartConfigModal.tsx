@@ -49,9 +49,10 @@ import {
 interface ChartConfigModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (config: ChartConfiguration) => void
+  onSave: (config: ChartConfiguration & { excludedCategories?: string[] }) => void
   currentChart: any
   data: any[]
+  excluded?: string[]
 }
 
 interface ChartConfiguration {
@@ -65,6 +66,8 @@ interface ChartConfiguration {
   xAxis: string
   yAxis: string[]
   aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min' | 'median' | 'std' | 'variance'
+  timeBucket?: 'day' | 'week' | 'month'
+  excludedCategories?: string[]
 
   // Leyenda avanzada
   showLegend: boolean
@@ -355,7 +358,7 @@ const LEGEND_VERTICAL_ALIGN_OPTIONS = [
   { value: 'bottom', label: 'Bottom', icon: '⊥' }
 ]
 
-export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart, data }: ChartConfigModalProps) {
+export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart, data, excluded = [] }: ChartConfigModalProps) {
   const [config, setConfig] = useState<ChartConfiguration>({
     title: currentChart?.title || 'New Chart',
     subtitle: currentChart?.subtitle || '',
@@ -365,6 +368,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
     xAxis: '',
     yAxis: [],
     aggregation: 'sum',
+    timeBucket: currentChart?.timeBucket || 'month',
 
     // Leyenda
     showLegend: true,
@@ -461,7 +465,8 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
     availableFields.filter(field => {
       if (!data || data.length === 0) return false
       const sampleValue = data[0][field]
-      return typeof sampleValue === 'string' && field.toLowerCase().includes('date')
+      const f = field.toLowerCase()
+      return typeof sampleValue === 'string' && (f.includes('date') || f.includes('timestamp') || f === 'dos')
     }),
     [data, availableFields]
   )
@@ -474,6 +479,7 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
         xAxis: currentChart.xAxis || categoricalFields[0] || '',
         yAxis: currentChart.yAxis || [numericFields[0]] || [],
         aggregation: currentChart.aggregation || 'sum',
+        timeBucket: currentChart.timeBucket || 'month',
         showLegend: currentChart.showLegend !== undefined ? currentChart.showLegend : true,
         legendPosition: currentChart.legendPosition || 'bottom',
         legendAlign: currentChart.legendAlign || 'center',
@@ -545,6 +551,41 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
       })()
     }))
   }
+
+  // Build category list for filtering and local state of exclusions
+  const buildCategories = () => {
+    if (!data || data.length === 0 || !config.xAxis) return [] as string[]
+    const set = new Set<string>()
+    const isTime = ['timestamp', 'dos'].includes(config.xAxis) || config.xAxis.toLowerCase().includes('date')
+    const bucket = config.timeBucket || 'month'
+
+    const getWeekKey = (d: Date) => {
+      const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+      const day = date.getUTCDay() || 7
+      date.setUTCDate(date.getUTCDate() - (day - 1))
+      return date.toISOString().split('T')[0]
+    }
+
+    data.forEach(r => {
+      let key: string | null = null
+      if (isTime) {
+        const raw = (r as any).timestamp || (r as any).dos
+        if (!raw) return
+        const d = new Date(raw)
+        if (isNaN(d.getTime())) return
+        if (bucket === 'day') key = d.toISOString().split('T')[0]
+        else if (bucket === 'week') key = getWeekKey(d)
+        else key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      } else {
+        key = String((r as any)[config.xAxis] || 'Unknown')
+      }
+      if (key) set.add(key)
+    })
+
+    return Array.from(set)
+  }
+
+  const [excludedLocal, setExcludedLocal] = useState<string[]>(excluded || [])
 
   // Process data for live preview
   const processPreviewData = () => {
@@ -1033,6 +1074,24 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
               </div>
             </div>
 
+            {/* Time Grouping for time-based axes */}
+            {dateFields.length > 0 && (
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time Grouping</label>
+                <div className="flex gap-2">
+                  {(['day','week','month'] as const).map(opt => (
+                    <button
+                      key={opt}
+                      onClick={() => setConfig(prev => ({ ...prev, timeBucket: opt }))}
+                      className={`px-3 py-1 rounded border text-sm ${config.timeBucket === opt ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-800' : 'border-gray-300 dark:border-gray-600'}`}
+                    >
+                      {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Data Configuration (Pivot Style) */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
@@ -1227,6 +1286,31 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
               </div>
             </div>
 
+            {/* Category Filters (stay visible for re-selection) */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                <Layers className="w-5 h-5 mr-2 text-indigo-600" />
+                Filter Categories
+              </h3>
+              <div className="max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded p-3">
+                {buildCategories().map(name => {
+                  const checked = !excludedLocal.includes(name)
+                  return (
+                    <label key={name} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setExcludedLocal(prev => prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name])
+                        }}
+                      />
+                      <span className="truncate">{name}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            </div>
+
             {/* Legend Configuration */}
             {config.showLegend && (
               <div className="space-y-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -1417,7 +1501,10 @@ export default function ChartConfigModal({ isOpen, onClose, onSave, currentChart
             Cancel
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => {
+              onSave({ ...config, excludedCategories: excludedLocal })
+              onClose()
+            }}
             disabled={!config.xAxis || config.yAxis.length === 0}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
           >

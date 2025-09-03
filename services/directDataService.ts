@@ -17,7 +17,7 @@ export class DirectDataService {
       if (this.activeRequest && this.activeController) {
         console.log('🔄 [DirectDataService] Cancelando petición anterior en curso...')
         try {
-          this.activeController.abort(new Error('New request initiated, cancelling previous one'))
+          this.activeController.abort()
         } catch (error) {
           // Ignorar errores al cancelar
         }
@@ -273,9 +273,23 @@ export class DirectDataService {
       }
 
       if (!response.ok) {
-        const errorText = await response.text().catch(() => 'No error details available')
-        console.error(`❌ [DirectDataService] HTTP Error ${response.status}:`, errorText)
-        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`)
+        let details = ''
+        try {
+          const ct = response.headers.get('content-type') || ''
+          if (ct.includes('application/json')) {
+            const json = await response.json()
+            details = JSON.stringify(json)
+          } else {
+            details = await response.text()
+          }
+        } catch {
+          details = 'No error details available'
+        }
+        console.error(`❌ [DirectDataService] HTTP Error ${response.status}:`, details)
+        // Switch to fallback immediately to avoid breaking the app
+        this.isOfflineMode = true
+        this.lastOfflineCheck = Date.now()
+        return this.getFallbackData()
       }
 
       const contentType = response.headers.get('content-type')
@@ -331,9 +345,8 @@ export class DirectDataService {
 
       // Analizar el tipo de error para mejor debugging
       if (error.name === 'AbortError') {
-        const reason = controller.signal.reason || 'No reason provided'
-        console.error(`⏰ [DirectDataService] Request aborted en intento ${attempt}:`, reason)
-        throw new Error(`Request aborted: ${reason}`)
+        console.log(`⏰ [DirectDataService] Request aborted en intento ${attempt} (refresh/duplicate request)`)
+        return []
       }
 
       if (error.message?.includes('Failed to fetch') ||
@@ -443,12 +456,12 @@ export class DirectDataService {
       // Mapear campos con múltiples posibles nombres
       // CORRECCIÓN: claimstatus debe mapear de la columna X específicamente
       const record: PatientRecord = {
-        timestamp: item.timestamp || item.Timestamp || new Date().toISOString(),
+        timestamp: this.getColumnValue(item, 'AF') || this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp || new Date().toISOString(),
         insurancecarrier: item.insurancecarrier || item['Insurance Carrier'] || item.carrier || '',
         offices: item.offices || item.Office || item['Office'] || '',
         patientname: item.patientname || item['Patient Name'] || item.patient || '',
         paidamount: this.parseNumber(item.paidamount || item['Paid Amount'] || item.amount || 0),
-        // CORRECCIÓN: Mapear claimstatus específicamente de la columna X (índice 23, basado en 0)
+        // Claim Status debe venir de la columna X
         claimstatus: this.getColumnValue(item, 'X') || item.claimstatus || item['Claim Status'] || '',
         typeofinteraction: item.typeofinteraction || item['Type of Interaction'] || item.type || '',
         patientdob: item.patientdob || item['Patient DOB'] || item.dob || '',
@@ -458,9 +471,12 @@ export class DirectDataService {
         howweproceeded: item.howweproceeded || item['How We Proceeded'] || '',
         escalatedto: item.escalatedto || item['Escalated To'] || '',
         commentsreasons: item.commentsreasons || item['Comments/Reasons'] || item.comments || '',
-        emailaddress: item.emailaddress || item['Email Address'] || item.email || '',
-        status: item.status || item.Status || '',
+        // Email Status debe usar columna T (Email Address)
+        emailaddress: this.getColumnValue(item, 'T') || item.emailaddress || item['Email Address'] || item.email || '',
+        // Status general desde columna Y
+        status: this.getColumnValue(item, 'Y') || item.status || item.Status || '',
         timestampbyinteraction: item.timestampbyinteraction || item['Timestamp By Interaction'] || '',
+        // EFT/Check Issued Date desde AA
         eftCheckIssuedDate: this.getColumnValue(item, 'AA') || item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || ''
       }
 
@@ -510,8 +526,12 @@ export class DirectDataService {
 
     // Intentar obtener por clave de objeto con nombre completo de columna
     const columnNames = {
+      'T': ['emailaddress', 'email_address', 'Email Address', 'T'],
       'X': ['claimstatus', 'claim_status', 'Claim Status', 'X'],
-      'AA': ['eftCheckIssuedDate', 'eft_check_issued_date', 'EFT/Check Issued Date', 'AA']
+      'Y': ['status', 'Status', 'Y'],
+      'AA': ['eftCheckIssuedDate', 'eft_check_issued_date', 'EFT/Check Issued Date', 'AA'],
+      'AF': ['timestamp', 'Timestamp', 'AF'],
+      'AG': ['timestamp', 'Timestamp', 'AG']
     }
 
     if (columnNames[columnLetter as keyof typeof columnNames]) {

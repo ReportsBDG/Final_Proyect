@@ -62,9 +62,11 @@ interface ChartConfig {
   yAxis: string[]
   aggregation: 'sum' | 'avg' | 'count' | 'max' | 'min' | 'median' | 'std' | 'variance'
   colors: string[]
+  timeBucket?: 'day' | 'week' | 'month'
 }
 
 function ChartsSection({ data }: ChartProps) {
+  const [excludedByChart, setExcludedByChart] = useState<Record<string, Set<string>>>({})
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [showConfigModal, setShowConfigModal] = useState(false)
   const [currentChart, setCurrentChart] = useState<ChartConfig | null>(null)
@@ -119,10 +121,11 @@ function ChartsSection({ data }: ChartProps) {
       visible: true,
       showLegend: true,
       showGrid: true,
-      xAxis: 'month',
+      xAxis: 'timestamp',
       yAxis: ['paidamount'],
       aggregation: 'sum',
-      colors: ['#6366f1', '#06b6d4']
+      colors: ['#6366f1', '#06b6d4'],
+      timeBucket: 'month'
     },
     {
       id: '4',
@@ -138,38 +141,79 @@ function ChartsSection({ data }: ChartProps) {
     }
   ])
 
+  // Persistence of chart configs and exclusions
+  useEffect(() => {
+    try {
+      const savedCharts = localStorage.getItem('dentalDashboard.charts')
+      const savedExcluded = localStorage.getItem('dentalDashboard.excludedByChart')
+      if (savedCharts) {
+        const parsed = JSON.parse(savedCharts)
+        if (Array.isArray(parsed)) {
+          setCharts(parsed)
+        }
+      }
+      if (savedExcluded) {
+        const obj = JSON.parse(savedExcluded) as Record<string, string[]>
+        const map: Record<string, Set<string>> = {}
+        Object.keys(obj).forEach(k => { map[k] = new Set(obj[k]) })
+        setExcludedByChart(map)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('dentalDashboard.charts', JSON.stringify(charts))
+      const serializable: Record<string, string[]> = {}
+      Object.keys(excludedByChart).forEach(k => { serializable[k] = Array.from(excludedByChart[k] || new Set()) })
+      localStorage.setItem('dentalDashboard.excludedByChart', JSON.stringify(serializable))
+    } catch {}
+  }, [charts, excludedByChart])
+
   // Process data for charts
   const processChartData = (chart: ChartConfig) => {
     if (!data || data.length === 0) return []
 
     const { xAxis, yAxis, aggregation } = chart
+    const excluded = (excludedByChart[chart.id] || new Set<string>())
 
-    if (xAxis === 'month') {
-      // Special handling for monthly data
-      const monthlyData: Record<string, number> = {}
-      
+    if (xAxis === 'timestamp' || xAxis === 'dos' || xAxis === 'month' || xAxis.toLowerCase().includes('date')) {
+      const bucket = chart.timeBucket || (xAxis === 'month' ? 'month' : 'day')
+      const series: Record<string, number> = {}
+
+      const getWeekKey = (d: Date) => {
+        const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+        const day = date.getUTCDay() || 7
+        date.setUTCDate(date.getUTCDate() - (day - 1))
+        return date.toISOString().split('T')[0]
+      }
+
       data.forEach(record => {
-        if (record.dos || record.timestamp) {
-          const date = new Date(record.dos || record.timestamp)
-          const monthKey = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
-          
-          if (!monthlyData[monthKey]) {
-            monthlyData[monthKey] = 0
-          }
-          
-          if (aggregation === 'sum' && yAxis.includes('paidamount')) {
-            monthlyData[monthKey] += record.paidamount || 0
-          } else if (aggregation === 'count') {
-            monthlyData[monthKey] += 1
-          }
+        const raw = record.timestamp || record.dos
+        if (!raw) return
+        const d = new Date(raw)
+        if (isNaN(d.getTime())) return
+
+        let key = ''
+        if (bucket === 'day') {
+          key = d.toISOString().split('T')[0]
+        } else if (bucket === 'week') {
+          key = getWeekKey(d)
+        } else {
+          key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        }
+        if (excluded.has(key)) return
+
+        if (!series[key]) series[key] = 0
+        if (aggregation === 'sum' && yAxis.includes('paidamount')) {
+          series[key] += record.paidamount || 0
+        } else if (aggregation === 'count') {
+          series[key] += 1
         }
       })
 
-      return Object.entries(monthlyData)
-        .map(([month, value]) => ({
-          name: month,
-          [yAxis[0] === 'count' ? 'count' : yAxis[0]]: value
-        }))
+      return Object.entries(series)
+        .map(([name, value]) => ({ name, [yAxis[0] === 'count' ? 'count' : yAxis[0]]: value }))
         .sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime())
     }
 
@@ -179,6 +223,7 @@ function ChartsSection({ data }: ChartProps) {
     data.forEach(record => {
       const key = record[xAxis as keyof PatientRecord] || 'Unknown'
       const keyStr = String(key)
+      if (excluded.has(keyStr)) return
       
       if (!grouped[keyStr]) {
         grouped[keyStr] = {
@@ -660,11 +705,17 @@ function ChartsSection({ data }: ChartProps) {
     setActiveDropdown(null)
   }
 
-  const saveConfiguration = (config: Partial<ChartConfig>) => {
+  const saveConfiguration = (config: Partial<ChartConfig> & { excludedCategories?: string[] }) => {
     if (currentChart) {
       setCharts(charts.map(chart =>
         chart.id === currentChart.id ? { ...chart, ...config } : chart
       ))
+      if (config.excludedCategories) {
+        setExcludedByChart(prev => ({
+          ...prev,
+          [currentChart.id]: new Set(config.excludedCategories)
+        }))
+      }
     }
   }
 
@@ -702,7 +753,7 @@ function ChartsSection({ data }: ChartProps) {
 
                   {/* Dropdown Menu */}
                   {activeDropdown === chart.id && (
-                    <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-2xl z-50">
+                    <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-2xl z-50">
                       {/* Header */}
                       <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
@@ -777,19 +828,20 @@ function ChartsSection({ data }: ChartProps) {
                           </div>
                         </button>
 
-                        {/* 4. Delete Chart */}
+
+                        {/* 5. Delete Chart */}
                         <button
                           onClick={() => deleteChart(chart.id)}
                           className="flex items-center w-full px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
                         >
                           <Trash2 className="w-5 h-5 mr-3" />
                           <div className="text-left">
-                            <div className="font-medium">4. Delete Chart</div>
+                            <div className="font-medium">5. Delete Chart</div>
                             <div className="text-xs opacity-75">Remove this chart permanently</div>
                           </div>
                         </button>
 
-                        {/* 5. Hide Chart */}
+                        {/* 6. Hide Chart */}
                         <button
                           onClick={() => {
                             updateChart(chart.id, { visible: false })
@@ -799,7 +851,7 @@ function ChartsSection({ data }: ChartProps) {
                         >
                           <EyeOff className="w-5 h-5 mr-3 text-gray-500" />
                           <div className="text-left">
-                            <div className="font-medium text-gray-900 dark:text-white">5. Hide Chart</div>
+                            <div className="font-medium text-gray-900 dark:text-white">6. Hide Chart</div>
                             <div className="text-xs text-gray-500">Hide this chart from view</div>
                           </div>
                         </button>
@@ -916,6 +968,7 @@ function ChartsSection({ data }: ChartProps) {
         onSave={saveConfiguration}
         currentChart={currentChart}
         data={data}
+        excluded={currentChart ? Array.from(excludedByChart[currentChart.id] || new Set()) : []}
       />
     </div>
   )

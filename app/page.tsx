@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import {
   Activity,
@@ -111,6 +111,7 @@ function DentalDashboard() {
   const [selectedClaimStatuses, setSelectedClaimStatuses] = useState<string[]>([])
   const [selectedCarriers, setSelectedCarriers] = useState<string[]>([])
   const [selectedInteractionTypes, setSelectedInteractionTypes] = useState<string[]>([])
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([])
   // Configurar Date Range por defecto al mes actual
   const getCurrentMonthRange = () => {
     const now = new Date()
@@ -148,6 +149,7 @@ function DentalDashboard() {
     patientName: boolean
     carrier: boolean
     offices: boolean
+    dob: boolean
     dos: boolean
     claimStatus: boolean
     comments: boolean
@@ -162,6 +164,7 @@ function DentalDashboard() {
       patientName: true,
       carrier: true,
       offices: true,
+      dob: true,
       dos: true,
       claimStatus: true,
       comments: true,
@@ -233,8 +236,12 @@ function DentalDashboard() {
     loadData()
   }
 
+  const isLoadingRef = useRef(false)
+
   // Enhanced reload function with detailed change tracking
   const loadData = async (silent = false) => {
+    if (isLoadingRef.current) return
+    isLoadingRef.current = true
     try {
       if (!silent) {
         setLoading(true)
@@ -365,6 +372,7 @@ function DentalDashboard() {
       if (!silent) {
         setLoading(false)
       }
+      isLoadingRef.current = false
     }
   }
 
@@ -383,34 +391,18 @@ function DentalDashboard() {
   // Ensure consistent rendering between server and client
   useEffect(() => {
     setIsClient(true)
-    // Initialize date range after component mounts to avoid hydration issues
+    // Initialize only the reference range; do not apply date filtering by default
     const monthRange = getCurrentMonthRange()
-    setDateRange(monthRange)
     setInitialDateRange(monthRange)
   }, [])
 
-  // Enhanced metrics calculation with proper timestamp filtering
-  const totalRevenue = data.reduce((sum, item) => sum + item.paidamount, 0)
-  
-  // Modified Claims Processed - only count 'complete' status from column AF (status field)
-  const claimsProcessed = data.filter(item => 
-    item.status?.toLowerCase() === 'complete' || 
-    item.status?.toLowerCase() === 'completed'
-  ).length
-  
-  // Calculate monthly claims using timestamp from column AG (timestamp field)
-  const monthlyClaims = data.filter(item => {
-    // Use timestamp field (column AG) for filtering
-    return isCurrentMonth(item.timestamp)
-  }).length
-  
-  // Calculate today's claims using timestamp from column AG (timestamp field)
-  const todaysClaims = data.filter(item => {
-    // Use timestamp field (column AG) for filtering
-    return isToday(item.timestamp)
-  }).length
-  
-  const activeOffices = new Set(data.map(item => item.offices).filter(Boolean)).size
+
+  const normalize = (v: any) => (v ?? '').toString().trim().toLowerCase()
+  const selOffices = new Set(selectedOffices.map(normalize))
+  const selStatuses = new Set(selectedStatuses.map(normalize))
+  const selClaimStatuses = new Set(selectedClaimStatuses.map(normalize))
+  const selCarriers = new Set(selectedCarriers.map(normalize))
+  const selInteractionTypes = new Set(selectedInteractionTypes.map(normalize))
 
   // Enhanced global search that filters across all relevant fields
   const filteredData = data.filter(item => {
@@ -427,21 +419,72 @@ function DentalDashboard() {
     )
     
     // Multi-select filters
-    const matchesOffice = selectedOffices.length === 0 || selectedOffices.includes(item.offices || '')
-    const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(item.status || '')
-    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selectedClaimStatuses.includes(item.claimstatus || '')
-    const matchesCarrier = selectedCarriers.length === 0 || selectedCarriers.includes(item.insurancecarrier || '')
+    const matchesOffice = selectedOffices.length === 0 || selOffices.has(normalize(item.offices))
+    const matchesStatus = selectedStatuses.length === 0 || selStatuses.has(normalize(item.status))
+    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selClaimStatuses.has(normalize(item.claimstatus))
+    const matchesCarrier = selectedCarriers.length === 0 || selCarriers.has(normalize(item.insurancecarrier))
+    const matchesEmail = selectedEmails.length === 0 || selectedEmails.map(normalize).includes(normalize(item.emailaddress))
 
     // Type of Interaction filter (Column B) - Multi-select
-    const matchesInteractionType = selectedInteractionTypes.length === 0 || selectedInteractionTypes.includes(item.typeofinteraction || '')
+    const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
 
-    // Date range filter using DOS (column G)
-    const matchesDateRange = !dateRange.start || !dateRange.end || 
-      (item.dos && item.dos >= dateRange.start && item.dos <= dateRange.end)
-    
+    // Date range filter: ONLY use timestamp (AF). Do not use DOS or EFT dates for filtering.
+    const matchesDateRange = !dateRange.start || !dateRange.end || (() => {
+      const raw = item.timestamp
+      if (!raw) return false
+      const d = new Date(raw)
+      const start = new Date(dateRange.start)
+      const end = new Date(dateRange.end + 'T23:59:59')
+      if (isNaN(d.getTime()) || isNaN(start.getTime()) || isNaN(end.getTime())) return false
+      return d >= start && d <= end
+    })()
+
     return matchesSearch && matchesOffice && matchesStatus &&
-           matchesClaimStatus && matchesCarrier && matchesInteractionType && matchesDateRange
+           matchesClaimStatus && matchesCarrier && matchesEmail && matchesInteractionType && matchesDateRange
   })
+
+  // Metrics calculated from filtered data and specialized time logic
+  const baseFilteredNoDate = data.filter(item => {
+    const s = searchTerm.toLowerCase()
+    const matchesSearch = !searchTerm || (
+      (item.patientname || '').toLowerCase().includes(s) ||
+      (item.emailaddress || '').toLowerCase().includes(s) ||
+      (item.insurancecarrier || '').toLowerCase().includes(s) ||
+      (item.offices || '').toLowerCase().includes(s) ||
+      (item.claimstatus || '').toLowerCase().includes(s) ||
+      (item.commentsreasons || '').toLowerCase().includes(s) ||
+      (item.dos || '').toLowerCase().includes(s)
+    )
+
+    const matchesOffice = selectedOffices.length === 0 || selOffices.has(normalize(item.offices))
+    const matchesStatus = selectedStatuses.length === 0 || selStatuses.has(normalize(item.status))
+    const matchesClaimStatus = selectedClaimStatuses.length === 0 || selClaimStatuses.has(normalize(item.claimstatus))
+    const matchesCarrier = selectedCarriers.length === 0 || selCarriers.has(normalize(item.insurancecarrier))
+    const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
+    const matchesEmail = selectedEmails.length === 0 || selectedEmails.map(normalize).includes(normalize(item.emailaddress))
+
+    return matchesSearch && matchesOffice && matchesStatus && matchesClaimStatus && matchesCarrier && matchesInteractionType && matchesEmail
+  })
+
+  const totalRevenue = filteredData.reduce((sum, item) => sum + (item.paidamount || 0), 0)
+
+  const claimsProcessed = filteredData.filter(item => {
+    const s = (item.status || '').toLowerCase()
+    return s === 'complete' || s === 'completed'
+  }).length
+
+  const activeOffices = new Set(filteredData.map(item => item.offices).filter(Boolean)).size
+
+  const todaysClaims = baseFilteredNoDate.filter(item => isToday(item.timestamp)).length
+
+  const selectedMonthDate = (dateRange.end || dateRange.start || new Date().toISOString().split('T')[0])
+  const selectedDateObj = new Date(selectedMonthDate)
+  const monthlyClaims = baseFilteredNoDate.filter(item => {
+    const ts = item.timestamp
+    if (!ts) return false
+    const d = new Date(ts)
+    return d.getMonth() === selectedDateObj.getMonth() && d.getFullYear() === selectedDateObj.getFullYear()
+  }).length
 
   // Sorting functionality
   const sortedData = [...filteredData].sort((a, b) => {
@@ -463,11 +506,17 @@ function DentalDashboard() {
   const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage)
 
   // Get unique values for filters
-  const uniqueOffices = Array.from(new Set(data.map(item => item.offices).filter((item): item is string => Boolean(item))))
-  const uniqueStatuses = Array.from(new Set(data.map(item => item.status).filter((item): item is string => Boolean(item))))
-  const uniqueClaimStatuses = Array.from(new Set(data.map(item => item.claimstatus).filter((item): item is string => Boolean(item))))
-  const uniqueCarriers = Array.from(new Set(data.map(item => item.insurancecarrier).filter((item): item is string => Boolean(item))))
-  const uniqueInteractionTypes = Array.from(new Set(data.map(item => item.typeofinteraction).filter((item): item is string => Boolean(item))))
+  const uniqueOfficesRaw = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.offices; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const preferredOfficesOrder = ['Kona', 'Hollywood', 'Parks', 'Leon Springs', 'Pleasanton', 'Potranco']
+  const uniqueOffices = [
+    ...preferredOfficesOrder.filter(o => uniqueOfficesRaw.some(u => normalize(u) === normalize(o))).map(o => uniqueOfficesRaw.find(u => normalize(u) === normalize(o)) as string),
+    ...uniqueOfficesRaw.filter(o => !preferredOfficesOrder.some(p => normalize(p) === normalize(o))).sort((a,b) => a.localeCompare(b))
+  ]
+  const uniqueStatuses = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.status; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueClaimStatuses = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.claimstatus; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueCarriers = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.insurancecarrier; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueInteractionTypes = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.typeofinteraction; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueEmails = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.emailaddress; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
 
   // Complete Dashboard PDF Export functionality - TODOS LOS REGISTROS
   const handleCompleteDashboardPDFExport = async () => {
@@ -923,6 +972,7 @@ function DentalDashboard() {
     setSelectedClaimStatuses([])
     setSelectedCarriers([])
     setSelectedInteractionTypes([])
+    setSelectedEmails([])
     setDateRange({ start: '', end: '' })
     setSearchTerm('')
   }
@@ -1237,7 +1287,7 @@ function DentalDashboard() {
               </div>
               <div className="flex items-center mt-2 text-sm">
                 <TrendingUp className="w-4 h-4 mr-1" />
-                <span>From column AG timestamps</span>
+                <span>From column AF timestamps</span>
               </div>
             </div>
 
@@ -1252,7 +1302,7 @@ function DentalDashboard() {
               </div>
               <div className="flex items-center mt-2 text-sm">
                 <TrendingUp className="w-4 h-4 mr-1" />
-                <span>Current month (Col AG)</span>
+                <span>Current month (Col AF)</span>
               </div>
             </div>
           </div>
@@ -1293,7 +1343,7 @@ function DentalDashboard() {
             <div className="flex items-center space-x-2">
               {/* Clear All Filters Button */}
               {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
-                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || selectedEmails.length > 0 || searchTerm ||
                 (dateRange.start !== initialDateRange.start || dateRange.end !== initialDateRange.end)) && (
                 <button
                   onClick={clearAllFilters}
@@ -1425,6 +1475,16 @@ function DentalDashboard() {
                   onClearAll={clearAllInteractionTypes}
                   placeholder="All Types"
                 />
+
+                <SearchableMultiSelectFilter
+                  label="Email"
+                  options={uniqueEmails}
+                  selectedValues={selectedEmails}
+                  onToggle={(value) => toggleFilterSelection(value, selectedEmails, setSelectedEmails)}
+                  onSelectAll={() => setSelectedEmails([...uniqueEmails])}
+                  onClearAll={() => setSelectedEmails([])}
+                  placeholder="All Emails"
+                />
               </div>
             </div>
           </div>
@@ -1434,7 +1494,7 @@ function DentalDashboard() {
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-900 dark:text-white text-sm">Active Filters</h3>
               {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
-                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || selectedEmails.length > 0 || searchTerm ||
                 dateRange.start || dateRange.end) && (
                 <button
                   onClick={clearAllFilters}
@@ -1459,6 +1519,11 @@ function DentalDashboard() {
               {selectedClaimStatuses.length > 0 && (
                 <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-1 rounded-md">
                   Claims: {selectedClaimStatuses.length}
+                </span>
+              )}
+              {selectedEmails.length > 0 && (
+                <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 px-2 py-1 rounded-md">
+                  Emails: {selectedEmails.length}
                 </span>
               )}
               {selectedStatuses.length > 0 && (
@@ -1602,8 +1667,34 @@ function DentalDashboard() {
                 <table className="w-full min-w-max">
                   <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
+                      {selectedColumns.offices && (
+                        <th
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          onClick={() => handleSort('offices')}
+                        >
+                          <div className="truncate max-w-[80px] sm:max-w-none">
+                            Office
+                            {sortBy === 'offices' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
+                        </th>
+                      )}
+                      {selectedColumns.carrier && (
+                        <th
+                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
+                          onClick={() => handleSort('insurancecarrier')}
+                        >
+                          <div className="truncate max-w-[100px] sm:max-w-none">
+                            Carrier
+                            {sortBy === 'insurancecarrier' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                            )}
+                          </div>
+                        </th>
+                      )}
                       {selectedColumns.patientName && (
-                        <th 
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('patientname')}
                         >
@@ -1615,49 +1706,29 @@ function DentalDashboard() {
                           </div>
                         </th>
                       )}
-                      {selectedColumns.carrier && (
-                        <th 
+                      {selectedColumns.dob && (
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-                          onClick={() => handleSort('insurancecarrier')}
+                          onClick={() => handleSort('patientdob')}
                         >
-                          <div className="truncate max-w-[100px] sm:max-w-none">
-                            Carrier
-                            {sortBy === 'insurancecarrier' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '���'}</span>
-                            )}
-                          </div>
-                        </th>
-                      )}
-                      {selectedColumns.offices && (
-                        <th 
-                          className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
-                          onClick={() => handleSort('offices')}
-                        >
-                          <div className="truncate max-w-[80px] sm:max-w-none">
-                            Office
-                            {sortBy === 'offices' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '��' : '↓'}</span>
+                          <div className="truncate">
+                            DOB
+                            {sortBy === 'patientdob' && (
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                             )}
                           </div>
                         </th>
                       )}
                       {selectedColumns.dos && (
-                        <th 
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('dos')}
                         >
                           <div className="truncate">
                             DOS
                             {sortBy === 'dos' && (
-                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '��'}</span>
+                              <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                             )}
-                          </div>
-                        </th>
-                      )}
-                      {selectedColumns.claimStatus && (
-                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          <div className="truncate">
-                            Claim Status
                           </div>
                         </th>
                       )}
@@ -1668,15 +1739,8 @@ function DentalDashboard() {
                           </div>
                         </th>
                       )}
-                      {selectedColumns.email && (
-                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          <div className="truncate max-w-[120px] sm:max-w-none">
-                            Email
-                          </div>
-                        </th>
-                      )}
                       {selectedColumns.patientPortion && (
-                        <th 
+                        <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
                           onClick={() => handleSort('paidamount')}
                         >
@@ -1688,10 +1752,24 @@ function DentalDashboard() {
                           </div>
                         </th>
                       )}
+                      {selectedColumns.claimStatus && (
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate">
+                            Claim Status
+                          </div>
+                        </th>
+                      )}
                       {selectedColumns.eftCheckDate && (
                         <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           <div className="truncate">
                             EFT/Check Date
+                          </div>
+                        </th>
+                      )}
+                      {selectedColumns.email && (
+                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          <div className="truncate max-w-[120px] sm:max-w-none">
+                            Email Status
                           </div>
                         </th>
                       )}
@@ -1708,10 +1786,10 @@ function DentalDashboard() {
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {paginatedData.map((record, index) => (
                       <tr key={`${record.timestamp || 'no-timestamp'}-${record.patientname || 'no-name'}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200">
-                        {selectedColumns.patientName && (
-                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px] sm:max-w-none">
-                              {record.patientname}
+                        {selectedColumns.offices && (
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[80px] sm:max-w-none">
+                              {record.offices}
                             </div>
                           </td>
                         )}
@@ -1722,10 +1800,17 @@ function DentalDashboard() {
                             </div>
                           </td>
                         )}
-                        {selectedColumns.offices && (
+                        {selectedColumns.patientName && (
+                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[120px] sm:max-w-none">
+                              {record.patientname}
+                            </div>
+                          </td>
+                        )}
+                        {selectedColumns.dob && (
                           <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            <div className="truncate max-w-[80px] sm:max-w-none">
-                              {record.offices}
+                            <div className="truncate">
+                              {record.patientdob ? formatDate(record.patientdob) : 'N/A'}
                             </div>
                           </td>
                         )}
@@ -1736,24 +1821,10 @@ function DentalDashboard() {
                             </div>
                           </td>
                         )}
-                        {selectedColumns.claimStatus && (
-                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.claimstatus)}`}>
-                              {record.claimstatus}
-                            </span>
-                          </td>
-                        )}
                         {selectedColumns.comments && (
                           <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
                             <div className="truncate max-w-[150px] sm:max-w-xs" title={record.commentsreasons}>
                               {record.commentsreasons || 'N/A'}
-                            </div>
-                          </td>
-                        )}
-                        {selectedColumns.email && (
-                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            <div className="truncate max-w-[120px] sm:max-w-none">
-                              {record.emailaddress || 'N/A'}
                             </div>
                           </td>
                         )}
@@ -1764,10 +1835,24 @@ function DentalDashboard() {
                             </div>
                           </td>
                         )}
+                        {selectedColumns.claimStatus && (
+                          <td className="px-2 sm:px-4 py-3 transition-all duration-200">
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(record.claimstatus)}`}>
+                              {record.claimstatus}
+                            </span>
+                          </td>
+                        )}
                         {selectedColumns.eftCheckDate && (
                           <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
                             <div className="truncate">
                               {record.eftCheckIssuedDate ? formatDate(record.eftCheckIssuedDate) : 'N/A'}
+                            </div>
+                          </td>
+                        )}
+                        {selectedColumns.email && (
+                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
+                            <div className="truncate max-w-[120px] sm:max-w-none">
+                              {record.emailaddress || 'N/A'}
                             </div>
                           </td>
                         )}
