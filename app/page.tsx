@@ -732,7 +732,6 @@ function DentalDashboard() {
                 <button
                   onClick={() => {
                     onClearAll()
-                    setIsOpen(false)
                   }}
                   className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
                 >
@@ -840,7 +839,6 @@ function DentalDashboard() {
                 <button
                   onClick={() => {
                     onClearAll()
-                    setIsOpen(false)
                   }}
                   className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
                 >
