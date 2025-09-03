@@ -231,8 +231,12 @@ export class DirectDataService {
     }, timeout)
 
     try {
-      // Construir URL con límite específico para este intento
-      const url = `/api/proxy?action=getAllRecords&limit=${limit}&sheet=DB&range=A:AG`
+      // Construir URLs candidatas con límite específico para este intento
+      const rel = `/api/proxy?action=getAllRecords&limit=${limit}&sheet=DB&range=A:AG`
+      const origin = typeof window !== 'undefined' && window.location ? window.location.origin : ''
+      const abs = origin ? `${origin}${rel}` : rel
+      const fallbackRel = `/api/proxy?action=getAllRecords&limit=${limit}`
+      const urls = [rel, abs, fallbackRel]
       console.log(`🔄 [DirectDataService] Intento ${attempt} con límite ${limit} registros`)
 
       // Configuraciones anti-interferencia
@@ -241,23 +245,34 @@ export class DirectDataService {
         throw new Error('Request was cancelled before fetch')
       }
 
-      let response: Response
-      try {
-        response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          },
-          signal: controller.signal,
-          cache: 'no-cache',
-          credentials: 'same-origin'
-        })
-      } catch (fetchError: any) {
+      let response: Response | null = null
+      let lastFetchError: any = null
+      for (const candidate of urls) {
+        try {
+          response = await fetch(candidate, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            },
+            signal: controller.signal,
+            cache: 'no-store',
+            credentials: 'omit',
+            mode: 'cors',
+            keepalive: true
+          })
+          if (response) break
+        } catch (fe: any) {
+          lastFetchError = fe
+          continue
+        }
+      }
+
+      if (!response) {
         // Immediate handling of fetch failures to prevent "Failed to fetch" from propagating
-        console.log(`🌐 [DirectDataService] Network fetch failed in attempt ${attempt}:`, fetchError.message)
+        const msg = lastFetchError?.message || 'Unknown fetch error'
+        console.log(`🌐 [DirectDataService] Network fetch failed in attempt ${attempt}:`, msg)
 
         // Activate offline mode immediately to prevent repeated attempts
         this.isOfflineMode = true
@@ -292,8 +307,8 @@ export class DirectDataService {
         return this.getFallbackData()
       }
 
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.toLowerCase().includes('application/json')) {
         const responseText = await response.text()
         console.error('❌ [DirectDataService] Response is not JSON:', responseText.substring(0, 200))
         throw new Error(`Invalid response format: expected JSON, got ${contentType}`)
