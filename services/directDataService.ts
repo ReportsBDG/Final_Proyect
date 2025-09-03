@@ -456,7 +456,7 @@ export class DirectDataService {
       // Mapear campos con múltiples posibles nombres
       // CORRECCIÓN: claimstatus debe mapear de la columna X específicamente
       const record: PatientRecord = {
-        timestamp: this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp || new Date().toISOString(),
+        timestamp: this.getColumnValue(item, 'AF') || this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp || new Date().toISOString(),
         insurancecarrier: item.insurancecarrier || item['Insurance Carrier'] || item.carrier || '',
         offices: item.offices || item.Office || item['Office'] || '',
         patientname: item.patientname || item['Patient Name'] || item.patient || '',
@@ -530,6 +530,7 @@ export class DirectDataService {
       'X': ['claimstatus', 'claim_status', 'Claim Status', 'X'],
       'Y': ['status', 'Status', 'Y'],
       'AA': ['eftCheckIssuedDate', 'eft_check_issued_date', 'EFT/Check Issued Date', 'AA'],
+      'AF': ['timestamp', 'Timestamp', 'AF'],
       'AG': ['timestamp', 'Timestamp', 'AG']
     }
 
