@@ -644,8 +644,8 @@ function DentalDashboard() {
     if (!isClient || !dateString) return dateString
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+      month: '2-digit',
+      day: '2-digit'
     })
   }
 
