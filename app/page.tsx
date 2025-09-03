@@ -428,9 +428,9 @@ function DentalDashboard() {
     // Type of Interaction filter (Column B) - Multi-select
     const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
 
-    // Date range filter: use DOS primarily; fallback to EFT/Check Issued Date; use timestamp only if neither exists.
+    // Date range filter: ONLY use timestamp (AF). Do not use DOS or EFT dates for filtering.
     const matchesDateRange = !dateRange.start || !dateRange.end || (() => {
-      const raw = item.dos || item.eftCheckIssuedDate || item.timestamp
+      const raw = item.timestamp
       if (!raw) return false
       const d = new Date(raw)
       const start = new Date(dateRange.start)
@@ -1287,7 +1287,7 @@ function DentalDashboard() {
               </div>
               <div className="flex items-center mt-2 text-sm">
                 <TrendingUp className="w-4 h-4 mr-1" />
-                <span>From column AG timestamps</span>
+                <span>From column AF timestamps</span>
               </div>
             </div>
 
@@ -1302,7 +1302,7 @@ function DentalDashboard() {
               </div>
               <div className="flex items-center mt-2 text-sm">
                 <TrendingUp className="w-4 h-4 mr-1" />
-                <span>Current month (Col AG)</span>
+                <span>Current month (Col AF)</span>
               </div>
             </div>
           </div>
