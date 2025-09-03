@@ -103,6 +103,215 @@ const savePersistedState = (key: string, value: any) => {
   }
 }
 
+// Searchable multi-select filter component (module scope to preserve state)
+const SearchableMultiSelectFilter = ({
+  label,
+  options,
+  selectedValues,
+  onToggle,
+  onSelectAll,
+  onClearAll,
+  placeholder = "Select options..."
+}: {
+  label: string
+  options: string[]
+  selectedValues: string[]
+  onToggle: (value: string) => void
+  onSelectAll: () => void
+  onClearAll: () => void
+  placeholder?: string
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const filteredOptions = options.filter(option =>
+    option.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  return (
+    <div className="relative">
+      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+        {label}
+      </label>
+
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-2.5 py-1.5 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-xs"
+      >
+        <span className="truncate text-gray-700 dark:text-gray-300">
+          {selectedValues.length === 0
+            ? placeholder
+            : selectedValues.length === 1
+              ? selectedValues[0]
+              : `${selectedValues.length} selected`
+          }
+        </span>
+        <ChevronDown className={`w-3 h-3 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 flex flex-col">
+          <div className="p-2 border-b border-gray-200 dark:border-gray-600">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search carriers..."
+                className="w-full pl-6 pr-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs dark:bg-gray-600 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+
+          <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+            <div className="flex gap-1">
+              <button
+                onClick={() => { onSelectAll() }}
+                className="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-blue-600 transition-colors"
+              >
+                All
+              </button>
+              <button
+                onClick={() => { onClearAll() }}
+                className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {filteredOptions.map((option) => (
+              <label
+                key={option}
+                className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedValues.includes(option)}
+                  onChange={() => onToggle(option)}
+                  className="mr-1.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-3 h-3"
+                />
+                <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
+              </label>
+            ))}
+
+            {filteredOptions.length === 0 && (
+              <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                {searchTerm ? 'No carriers found' : 'No options available'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-30"
+          onClick={() => { setIsOpen(false); setSearchTerm('') }}
+        ></div>
+      )}
+    </div>
+  )
+}
+
+// Simple multi-select filter (module scope to preserve state)
+const MultiSelectFilter = ({
+  label,
+  options,
+  selectedValues,
+  onToggle,
+  onSelectAll,
+  onClearAll,
+  placeholder = "Select options..."
+}: {
+  label: string
+  options: string[]
+  selectedValues: string[]
+  onToggle: (value: string) => void
+  onSelectAll: () => void
+  onClearAll: () => void
+  placeholder?: string
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div className="relative">
+      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+        {label}
+      </label>
+
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-2.5 py-1.5 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-xs"
+      >
+        <span className="truncate text-gray-700 dark:text-gray-300">
+          {selectedValues.length === 0
+            ? placeholder
+            : selectedValues.length === 1
+              ? selectedValues[0]
+              : `${selectedValues.length} selected`
+          }
+        </span>
+        <ChevronDown className={`w-3 h-3 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 flex flex-col">
+          <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+            <div className="flex gap-1">
+              <button
+                onClick={() => { onSelectAll() }}
+                className="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-blue-600 transition-colors"
+              >
+                All
+              </button>
+              <button
+                onClick={() => { onClearAll() }}
+                className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {options.map((option) => (
+              <label
+                key={option}
+                className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedValues.includes(option)}
+                  onChange={() => onToggle(option)}
+                  className="mr-1.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-3 h-3"
+                />
+                <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
+              </label>
+            ))}
+
+            {options.length === 0 && (
+              <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                No options available
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-30"
+          onClick={() => setIsOpen(false)}
+        ></div>
+      )}
+    </div>
+  )
+}
+
 function DentalDashboard() {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -647,241 +856,6 @@ function DentalDashboard() {
       month: '2-digit',
       day: '2-digit'
     })
-  }
-
-  // Searchable multi-select filter component for Carrier
-  const SearchableMultiSelectFilter = ({
-    label,
-    options,
-    selectedValues,
-    onToggle,
-    onSelectAll,
-    onClearAll,
-    placeholder = "Select options..."
-  }: {
-    label: string
-    options: string[]
-    selectedValues: string[]
-    onToggle: (value: string) => void
-    onSelectAll: () => void
-    onClearAll: () => void
-    placeholder?: string
-  }) => {
-    const [isOpen, setIsOpen] = useState(false)
-    const [searchTerm, setSearchTerm] = useState('')
-
-    const filteredOptions = options.filter(option =>
-      option.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value)
-    }
-
-    return (
-      <div className="relative">
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          {label}
-        </label>
-
-        {/* Toggle Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-2.5 py-1.5 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-xs"
-        >
-          <span className="truncate text-gray-700 dark:text-gray-300">
-            {selectedValues.length === 0
-              ? placeholder
-              : selectedValues.length === 1
-                ? selectedValues[0]
-                : `${selectedValues.length} selected`
-            }
-          </span>
-          <ChevronDown className={`w-3 h-3 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {/* Dropdown */}
-        {isOpen && (
-          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 flex flex-col">
-            {/* Search Input */}
-            <div className="p-2 border-b border-gray-200 dark:border-gray-600">
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  placeholder="Search carriers..."
-                  className="w-full pl-6 pr-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs dark:bg-gray-600 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            </div>
-
-            {/* Select All / Clear All */}
-            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => {
-                    onSelectAll()
-                  }}
-                  className="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-blue-600 transition-colors"
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => {
-                    onClearAll()
-                  }}
-                  className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-
-            {/* Options - Single scroll container */}
-            <div className="flex-1 overflow-y-auto min-h-0">
-              {filteredOptions.map((option) => (
-                <label
-                  key={option}
-                  className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedValues.includes(option)}
-                    onChange={() => onToggle(option)}
-                    className="mr-1.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-3 h-3"
-                  />
-                  <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
-                </label>
-              ))}
-
-              {filteredOptions.length === 0 && (
-                <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                  {searchTerm ? 'No carriers found' : 'No options available'}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Click outside to close */}
-        {isOpen && (
-          <div
-            className="fixed inset-0 z-30"
-            onClick={() => {
-              setIsOpen(false)
-              setSearchTerm('')
-            }}
-          ></div>
-        )}
-      </div>
-    )
-  }
-
-  // Multi-select filter component
-  const MultiSelectFilter = ({
-    label,
-    options,
-    selectedValues,
-    onToggle,
-    onSelectAll,
-    onClearAll,
-    placeholder = "Select options..."
-  }: {
-    label: string
-    options: string[]
-    selectedValues: string[]
-    onToggle: (value: string) => void
-    onSelectAll: () => void
-    onClearAll: () => void
-    placeholder?: string
-  }) => {
-    const [isOpen, setIsOpen] = useState(false)
-
-    return (
-      <div className="relative">
-        <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-          {label}
-        </label>
-
-        {/* Toggle Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-2.5 py-1.5 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white bg-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-xs"
-        >
-          <span className="truncate text-gray-700 dark:text-gray-300">
-            {selectedValues.length === 0
-              ? placeholder
-              : selectedValues.length === 1
-                ? selectedValues[0]
-                : `${selectedValues.length} selected`
-            }
-          </span>
-          <ChevronDown className={`w-3 h-3 transition-transform flex-shrink-0 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {/* Dropdown */}
-        {isOpen && (
-          <div className="absolute z-40 mt-1 left-0 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 flex flex-col">
-            {/* Select All / Clear All */}
-            <div className="p-1.5 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => {
-                    onSelectAll()
-                  }}
-                  className="bg-blue-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-blue-600 transition-colors"
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => {
-                    onClearAll()
-                  }}
-                  className="bg-gray-500 text-white px-1.5 py-0.5 rounded text-xs hover:bg-gray-600 transition-colors"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-
-            {/* Options - Single scroll container */}
-            <div className="flex-1 overflow-y-auto min-h-0">
-              {options.map((option) => (
-                <label
-                  key={option}
-                  className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedValues.includes(option)}
-                    onChange={() => onToggle(option)}
-                    className="mr-1.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0 w-3 h-3"
-                  />
-                  <span className="text-xs text-gray-900 dark:text-white min-w-0 leading-tight break-words">{option}</span>
-                </label>
-              ))}
-
-              {options.length === 0 && (
-                <div className="p-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                  No options available
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Click outside to close */}
-        {isOpen && (
-          <div
-            className="fixed inset-0 z-30"
-            onClick={() => setIsOpen(false)}
-          ></div>
-        )}
-      </div>
-    )
   }
 
   // Handle sorting
