@@ -111,6 +111,7 @@ function DentalDashboard() {
   const [selectedClaimStatuses, setSelectedClaimStatuses] = useState<string[]>([])
   const [selectedCarriers, setSelectedCarriers] = useState<string[]>([])
   const [selectedInteractionTypes, setSelectedInteractionTypes] = useState<string[]>([])
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([])
   // Configurar Date Range por defecto al mes actual
   const getCurrentMonthRange = () => {
     const now = new Date()
@@ -422,6 +423,7 @@ function DentalDashboard() {
     const matchesStatus = selectedStatuses.length === 0 || selStatuses.has(normalize(item.status))
     const matchesClaimStatus = selectedClaimStatuses.length === 0 || selClaimStatuses.has(normalize(item.claimstatus))
     const matchesCarrier = selectedCarriers.length === 0 || selCarriers.has(normalize(item.insurancecarrier))
+    const matchesEmail = selectedEmails.length === 0 || selectedEmails.map(normalize).includes(normalize(item.emailaddress))
 
     // Type of Interaction filter (Column B) - Multi-select
     const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
@@ -438,7 +440,7 @@ function DentalDashboard() {
     })()
 
     return matchesSearch && matchesOffice && matchesStatus &&
-           matchesClaimStatus && matchesCarrier && matchesInteractionType && matchesDateRange
+           matchesClaimStatus && matchesCarrier && matchesEmail && matchesInteractionType && matchesDateRange
   })
 
   // Metrics calculated from filtered data and specialized time logic
@@ -459,8 +461,9 @@ function DentalDashboard() {
     const matchesClaimStatus = selectedClaimStatuses.length === 0 || selClaimStatuses.has(normalize(item.claimstatus))
     const matchesCarrier = selectedCarriers.length === 0 || selCarriers.has(normalize(item.insurancecarrier))
     const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
+    const matchesEmail = selectedEmails.length === 0 || selectedEmails.map(normalize).includes(normalize(item.emailaddress))
 
-    return matchesSearch && matchesOffice && matchesStatus && matchesClaimStatus && matchesCarrier && matchesInteractionType
+    return matchesSearch && matchesOffice && matchesStatus && matchesClaimStatus && matchesCarrier && matchesInteractionType && matchesEmail
   })
 
   const totalRevenue = filteredData.reduce((sum, item) => sum + (item.paidamount || 0), 0)
@@ -519,6 +522,7 @@ function DentalDashboard() {
   const uniqueClaimStatuses = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.claimstatus; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
   const uniqueCarriers = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.insurancecarrier; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
   const uniqueInteractionTypes = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.typeofinteraction; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
+  const uniqueEmails = (() => { const seen = new Set<string>(); const arr: string[] = []; data.forEach(i => { const v = i.emailaddress; if (v) { const k = normalize(v); if (!seen.has(k)) { seen.add(k); arr.push(v); } } }); return arr })()
 
   // Complete Dashboard PDF Export functionality - TODOS LOS REGISTROS
   const handleCompleteDashboardPDFExport = async () => {
@@ -1476,6 +1480,16 @@ function DentalDashboard() {
                   onClearAll={clearAllInteractionTypes}
                   placeholder="All Types"
                 />
+
+                <SearchableMultiSelectFilter
+                  label="Email"
+                  options={uniqueEmails}
+                  selectedValues={selectedEmails}
+                  onToggle={(value) => toggleFilterSelection(value, selectedEmails, setSelectedEmails)}
+                  onSelectAll={() => setSelectedEmails([...uniqueEmails])}
+                  onClearAll={() => setSelectedEmails([])}
+                  placeholder="All Emails"
+                />
               </div>
             </div>
           </div>
@@ -1485,7 +1499,7 @@ function DentalDashboard() {
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-gray-900 dark:text-white text-sm">Active Filters</h3>
               {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
-                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || selectedEmails.length > 0 || searchTerm ||
                 dateRange.start || dateRange.end) && (
                 <button
                   onClick={clearAllFilters}
@@ -1510,6 +1524,11 @@ function DentalDashboard() {
               {selectedClaimStatuses.length > 0 && (
                 <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-2 py-1 rounded-md">
                   Claims: {selectedClaimStatuses.length}
+                </span>
+              )}
+              {selectedEmails.length > 0 && (
+                <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 px-2 py-1 rounded-md">
+                  Emails: {selectedEmails.length}
                 </span>
               )}
               {selectedStatuses.length > 0 && (
