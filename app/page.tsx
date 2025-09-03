@@ -428,9 +428,9 @@ function DentalDashboard() {
     // Type of Interaction filter (Column B) - Multi-select
     const matchesInteractionType = selectedInteractionTypes.length === 0 || selInteractionTypes.has(normalize(item.typeofinteraction))
 
-    // Date range filter: use DOS when available; fallback to timestamp (AG). Compare as dates.
+    // Date range filter: use DOS primarily; fallback to EFT/Check Issued Date; use timestamp only if neither exists.
     const matchesDateRange = !dateRange.start || !dateRange.end || (() => {
-      const raw = item.dos || item.timestamp
+      const raw = item.dos || item.eftCheckIssuedDate || item.timestamp
       if (!raw) return false
       const d = new Date(raw)
       const start = new Date(dateRange.start)
@@ -475,19 +475,13 @@ function DentalDashboard() {
 
   const activeOffices = new Set(filteredData.map(item => item.offices).filter(Boolean)).size
 
-  const todaysClaims = baseFilteredNoDate.filter(item => {
-    const s = (item.status || '').toLowerCase()
-    return (s === 'submitting' || s === 'posting') && isToday(item.timestamp)
-  }).length
+  const todaysClaims = baseFilteredNoDate.filter(item => isToday(item.timestamp)).length
 
   const selectedMonthDate = (dateRange.end || dateRange.start || new Date().toISOString().split('T')[0])
   const selectedDateObj = new Date(selectedMonthDate)
   const monthlyClaims = baseFilteredNoDate.filter(item => {
     const ts = item.timestamp
     if (!ts) return false
-    const s = (item.status || '').toLowerCase()
-    const allowed = s === 'submitting' || s === 'tracking' || s === 'posting'
-    if (!allowed) return false
     const d = new Date(ts)
     return d.getMonth() === selectedDateObj.getMonth() && d.getFullYear() === selectedDateObj.getFullYear()
   }).length
@@ -978,6 +972,7 @@ function DentalDashboard() {
     setSelectedClaimStatuses([])
     setSelectedCarriers([])
     setSelectedInteractionTypes([])
+    setSelectedEmails([])
     setDateRange({ start: '', end: '' })
     setSearchTerm('')
   }
@@ -1348,7 +1343,7 @@ function DentalDashboard() {
             <div className="flex items-center space-x-2">
               {/* Clear All Filters Button */}
               {(selectedOffices.length > 0 || selectedCarriers.length > 0 || selectedClaimStatuses.length > 0 ||
-                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || searchTerm ||
+                selectedStatuses.length > 0 || selectedInteractionTypes.length > 0 || selectedEmails.length > 0 || searchTerm ||
                 (dateRange.start !== initialDateRange.start || dateRange.end !== initialDateRange.end)) && (
                 <button
                   onClick={clearAllFilters}
