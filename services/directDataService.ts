@@ -231,8 +231,12 @@ export class DirectDataService {
     }, timeout)
 
     try {
-      // Construir URL con límite específico para este intento
-      const url = `/api/proxy?action=getAllRecords&limit=${limit}&sheet=DB&range=A:AG`
+      // Construir URLs candidatas con límite específico para este intento
+      const rel = `/api/proxy?action=getAllRecords&limit=${limit}&sheet=DB&range=A:AG`
+      const origin = typeof window !== 'undefined' && window.location ? window.location.origin : ''
+      const abs = origin ? `${origin}${rel}` : rel
+      const fallbackRel = `/api/proxy?action=getAllRecords&limit=${limit}`
+      const urls = [rel, abs, fallbackRel]
       console.log(`🔄 [DirectDataService] Intento ${attempt} con límite ${limit} registros`)
 
       // Configuraciones anti-interferencia
@@ -241,30 +245,49 @@ export class DirectDataService {
         throw new Error('Request was cancelled before fetch')
       }
 
-      let response: Response
-      try {
-        response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          },
-          signal: controller.signal,
-          cache: 'no-cache',
-          credentials: 'same-origin'
-        })
-      } catch (fetchError: any) {
-        // Immediate handling of fetch failures to prevent "Failed to fetch" from propagating
-        console.log(`🌐 [DirectDataService] Network fetch failed in attempt ${attempt}:`, fetchError.message)
+      let response: Response | null = null
+      let lastFetchError: any = null
+      for (const candidate of urls) {
+        try {
+          response = await fetch(candidate, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            },
+            signal: controller.signal,
+            cache: 'no-store',
+            credentials: 'omit',
+            mode: 'cors',
+            keepalive: true
+          })
+          if (response) break
+        } catch (fe: any) {
+          lastFetchError = fe
+          continue
+        }
+      }
 
-        // Activate offline mode immediately to prevent repeated attempts
-        this.isOfflineMode = true
-        this.lastOfflineCheck = Date.now()
-
-        // Throw a more specific error for better handling
-        throw new Error(`Network connectivity issue: Unable to reach server`)
+      if (!response) {
+        // Intentar XHR como fallback para evitar wrappers de fetch
+        try {
+          const apiData = await this.tryXHR(urls[0], timeout, controller)
+          if (timeoutId) { clearTimeout(timeoutId); timeoutId = null }
+          // Validar datos y continuar flujo como con fetch
+          const rawData = apiData?.data || []
+          if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
+            if (attempt === 1) throw new Error('No hay datos válidos en primer intento (XHR)')
+            return []
+          }
+          return this.processRawData(rawData)
+        } catch (xhrErr: any) {
+          const msg = lastFetchError?.message || xhrErr?.message || 'Unknown fetch error'
+          console.log(`🌐 [DirectDataService] Network fetch failed in attempt ${attempt}:`, msg)
+          this.isOfflineMode = true
+          this.lastOfflineCheck = Date.now()
+          throw new Error(`Network connectivity issue: Unable to reach server`)
+        }
       }
 
       if (timeoutId) {
@@ -292,8 +315,8 @@ export class DirectDataService {
         return this.getFallbackData()
       }
 
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.toLowerCase().includes('application/json')) {
         const responseText = await response.text()
         console.error('❌ [DirectDataService] Response is not JSON:', responseText.substring(0, 200))
         throw new Error(`Invalid response format: expected JSON, got ${contentType}`)
@@ -423,6 +446,46 @@ export class DirectDataService {
   }
 
   /**
+   * Normaliza diversos formatos de fecha/hora a ISO 8601 (si falla, devuelve '')
+   */
+  private normalizeTimestamp(value: any): string {
+    if (value === undefined || value === null) return ''
+    let v: any = typeof value === 'string' ? value.trim() : value
+
+    // Números: epoch ms/segundos o serial de Excel
+    const numeric = Number(v)
+    if (!isNaN(numeric) && String(v).length > 0) {
+      if (numeric > 1e12) return new Date(numeric).toISOString() // epoch ms
+      if (numeric > 1e9) return new Date(numeric * 1000).toISOString() // epoch s
+      // Excel serial date (días desde 1899-12-30)
+      const excelEpoch = Date.UTC(1899, 11, 30)
+      const ms = excelEpoch + numeric * 86400000
+      return new Date(ms).toISOString()
+    }
+
+    // Intento directo
+    const direct = new Date(v)
+    if (!isNaN(direct.getTime())) return direct.toISOString()
+
+    // Formatos comunes
+    const ymd = /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/
+    const mdy = /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/
+    let m: RegExpExecArray | null = null
+
+    if ((m = ymd.exec(String(v)))) {
+      const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0))
+      if (!isNaN(d.getTime())) return d.toISOString()
+    }
+    if ((m = mdy.exec(String(v)))) {
+      const year = m[3].length === 2 ? Number('20' + m[3]) : Number(m[3])
+      const d = new Date(Date.UTC(year, Number(m[1]) - 1, Number(m[2]), 0, 0, 0))
+      if (!isNaN(d.getTime())) return d.toISOString()
+    }
+
+    return ''
+  }
+
+  /**
    * Procesar datos en bruto de Google Sheets
    */
   private processRawData(rawData: any[]): PatientRecord[] {
@@ -456,7 +519,9 @@ export class DirectDataService {
       // Mapear campos con múltiples posibles nombres
       // CORRECCIÓN: claimstatus debe mapear de la columna X específicamente
       const record: PatientRecord = {
-        timestamp: this.getColumnValue(item, 'AF') || this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp || new Date().toISOString(),
+        timestamp: this.normalizeTimestamp(
+          this.getColumnValue(item, 'AF') || this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp
+        ) || new Date().toISOString(),
         insurancecarrier: item.insurancecarrier || item['Insurance Carrier'] || item.carrier || '',
         offices: item.offices || item.Office || item['Office'] || '',
         patientname: item.patientname || item['Patient Name'] || item.patient || '',
@@ -464,8 +529,8 @@ export class DirectDataService {
         // Claim Status debe venir de la columna X
         claimstatus: this.getColumnValue(item, 'X') || item.claimstatus || item['Claim Status'] || '',
         typeofinteraction: item.typeofinteraction || item['Type of Interaction'] || item.type || '',
-        patientdob: item.patientdob || item['Patient DOB'] || item.dob || '',
-        dos: item.dos || item.DOS || item['DOS'] || '',
+        patientdob: this.normalizeTimestamp(item.patientdob || item['Patient DOB'] || item.dob || ''),
+        dos: this.normalizeTimestamp(item.dos || item.DOS || item['DOS'] || ''),
         productivityamount: this.parseNumber(item.productivityamount || item['Productivity Amount'] || 0),
         missingdocsorinformation: item.missingdocsorinformation || item['Missing Docs'] || '',
         howweproceeded: item.howweproceeded || item['How We Proceeded'] || '',
@@ -475,9 +540,9 @@ export class DirectDataService {
         emailaddress: this.getColumnValue(item, 'T') || item.emailaddress || item['Email Address'] || item.email || '',
         // Status general desde columna Y
         status: this.getColumnValue(item, 'Y') || item.status || item.Status || '',
-        timestampbyinteraction: item.timestampbyinteraction || item['Timestamp By Interaction'] || '',
+        timestampbyinteraction: this.normalizeTimestamp(item.timestampbyinteraction || item['Timestamp By Interaction'] || ''),
         // EFT/Check Issued Date desde AA
-        eftCheckIssuedDate: this.getColumnValue(item, 'AA') || item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || ''
+        eftCheckIssuedDate: this.normalizeTimestamp(this.getColumnValue(item, 'AA') || item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || '')
       }
 
       return record
@@ -543,6 +608,54 @@ export class DirectDataService {
     }
 
     return ''
+  }
+
+  /**
+   * XHR fallback para evitar interceptores de window.fetch
+   */
+  private tryXHR(url: string, timeout: number, controller: AbortController): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', url, true)
+        xhr.responseType = 'text'
+        xhr.setRequestHeader('Cache-Control', 'no-cache')
+        xhr.setRequestHeader('Pragma', 'no-cache')
+        const onAbort = () => {
+          try { xhr.abort() } catch {}
+          reject(new Error('XHR aborted'))
+        }
+        const to = setTimeout(() => {
+          try { xhr.abort() } catch {}
+          reject(new Error('XHR timeout'))
+        }, timeout)
+        controller.signal.addEventListener('abort', onAbort, { once: true })
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            clearTimeout(to)
+            controller.signal.removeEventListener('abort', onAbort)
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const json = JSON.parse(xhr.responseText || '{}')
+                resolve(json)
+              } catch (e) {
+                reject(new Error('Invalid JSON from XHR'))
+              }
+            } else {
+              reject(new Error(`XHR HTTP ${xhr.status}`))
+            }
+          }
+        }
+        xhr.onerror = () => {
+          clearTimeout(to)
+          controller.signal.removeEventListener('abort', onAbort)
+          reject(new Error('XHR network error'))
+        }
+        xhr.send()
+      } catch (e) {
+        reject(e)
+      }
+    })
   }
 
   /**
