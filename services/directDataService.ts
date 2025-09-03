@@ -270,16 +270,24 @@ export class DirectDataService {
       }
 
       if (!response) {
-        // Immediate handling of fetch failures to prevent "Failed to fetch" from propagating
-        const msg = lastFetchError?.message || 'Unknown fetch error'
-        console.log(`🌐 [DirectDataService] Network fetch failed in attempt ${attempt}:`, msg)
-
-        // Activate offline mode immediately to prevent repeated attempts
-        this.isOfflineMode = true
-        this.lastOfflineCheck = Date.now()
-
-        // Throw a more specific error for better handling
-        throw new Error(`Network connectivity issue: Unable to reach server`)
+        // Intentar XHR como fallback para evitar wrappers de fetch
+        try {
+          const apiData = await this.tryXHR(urls[0], timeout, controller)
+          if (timeoutId) { clearTimeout(timeoutId); timeoutId = null }
+          // Validar datos y continuar flujo como con fetch
+          const rawData = apiData?.data || []
+          if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
+            if (attempt === 1) throw new Error('No hay datos válidos en primer intento (XHR)')
+            return []
+          }
+          return this.processRawData(rawData)
+        } catch (xhrErr: any) {
+          const msg = lastFetchError?.message || xhrErr?.message || 'Unknown fetch error'
+          console.log(`🌐 [DirectDataService] Network fetch failed in attempt ${attempt}:`, msg)
+          this.isOfflineMode = true
+          this.lastOfflineCheck = Date.now()
+          throw new Error(`Network connectivity issue: Unable to reach server`)
+        }
       }
 
       if (timeoutId) {
