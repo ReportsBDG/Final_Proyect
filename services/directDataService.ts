@@ -423,6 +423,46 @@ export class DirectDataService {
   }
 
   /**
+   * Normaliza diversos formatos de fecha/hora a ISO 8601 (si falla, devuelve '')
+   */
+  private normalizeTimestamp(value: any): string {
+    if (value === undefined || value === null) return ''
+    let v: any = typeof value === 'string' ? value.trim() : value
+
+    // Números: epoch ms/segundos o serial de Excel
+    const numeric = Number(v)
+    if (!isNaN(numeric) && String(v).length > 0) {
+      if (numeric > 1e12) return new Date(numeric).toISOString() // epoch ms
+      if (numeric > 1e9) return new Date(numeric * 1000).toISOString() // epoch s
+      // Excel serial date (días desde 1899-12-30)
+      const excelEpoch = Date.UTC(1899, 11, 30)
+      const ms = excelEpoch + numeric * 86400000
+      return new Date(ms).toISOString()
+    }
+
+    // Intento directo
+    const direct = new Date(v)
+    if (!isNaN(direct.getTime())) return direct.toISOString()
+
+    // Formatos comunes
+    const ymd = /^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/
+    const mdy = /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/
+    let m: RegExpExecArray | null = null
+
+    if ((m = ymd.exec(String(v)))) {
+      const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0))
+      if (!isNaN(d.getTime())) return d.toISOString()
+    }
+    if ((m = mdy.exec(String(v)))) {
+      const year = m[3].length === 2 ? Number('20' + m[3]) : Number(m[3])
+      const d = new Date(Date.UTC(year, Number(m[1]) - 1, Number(m[2]), 0, 0, 0))
+      if (!isNaN(d.getTime())) return d.toISOString()
+    }
+
+    return ''
+  }
+
+  /**
    * Procesar datos en bruto de Google Sheets
    */
   private processRawData(rawData: any[]): PatientRecord[] {
@@ -456,7 +496,9 @@ export class DirectDataService {
       // Mapear campos con múltiples posibles nombres
       // CORRECCIÓN: claimstatus debe mapear de la columna X específicamente
       const record: PatientRecord = {
-        timestamp: this.getColumnValue(item, 'AF') || this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp || new Date().toISOString(),
+        timestamp: this.normalizeTimestamp(
+          this.getColumnValue(item, 'AF') || this.getColumnValue(item, 'AG') || item.timestamp || item.Timestamp
+        ) || new Date().toISOString(),
         insurancecarrier: item.insurancecarrier || item['Insurance Carrier'] || item.carrier || '',
         offices: item.offices || item.Office || item['Office'] || '',
         patientname: item.patientname || item['Patient Name'] || item.patient || '',
@@ -464,8 +506,8 @@ export class DirectDataService {
         // Claim Status debe venir de la columna X
         claimstatus: this.getColumnValue(item, 'X') || item.claimstatus || item['Claim Status'] || '',
         typeofinteraction: item.typeofinteraction || item['Type of Interaction'] || item.type || '',
-        patientdob: item.patientdob || item['Patient DOB'] || item.dob || '',
-        dos: item.dos || item.DOS || item['DOS'] || '',
+        patientdob: this.normalizeTimestamp(item.patientdob || item['Patient DOB'] || item.dob || ''),
+        dos: this.normalizeTimestamp(item.dos || item.DOS || item['DOS'] || ''),
         productivityamount: this.parseNumber(item.productivityamount || item['Productivity Amount'] || 0),
         missingdocsorinformation: item.missingdocsorinformation || item['Missing Docs'] || '',
         howweproceeded: item.howweproceeded || item['How We Proceeded'] || '',
@@ -475,9 +517,9 @@ export class DirectDataService {
         emailaddress: this.getColumnValue(item, 'T') || item.emailaddress || item['Email Address'] || item.email || '',
         // Status general desde columna Y
         status: this.getColumnValue(item, 'Y') || item.status || item.Status || '',
-        timestampbyinteraction: item.timestampbyinteraction || item['Timestamp By Interaction'] || '',
+        timestampbyinteraction: this.normalizeTimestamp(item.timestampbyinteraction || item['Timestamp By Interaction'] || ''),
         // EFT/Check Issued Date desde AA
-        eftCheckIssuedDate: this.getColumnValue(item, 'AA') || item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || ''
+        eftCheckIssuedDate: this.normalizeTimestamp(this.getColumnValue(item, 'AA') || item.eftCheckIssuedDate || item['EFT/Check Issued Date'] || '')
       }
 
       return record
