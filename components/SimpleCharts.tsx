@@ -65,6 +65,7 @@ interface ChartConfig {
 }
 
 function ChartsSection({ data }: ChartProps) {
+  const [excludedByChart, setExcludedByChart] = useState<Record<string, Set<string>>>({})
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [showConfigModal, setShowConfigModal] = useState(false)
   const [currentChart, setCurrentChart] = useState<ChartConfig | null>(null)
@@ -143,15 +144,17 @@ function ChartsSection({ data }: ChartProps) {
     if (!data || data.length === 0) return []
 
     const { xAxis, yAxis, aggregation } = chart
+    const excluded = (excludedByChart[chart.id] || new Set<string>())
 
-    if (xAxis === 'month') {
+    if (xAxis === 'month' || xAxis === 'day' || xAxis === 'date' || xAxis === 'timestamp' || xAxis === 'dos') {
       // Special handling for monthly data
       const monthlyData: Record<string, number> = {}
       
       data.forEach(record => {
         if (record.dos || record.timestamp) {
           const date = new Date(record.dos || record.timestamp)
-          const monthKey = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+          const monthKey = (xAxis === 'month') ? date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }) : date.toISOString().split('T')[0]
+          if (excluded.has(monthKey)) return
           
           if (!monthlyData[monthKey]) {
             monthlyData[monthKey] = 0
@@ -179,6 +182,7 @@ function ChartsSection({ data }: ChartProps) {
     data.forEach(record => {
       const key = record[xAxis as keyof PatientRecord] || 'Unknown'
       const keyStr = String(key)
+      if (excluded.has(keyStr)) return
       
       if (!grouped[keyStr]) {
         grouped[keyStr] = {
@@ -702,7 +706,7 @@ function ChartsSection({ data }: ChartProps) {
 
                   {/* Dropdown Menu */}
                   {activeDropdown === chart.id && (
-                    <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-2xl z-50">
+                    <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-2xl z-50">
                       {/* Header */}
                       <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
@@ -777,19 +781,45 @@ function ChartsSection({ data }: ChartProps) {
                           </div>
                         </button>
 
-                        {/* 4. Delete Chart */}
+                        {/* 4. Filter Categories */}
+                        <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+                          <div className="font-medium text-gray-900 dark:text-white mb-2">4. Filter Categories</div>
+                          <div className="max-h-40 overflow-y-auto space-y-1 text-sm">
+                            {processChartData(chart).map((it: any) => it.name).slice(0, 30).map((name: string) => {
+                              const isExcluded = (excludedByChart[chart.id] || new Set()).has(name)
+                              return (
+                                <label key={name} className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={!isExcluded}
+                                    onChange={() => {
+                                      setExcludedByChart(prev => {
+                                        const set = new Set(prev[chart.id] || [])
+                                        if (set.has(name)) set.delete(name); else set.add(name)
+                                        return { ...prev, [chart.id]: set }
+                                      })
+                                    }}
+                                  />
+                                  <span className="truncate">{name}</span>
+                                </label>
+                              )
+                            })}
+                          </div>
+                        </div>
+
+                        {/* 5. Delete Chart */}
                         <button
                           onClick={() => deleteChart(chart.id)}
                           className="flex items-center w-full px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400"
                         >
                           <Trash2 className="w-5 h-5 mr-3" />
                           <div className="text-left">
-                            <div className="font-medium">4. Delete Chart</div>
+                            <div className="font-medium">5. Delete Chart</div>
                             <div className="text-xs opacity-75">Remove this chart permanently</div>
                           </div>
                         </button>
 
-                        {/* 5. Hide Chart */}
+                        {/* 6. Hide Chart */}
                         <button
                           onClick={() => {
                             updateChart(chart.id, { visible: false })
@@ -799,7 +829,7 @@ function ChartsSection({ data }: ChartProps) {
                         >
                           <EyeOff className="w-5 h-5 mr-3 text-gray-500" />
                           <div className="text-left">
-                            <div className="font-medium text-gray-900 dark:text-white">5. Hide Chart</div>
+                            <div className="font-medium text-gray-900 dark:text-white">6. Hide Chart</div>
                             <div className="text-xs text-gray-500">Hide this chart from view</div>
                           </div>
                         </button>
