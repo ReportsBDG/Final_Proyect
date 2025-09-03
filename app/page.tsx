@@ -361,7 +361,6 @@ function DentalDashboard() {
     dob: boolean
     dos: boolean
     claimStatus: boolean
-    comments: boolean
     email: boolean
     patientPortion: boolean
     eftCheckDate: boolean
@@ -376,7 +375,6 @@ function DentalDashboard() {
       dob: true,
       dos: true,
       claimStatus: true,
-      comments: true,
       email: true,
       patientPortion: true,
       eftCheckDate: true,
@@ -1702,13 +1700,6 @@ function DentalDashboard() {
                           </div>
                         </th>
                       )}
-                      {selectedColumns.comments && (
-                        <th className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          <div className="truncate max-w-[150px] sm:max-w-none">
-                            Comments
-                          </div>
-                        </th>
-                      )}
                       {selectedColumns.patientPortion && (
                         <th
                           className="px-2 sm:px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
@@ -1788,13 +1779,6 @@ function DentalDashboard() {
                           <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
                             <div className="truncate">
                               {record.dos ? formatDate(record.dos) : 'N/A'}
-                            </div>
-                          </td>
-                        )}
-                        {selectedColumns.comments && (
-                          <td className="px-2 sm:px-4 py-3 text-sm text-gray-900 dark:text-white transition-all duration-200">
-                            <div className="truncate max-w-[150px] sm:max-w-xs" title={record.commentsreasons}>
-                              {record.commentsreasons || 'N/A'}
                             </div>
                           </td>
                         )}
