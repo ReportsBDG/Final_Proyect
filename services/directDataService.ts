@@ -603,6 +603,54 @@ export class DirectDataService {
   }
 
   /**
+   * XHR fallback para evitar interceptores de window.fetch
+   */
+  private tryXHR(url: string, timeout: number, controller: AbortController): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', url, true)
+        xhr.responseType = 'text'
+        xhr.setRequestHeader('Cache-Control', 'no-cache')
+        xhr.setRequestHeader('Pragma', 'no-cache')
+        const onAbort = () => {
+          try { xhr.abort() } catch {}
+          reject(new Error('XHR aborted'))
+        }
+        const to = setTimeout(() => {
+          try { xhr.abort() } catch {}
+          reject(new Error('XHR timeout'))
+        }, timeout)
+        controller.signal.addEventListener('abort', onAbort, { once: true })
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4) {
+            clearTimeout(to)
+            controller.signal.removeEventListener('abort', onAbort)
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const json = JSON.parse(xhr.responseText || '{}')
+                resolve(json)
+              } catch (e) {
+                reject(new Error('Invalid JSON from XHR'))
+              }
+            } else {
+              reject(new Error(`XHR HTTP ${xhr.status}`))
+            }
+          }
+        }
+        xhr.onerror = () => {
+          clearTimeout(to)
+          controller.signal.removeEventListener('abort', onAbort)
+          reject(new Error('XHR network error'))
+        }
+        xhr.send()
+      } catch (e) {
+        reject(e)
+      }
+    })
+  }
+
+  /**
    * Probar conectividad con la API de forma simple
    * Simplified to avoid timeout issues - always returns true (optimistic)
    */
